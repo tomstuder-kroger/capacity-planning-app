@@ -1,7 +1,6 @@
 import React from 'react';
-import { KdsInput, KdsLabel, KdsMessage } from 'react-mx-web-components';
+import { MxInputTextBox, MxSingleSelect } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
-import { validateICName, validateICRole } from '../utils/validation';
 
 const ICInfoForm = () => {
   const { activeIC, updateIC } = useCapacity();
@@ -13,41 +12,31 @@ const ICInfoForm = () => {
   };
 
   const handleRoleChange = (e) => {
-    updateIC(activeIC.id, { icRole: e.target.value });
+    updateIC(activeIC.id, { icRole: e.detail });
   };
-
-  const nameError = validateICName(activeIC.icName);
-  const roleError = validateICRole(activeIC.icRole);
 
   return (
     <div className="kds-Card kds-Card--m kds-card-section">
       <h2 className="kds-Heading kds-Heading--s section-heading">IC Information</h2>
       <div className="form-grid-2col">
         <div>
-          <KdsLabel>
-            IC Name
-            <KdsInput
-              type="text"
-              placeholder="e.g., Joe Test"
-              value={activeIC.icName}
-              onChange={handleNameChange}
-              invalid={!!nameError}
-            />
-          </KdsLabel>
-          {nameError && <KdsMessage kind="error">{nameError}</KdsMessage>}
+          <MxInputTextBox
+            label="IC Name"
+            placeholder="e.g., Joe Test"
+            value={activeIC.icName}
+            onChange={handleNameChange}
+            mask="none"
+            isClearable={false}
+          />
         </div>
         <div>
-          <KdsLabel>
-            IC Role
-            <KdsInput
-              type="text"
-              placeholder="e.g., PD"
-              value={activeIC.icRole}
-              onChange={handleRoleChange}
-              invalid={!!roleError}
-            />
-          </KdsLabel>
-          {roleError && <KdsMessage kind="error">{roleError}</KdsMessage>}
+          <MxSingleSelect
+            label="IC Role"
+            items={['APD', 'PD', 'SPD']}
+            value={activeIC.icRole}
+            emitOnlyValue
+            onValueUpdate={handleRoleChange}
+          />
         </div>
       </div>
     </div>

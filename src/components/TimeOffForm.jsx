@@ -1,7 +1,11 @@
 import React from 'react';
-import { KdsInput, KdsLabel, KdsRadio, KdsMessage } from 'react-mx-web-components';
+import { KdsLabel, KdsRadio, MxInputTextBox } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
-import { validateNonNegativeNumber } from '../utils/validation';
+
+const allowNumericOnly = (e) => {
+  const allowed = ['0','1','2','3','4','5','6','7','8','9','.','Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
+  if (!allowed.includes(e.key)) e.preventDefault();
+};
 
 const TimeOffForm = () => {
   const { activeIC, updateIC, calculateResults } = useCapacity();
@@ -48,11 +52,6 @@ const TimeOffForm = () => {
     });
   };
 
-  const okrError = validateNonNegativeNumber(activeIC.timeOff.okrTime.value);
-  const ptoError = validateNonNegativeNumber(activeIC.timeOff.ptoDays);
-  const devError = validateNonNegativeNumber(activeIC.timeOff.devDays);
-  const holidayError = validateNonNegativeNumber(activeIC.timeOff.holidayDays);
-
   const calculated = calculateResults(activeIC);
   const totalTimeOff = calculated ? calculated.totalTimeOffWeeks.toFixed(1) : '0.0';
 
@@ -61,18 +60,17 @@ const TimeOffForm = () => {
       <h2 className="kds-Heading kds-Heading--s section-heading">Time Off</h2>
       <div className="form-grid-2col">
         <div>
-          <KdsLabel>OKR Time</KdsLabel>
           <div className="okr-row">
             <div className="okr-input">
-              <KdsInput
-                type="number"
-                value={activeIC.timeOff.okrTime.value}
-                onChange={handleOKRValueChange}
-                invalid={!!okrError}
-                min={0}
-                step={0.1}
-              />
-              {okrError && <KdsMessage kind="error">{okrError}</KdsMessage>}
+              <div onKeyDown={allowNumericOnly}>
+                <MxInputTextBox
+                  label="OKR Time"
+                  value={String(activeIC.timeOff.okrTime.value)}
+                  onChange={handleOKRValueChange}
+                  mask="none"
+                  isClearable={false}
+                />
+              </div>
             </div>
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
               <div className="okr-units">
@@ -100,48 +98,39 @@ const TimeOffForm = () => {
         </div>
 
         <div>
-          <KdsLabel>
-            PTO Days
-            <KdsInput
-              type="number"
-              value={activeIC.timeOff.ptoDays}
+          <div onKeyDown={allowNumericOnly}>
+            <MxInputTextBox
+              label="PTO Days"
+              value={String(activeIC.timeOff.ptoDays)}
               onChange={handlePTOChange}
-              invalid={!!ptoError}
-              min={0}
-              step={0.1}
+              mask="none"
+              isClearable={false}
             />
-          </KdsLabel>
-          {ptoError && <KdsMessage kind="error">{ptoError}</KdsMessage>}
+          </div>
         </div>
 
         <div>
-          <KdsLabel>
-            Dev / L&amp;D Days
-            <KdsInput
-              type="number"
-              value={activeIC.timeOff.devDays}
+          <div onKeyDown={allowNumericOnly}>
+            <MxInputTextBox
+              label="Dev / L&D Days"
+              value={String(activeIC.timeOff.devDays)}
               onChange={handleDevChange}
-              invalid={!!devError}
-              min={0}
-              step={0.1}
+              mask="none"
+              isClearable={false}
             />
-          </KdsLabel>
-          {devError && <KdsMessage kind="error">{devError}</KdsMessage>}
+          </div>
         </div>
 
         <div>
-          <KdsLabel>
-            Holiday Days
-            <KdsInput
-              type="number"
-              value={activeIC.timeOff.holidayDays}
+          <div onKeyDown={allowNumericOnly}>
+            <MxInputTextBox
+              label="Holiday Days"
+              value={String(activeIC.timeOff.holidayDays)}
               onChange={handleHolidayChange}
-              invalid={!!holidayError}
-              min={0}
-              step={0.1}
+              mask="none"
+              isClearable={false}
             />
-          </KdsLabel>
-          {holidayError && <KdsMessage kind="error">{holidayError}</KdsMessage>}
+          </div>
         </div>
       </div>
 

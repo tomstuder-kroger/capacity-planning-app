@@ -2,6 +2,7 @@ import React from 'react';
 import { KdsMessage } from 'react-mx-web-components';
 import { CapacityProvider, useCapacity } from './context/CapacityContext';
 import ICSelector from './components/ICSelector';
+import EmptyState from './components/EmptyState';
 import QuarterInfoForm from './components/QuarterInfoForm';
 import ICInfoForm from './components/ICInfoForm';
 import TimeOffForm from './components/TimeOffForm';
@@ -26,9 +27,7 @@ function AppContent() {
         <ICSelector />
 
         {!activeIC ? (
-          <KdsMessage kind="info">
-            Create your first IC capacity plan by clicking "New IC" above
-          </KdsMessage>
+          <EmptyState />
         ) : (
           <div className="capacity-layout-grid">
             <div className="forms-column">

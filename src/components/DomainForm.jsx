@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { KdsInput, KdsLabel, KdsButton, KdsMessage } from 'react-mx-web-components';
+import { KdsButton, MxInputTextBox } from 'react-mx-web-components';
 import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
-import { validateDomainName, validateNonNegativeInteger } from '../utils/validation';
 import { calculateDomainEffort } from '../utils/calculations';
 
 const DomainForm = ({ domain }) => {
@@ -37,11 +36,6 @@ const DomainForm = ({ domain }) => {
     setDeleteDialogOpen(false);
   };
 
-  const nameError = validateDomainName(domain.name);
-  const smallError = validateNonNegativeInteger(domain.smallProjects);
-  const mediumError = validateNonNegativeInteger(domain.mediumProjects);
-  const largeError = validateNonNegativeInteger(domain.largeProjects);
-
   const totalWeeks = calculateDomainEffort({
     small: domain.smallProjects,
     medium: domain.mediumProjects,
@@ -59,61 +53,43 @@ const DomainForm = ({ domain }) => {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <KdsLabel>
-            Domain Name
-            <KdsInput
-              type="text"
-              placeholder="e.g., TEST"
-              value={domain.name}
-              onChange={(e) => handleDomainChange('name', e.target.value)}
-              invalid={!!nameError}
-            />
-          </KdsLabel>
-          {nameError && <KdsMessage kind="error">{nameError}</KdsMessage>}
+          <MxInputTextBox
+            label="Domain Name"
+            placeholder="e.g., TEST"
+            value={domain.name}
+            onChange={(e) => handleDomainChange('name', e.target.value)}
+            mask="none"
+            isClearable={false}
+          />
         </div>
 
         <div className="form-grid-3col">
           <div>
-            <KdsLabel>
-              Small Projects (2w ea)
-              <KdsInput
-                type="number"
-                value={domain.smallProjects}
-                onChange={(e) => handleDomainChange('smallProjects', e.target.value)}
-                invalid={!!smallError}
-                min={0}
-                step={1}
-              />
-            </KdsLabel>
-            {smallError && <KdsMessage kind="error">{smallError}</KdsMessage>}
+            <MxInputTextBox
+              label="Small Projects (2w ea)"
+              value={String(domain.smallProjects)}
+              onChange={(e) => handleDomainChange('smallProjects', e.target.value)}
+              mask="none"
+              isClearable={false}
+            />
           </div>
           <div>
-            <KdsLabel>
-              Medium Projects (4w ea)
-              <KdsInput
-                type="number"
-                value={domain.mediumProjects}
-                onChange={(e) => handleDomainChange('mediumProjects', e.target.value)}
-                invalid={!!mediumError}
-                min={0}
-                step={1}
-              />
-            </KdsLabel>
-            {mediumError && <KdsMessage kind="error">{mediumError}</KdsMessage>}
+            <MxInputTextBox
+              label="Medium Projects (4w ea)"
+              value={String(domain.mediumProjects)}
+              onChange={(e) => handleDomainChange('mediumProjects', e.target.value)}
+              mask="none"
+              isClearable={false}
+            />
           </div>
           <div>
-            <KdsLabel>
-              Large Projects (8w ea)
-              <KdsInput
-                type="number"
-                value={domain.largeProjects}
-                onChange={(e) => handleDomainChange('largeProjects', e.target.value)}
-                invalid={!!largeError}
-                min={0}
-                step={1}
-              />
-            </KdsLabel>
-            {largeError && <KdsMessage kind="error">{largeError}</KdsMessage>}
+            <MxInputTextBox
+              label="Large Projects (8w ea)"
+              value={String(domain.largeProjects)}
+              onChange={(e) => handleDomainChange('largeProjects', e.target.value)}
+              mask="none"
+              isClearable={false}
+            />
           </div>
         </div>
 

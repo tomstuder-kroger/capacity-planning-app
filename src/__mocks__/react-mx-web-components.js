@@ -8,6 +8,12 @@ const makeComponent = (name) => {
 };
 
 module.exports = {
+  MxInputTextBox: ({ children, label, onChange, ...props }) =>
+    React.createElement('div', { 'data-testid': 'MxInputTextBox', onChange, ...props },
+      label && React.createElement('label', null, label),
+      React.createElement('input', { onChange, ...props }),
+      children
+    ),
   KdsButton: ({ children, onClick, disabled, ...props }) =>
     React.createElement('button', { onClick, disabled, ...props }, children),
   KdsInput: makeComponent('KdsInput'),
