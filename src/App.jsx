@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Box, Typography, Grid, Alert } from '@mui/material';
+import { KdsMessage } from 'react-mx-web-components';
 import { CapacityProvider, useCapacity } from './context/CapacityContext';
 import ICSelector from './components/ICSelector';
 import QuarterInfoForm from './components/QuarterInfoForm';
@@ -13,39 +13,37 @@ function AppContent() {
   const { activeIC, saveError } = useCapacity();
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100', py: 4 }}>
-      <Container maxWidth="xl">
-        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-          IC Capacity Planning
-        </Typography>
+    <div className="app-shell">
+      <div className="app-container">
+        <h1 className="kds-Heading kds-Heading--xl app-title">IC Capacity Planning</h1>
 
         {saveError && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
+          <KdsMessage kind="warning" className="mb-16">
             Auto-save disabled - data won't persist across sessions
-          </Alert>
+          </KdsMessage>
         )}
 
         <ICSelector />
 
         {!activeIC ? (
-          <Alert severity="info">
+          <KdsMessage kind="info">
             Create your first IC capacity plan by clicking "New IC" above
-          </Alert>
+          </KdsMessage>
         ) : (
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={7}>
+          <div className="capacity-layout-grid">
+            <div className="forms-column">
               <QuarterInfoForm />
               <ICInfoForm />
               <TimeOffForm />
               <DomainList />
-            </Grid>
-            <Grid item xs={12} md={5}>
+            </div>
+            <div className="dashboard-column">
               <CapacityDashboard />
-            </Grid>
-          </Grid>
+            </div>
+          </div>
         )}
-      </Container>
-    </Box>
+      </div>
+    </div>
   );
 }
 

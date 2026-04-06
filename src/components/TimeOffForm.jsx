@@ -1,16 +1,5 @@
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Grid,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormLabel,
-  Box
-} from '@mui/material';
+import { KdsInput, KdsLabel, KdsRadio, KdsMessage } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import { validateNonNegativeNumber } from '../utils/validation';
 
@@ -68,78 +57,98 @@ const TimeOffForm = () => {
   const totalTimeOff = calculated ? calculated.totalTimeOffWeeks.toFixed(1) : '0.0';
 
   return (
-    <Card sx={{ mb: 2 }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Time Off
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <FormLabel component="legend">OKR Time</FormLabel>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-              <TextField
-                sx={{ flex: 1 }}
+    <div className="kds-Card kds-Card--m kds-card-section">
+      <h2 className="kds-Heading kds-Heading--s section-heading">Time Off</h2>
+      <div className="form-grid-2col">
+        <div>
+          <KdsLabel>OKR Time</KdsLabel>
+          <div className="okr-row">
+            <div className="okr-input">
+              <KdsInput
                 type="number"
                 value={activeIC.timeOff.okrTime.value}
                 onChange={handleOKRValueChange}
-                error={!!okrError}
-                helperText={okrError}
-                inputProps={{ min: 0, step: 0.1 }}
+                invalid={!!okrError}
+                min={0}
+                step={0.1}
               />
-              <RadioGroup
-                row
-                value={activeIC.timeOff.okrTime.unit}
-                onChange={handleOKRUnitChange}
-              >
-                <FormControlLabel value="days" control={<Radio />} label="Days" />
-                <FormControlLabel value="weeks" control={<Radio />} label="Weeks" />
-              </RadioGroup>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="PTO Days"
+              {okrError && <KdsMessage kind="error">{okrError}</KdsMessage>}
+            </div>
+            <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+              <div className="okr-units">
+                <KdsLabel leftOfInput>
+                  <KdsRadio
+                    name="okrUnit"
+                    value="days"
+                    checked={activeIC.timeOff.okrTime.unit === 'days'}
+                    onChange={handleOKRUnitChange}
+                  />
+                  Days
+                </KdsLabel>
+                <KdsLabel leftOfInput>
+                  <KdsRadio
+                    name="okrUnit"
+                    value="weeks"
+                    checked={activeIC.timeOff.okrTime.unit === 'weeks'}
+                    onChange={handleOKRUnitChange}
+                  />
+                  Weeks
+                </KdsLabel>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+
+        <div>
+          <KdsLabel>
+            PTO Days
+            <KdsInput
               type="number"
               value={activeIC.timeOff.ptoDays}
               onChange={handlePTOChange}
-              error={!!ptoError}
-              helperText={ptoError}
-              inputProps={{ min: 0, step: 0.1 }}
+              invalid={!!ptoError}
+              min={0}
+              step={0.1}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Dev / L&D Days"
+          </KdsLabel>
+          {ptoError && <KdsMessage kind="error">{ptoError}</KdsMessage>}
+        </div>
+
+        <div>
+          <KdsLabel>
+            Dev / L&amp;D Days
+            <KdsInput
               type="number"
               value={activeIC.timeOff.devDays}
               onChange={handleDevChange}
-              error={!!devError}
-              helperText={devError}
-              inputProps={{ min: 0, step: 0.1 }}
+              invalid={!!devError}
+              min={0}
+              step={0.1}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Holiday Days"
+          </KdsLabel>
+          {devError && <KdsMessage kind="error">{devError}</KdsMessage>}
+        </div>
+
+        <div>
+          <KdsLabel>
+            Holiday Days
+            <KdsInput
               type="number"
               value={activeIC.timeOff.holidayDays}
               onChange={handleHolidayChange}
-              error={!!holidayError}
-              helperText={holidayError}
-              inputProps={{ min: 0, step: 0.1 }}
+              invalid={!!holidayError}
+              min={0}
+              step={0.1}
             />
-          </Grid>
-        </Grid>
-        <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            Total time off: <strong>{totalTimeOff} weeks</strong>
-          </Typography>
-        </Box>
-      </CardContent>
-    </Card>
+          </KdsLabel>
+          {holidayError && <KdsMessage kind="error">{holidayError}</KdsMessage>}
+        </div>
+      </div>
+
+      <div className="summary-box">
+        <span>Total time off: <strong>{totalTimeOff} weeks</strong></span>
+      </div>
+    </div>
   );
 };
 

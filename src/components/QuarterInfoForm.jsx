@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, TextField, Grid } from '@mui/material';
+import { KdsInput, KdsLabel, KdsMessage } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import { validateQuarterName, validateWeeksInQuarter } from '../utils/validation';
 
@@ -21,39 +21,39 @@ const QuarterInfoForm = () => {
   const weeksError = validateWeeksInQuarter(activeIC.weeksInQuarter);
 
   return (
-    <Card sx={{ mb: 2 }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Quarter Information
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Quarter"
+    <div className="kds-Card kds-Card--m kds-card-section">
+      <h2 className="kds-Heading kds-Heading--s section-heading">Quarter Information</h2>
+      <div className="form-grid-2col">
+        <div>
+          <KdsLabel>
+            Quarter
+            <KdsInput
+              type="text"
               placeholder="e.g., Q1 2024"
               value={activeIC.quarter}
               onChange={handleQuarterChange}
-              error={!!quarterError}
-              helperText={quarterError}
+              invalid={!!quarterError}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Weeks in Quarter"
+          </KdsLabel>
+          {quarterError && <KdsMessage kind="error">{quarterError}</KdsMessage>}
+        </div>
+        <div>
+          <KdsLabel>
+            Weeks in Quarter
+            <KdsInput
               type="number"
               placeholder="e.g., 13"
               value={activeIC.weeksInQuarter}
               onChange={handleWeeksChange}
-              error={!!weeksError}
-              helperText={weeksError}
-              inputProps={{ min: 0, step: 0.1 }}
+              invalid={!!weeksError}
+              min={0}
+              step={0.1}
             />
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
+          </KdsLabel>
+          {weeksError && <KdsMessage kind="error">{weeksError}</KdsMessage>}
+        </div>
+      </div>
+    </div>
   );
 };
 

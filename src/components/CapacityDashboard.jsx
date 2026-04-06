@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Chip,
-  Button,
-  LinearProgress,
-  Alert
-} from '@mui/material';
-import { Visibility, Warning } from '@mui/icons-material';
+import { KdsButton, KdsTag, KdsMessage, KdsIconEye } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import FormattedOutput from './FormattedOutput';
 
@@ -19,13 +9,9 @@ const CapacityDashboard = () => {
 
   if (!activeIC) {
     return (
-      <Card>
-        <CardContent>
-          <Typography color="text.secondary" align="center">
-            Create an IC to see capacity dashboard
-          </Typography>
-        </CardContent>
-      </Card>
+      <div className="kds-Card kds-Card--m kds-card-section" style={{ textAlign: 'center' }}>
+        <span style={{ color: '#6b7280' }}>Create an IC to see capacity dashboard</span>
+      </div>
     );
   }
 
@@ -42,9 +28,15 @@ const CapacityDashboard = () => {
   } = calculated;
 
   const getStatusColor = () => {
-    if (status === 'over') return 'error';
-    if (status === 'fully') return 'warning';
-    return 'success';
+    if (status === 'over') return '#d32f2f';
+    if (status === 'fully') return '#ed6c02';
+    return '#2e7d32';
+  };
+
+  const getStatusKind = () => {
+    if (status === 'over') return 'negative';
+    if (status === 'fully') return 'callout';
+    return 'positive';
   };
 
   const getStatusLabel = () => {
@@ -62,7 +54,7 @@ const CapacityDashboard = () => {
     return 'Fully allocated';
   };
 
-  const utilizationValue = Math.min(capacityUtilization, 200); // Cap for display
+  const utilizationValue = Math.min(capacityUtilization, 200);
   const showInfinityWarning = !isFinite(capacityUtilization);
 
   const totalProjects = activeIC.domains.reduce((sum, d) =>
@@ -79,79 +71,59 @@ const CapacityDashboard = () => {
 
   return (
     <>
-      <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Capacity Status
-          </Typography>
+      <div className="kds-Card kds-Card--m kds-card-section">
+        <h2 className="kds-Heading kds-Heading--s section-heading">Capacity Status</h2>
 
-          {showInfinityWarning ? (
-            <Alert severity="warning" icon={<Warning />} sx={{ mb: 2 }}>
-              Cannot calculate utilization - no available time
-            </Alert>
-          ) : (
-            <>
-              <Box sx={{ textAlign: 'center', my: 3 }}>
-                <Typography variant="h2" color={getStatusColor()}>
-                  {capacityUtilization.toFixed(0)}%
-                </Typography>
-                <Typography variant="h6" color={getStatusColor()} gutterBottom>
-                  {getStatusLabel()}
-                </Typography>
-                <LinearProgress
-                  variant="determinate"
-                  value={(utilizationValue / 200) * 100}
-                  color={getStatusColor()}
-                  sx={{ height: 10, borderRadius: 5, my: 2 }}
-                />
-              </Box>
-            </>
+        {showInfinityWarning ? (
+          <KdsMessage kind="warning" style={{ marginBottom: '1rem' }}>
+            Cannot calculate utilization - no available time
+          </KdsMessage>
+        ) : (
+          <div className="utilization-display">
+            <div className="utilization-percent" style={{ color: getStatusColor() }}>
+              {capacityUtilization.toFixed(0)}%
+            </div>
+            <div style={{ color: getStatusColor(), marginTop: '0.25rem' }}>
+              {getStatusLabel()}
+            </div>
+            <div className="progress-track">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${(utilizationValue / 200) * 100}%`,
+                  backgroundColor: getStatusColor()
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+          <div className="stat-row">
+            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Available:</span>
+            <strong style={{ fontSize: '0.875rem' }}>{totalWeeksAvailable.toFixed(1)}w</strong>
+          </div>
+          <div className="stat-row">
+            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Planned:</span>
+            <strong style={{ fontSize: '0.875rem' }}>{totalPlannedWork.toFixed(1)}w</strong>
+          </div>
+          <div className="stat-row">
+            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Difference:</span>
+            <strong style={{ fontSize: '0.875rem', color: getStatusColor() }}>{getOverUnderText()}</strong>
+          </div>
+        </div>
+
+        <div className="tag-row">
+          <KdsTag kind={getStatusKind()}>{activeIC.domains.length} Domain(s)</KdsTag>
+          {totalProjects > 0 && (
+            <KdsTag kind="default">{projectSummary.join(', ')}</KdsTag>
           )}
+        </div>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" color="text.secondary">
-                Available:
-              </Typography>
-              <Typography variant="body2" fontWeight="bold">
-                {totalWeeksAvailable.toFixed(1)}w
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" color="text.secondary">
-                Planned:
-              </Typography>
-              <Typography variant="body2" fontWeight="bold">
-                {totalPlannedWork.toFixed(1)}w
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" color="text.secondary">
-                Difference:
-              </Typography>
-              <Typography variant="body2" fontWeight="bold" color={getStatusColor()}>
-                {getOverUnderText()}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ mb: 2 }}>
-            <Chip label={`${activeIC.domains.length} Domain(s)`} size="small" sx={{ mr: 1 }} />
-            {totalProjects > 0 && (
-              <Chip label={projectSummary.join(', ')} size="small" />
-            )}
-          </Box>
-
-          <Button
-            variant="contained"
-            startIcon={<Visibility />}
-            onClick={() => setSummaryOpen(true)}
-            fullWidth
-          >
-            View Summary
-          </Button>
-        </CardContent>
-      </Card>
+        <KdsButton kind="primary" style={{ width: '100%' }} onClick={() => setSummaryOpen(true)}>
+          <KdsIconEye /> View Summary
+        </KdsButton>
+      </div>
 
       <FormattedOutput open={summaryOpen} onClose={() => setSummaryOpen(false)} />
     </>

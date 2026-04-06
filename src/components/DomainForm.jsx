@@ -1,20 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Grid,
-  IconButton,
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  Button
-} from '@mui/material';
-import { Delete } from '@mui/icons-material';
+import { KdsInput, KdsLabel, KdsButton, KdsMessage } from 'react-mx-web-components';
+import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import { validateDomainName, validateNonNegativeInteger } from '../utils/validation';
 import { calculateDomainEffort } from '../utils/calculations';
@@ -26,7 +12,6 @@ const DomainForm = ({ domain }) => {
   if (!activeIC) return null;
 
   const handleDomainChange = (field, value) => {
-    // For numeric fields, convert to number but keep empty string as 0
     let processedValue = value;
     if (['smallProjects', 'mediumProjects', 'largeProjects'].includes(field)) {
       processedValue = value === '' ? 0 : Number(value);
@@ -65,89 +50,93 @@ const DomainForm = ({ domain }) => {
 
   return (
     <>
-      <Card sx={{ mb: 2, position: 'relative' }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">
-              Domain
-            </Typography>
-            <IconButton color="error" onClick={handleRemove} size="small">
-              <Delete />
-            </IconButton>
-          </Box>
+      <div className="kds-Card kds-Card--m kds-card-section">
+        <div className="domain-header">
+          <h2 className="kds-Heading kds-Heading--s" style={{ margin: 0 }}>Domain</h2>
+          <KdsButton kind="destructive" variant="minimal" onClick={handleRemove} aria-label="Remove domain">
+            ✕
+          </KdsButton>
+        </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Domain Name"
-                placeholder="e.g., TEST"
-                value={domain.name}
-                onChange={(e) => handleDomainChange('name', e.target.value)}
-                error={!!nameError}
-                helperText={nameError}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                label="Small Projects (2w ea)"
+        <div style={{ marginBottom: '1rem' }}>
+          <KdsLabel>
+            Domain Name
+            <KdsInput
+              type="text"
+              placeholder="e.g., TEST"
+              value={domain.name}
+              onChange={(e) => handleDomainChange('name', e.target.value)}
+              invalid={!!nameError}
+            />
+          </KdsLabel>
+          {nameError && <KdsMessage kind="error">{nameError}</KdsMessage>}
+        </div>
+
+        <div className="form-grid-3col">
+          <div>
+            <KdsLabel>
+              Small Projects (2w ea)
+              <KdsInput
                 type="number"
                 value={domain.smallProjects}
                 onChange={(e) => handleDomainChange('smallProjects', e.target.value)}
-                error={!!smallError}
-                helperText={smallError}
-                inputProps={{ min: 0, step: 1 }}
+                invalid={!!smallError}
+                min={0}
+                step={1}
               />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                label="Medium Projects (4w ea)"
+            </KdsLabel>
+            {smallError && <KdsMessage kind="error">{smallError}</KdsMessage>}
+          </div>
+          <div>
+            <KdsLabel>
+              Medium Projects (4w ea)
+              <KdsInput
                 type="number"
                 value={domain.mediumProjects}
                 onChange={(e) => handleDomainChange('mediumProjects', e.target.value)}
-                error={!!mediumError}
-                helperText={mediumError}
-                inputProps={{ min: 0, step: 1 }}
+                invalid={!!mediumError}
+                min={0}
+                step={1}
               />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                label="Large Projects (8w ea)"
+            </KdsLabel>
+            {mediumError && <KdsMessage kind="error">{mediumError}</KdsMessage>}
+          </div>
+          <div>
+            <KdsLabel>
+              Large Projects (8w ea)
+              <KdsInput
                 type="number"
                 value={domain.largeProjects}
                 onChange={(e) => handleDomainChange('largeProjects', e.target.value)}
-                error={!!largeError}
-                helperText={largeError}
-                inputProps={{ min: 0, step: 1 }}
+                invalid={!!largeError}
+                min={0}
+                step={1}
               />
-            </Grid>
-          </Grid>
+            </KdsLabel>
+            {largeError && <KdsMessage kind="error">{largeError}</KdsMessage>}
+          </div>
+        </div>
 
-          <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-            <Typography variant="body2" color="text.secondary">
-              Domain total: <strong>{totalWeeks.toFixed(1)} weeks</strong>
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
+        <div className="summary-box">
+          <span>Domain total: <strong>{totalWeeks.toFixed(1)} weeks</strong></span>
+        </div>
+      </div>
 
-      <Dialog open={deleteDialogOpen} onClose={handleRemoveCancel}>
-        <DialogTitle>Remove Domain</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Remove domain "{domain.name || 'Untitled'}"?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleRemoveCancel}>Cancel</Button>
-          <Button onClick={handleRemoveConfirm} color="error" variant="contained">
-            Remove
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <MxModal
+        isOpened={deleteDialogOpen}
+        headercontent="Remove Domain"
+        footerPrimaryButtonText="Remove"
+        footerPrimaryButtonKind="destructive"
+        footerSecondaryButtonText="Cancel"
+        closeOnSecondaryButton
+        onApplyClick={handleRemoveConfirm}
+        onSecondaryClick={handleRemoveCancel}
+        onModalClose={handleRemoveCancel}
+      >
+        <MxModalBody>
+          Remove domain "{domain.name || 'Untitled'}"?
+        </MxModalBody>
+      </MxModal>
     </>
   );
 };

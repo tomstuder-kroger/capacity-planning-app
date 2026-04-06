@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, TextField, Grid } from '@mui/material';
+import { KdsInput, KdsLabel, KdsMessage } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import { validateICName, validateICRole } from '../utils/validation';
 
@@ -20,37 +20,37 @@ const ICInfoForm = () => {
   const roleError = validateICRole(activeIC.icRole);
 
   return (
-    <Card sx={{ mb: 2 }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          IC Information
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="IC Name"
+    <div className="kds-Card kds-Card--m kds-card-section">
+      <h2 className="kds-Heading kds-Heading--s section-heading">IC Information</h2>
+      <div className="form-grid-2col">
+        <div>
+          <KdsLabel>
+            IC Name
+            <KdsInput
+              type="text"
               placeholder="e.g., Joe Test"
               value={activeIC.icName}
               onChange={handleNameChange}
-              error={!!nameError}
-              helperText={nameError}
+              invalid={!!nameError}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="IC Role"
+          </KdsLabel>
+          {nameError && <KdsMessage kind="error">{nameError}</KdsMessage>}
+        </div>
+        <div>
+          <KdsLabel>
+            IC Role
+            <KdsInput
+              type="text"
               placeholder="e.g., PD"
               value={activeIC.icRole}
               onChange={handleRoleChange}
-              error={!!roleError}
-              helperText={roleError}
+              invalid={!!roleError}
             />
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
+          </KdsLabel>
+          {roleError && <KdsMessage kind="error">{roleError}</KdsMessage>}
+        </div>
+      </div>
+    </div>
   );
 };
 

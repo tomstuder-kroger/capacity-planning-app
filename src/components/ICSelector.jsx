@@ -1,23 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  Paper,
-  Typography
-} from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
+import { KdsButton, KdsSelect, KdsLabel } from 'react-mx-web-components';
+import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 
 const ICSelector = () => {
@@ -75,80 +58,68 @@ const ICSelector = () => {
   };
 
   return (
-    <Paper sx={{ p: 3, mb: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleCreateIC}
-        >
-          New IC
-        </Button>
+    <div className="kds-Card kds-Card--m kds-card-section" style={{ marginBottom: '1.5rem' }}>
+      <div className="ic-selector-bar">
+        <KdsButton kind="primary" onClick={handleCreateIC}>
+          + New IC
+        </KdsButton>
 
         {ics.length > 0 && (
           <>
-            <FormControl sx={{ minWidth: 300, flex: 1 }}>
-              <InputLabel id="ic-select-label">Select IC</InputLabel>
-              <Select
-                labelId="ic-select-label"
-                id="ic-select"
-                value={activeICId || ''}
-                label="Select IC"
-                onChange={handleICChange}
+            <div className="ic-select-wrapper">
+              <KdsLabel>
+                Select IC
+                <KdsSelect value={activeICId || ''} onChange={handleICChange}>
+                  <option value="" disabled>Select IC...</option>
+                  {ics.map((ic) => (
+                    <option key={ic.id} value={ic.id}>
+                      {getICDisplayName(ic)}
+                    </option>
+                  ))}
+                </KdsSelect>
+              </KdsLabel>
+            </div>
+
+            <div className="ic-actions">
+              <KdsButton
+                kind="secondary"
+                onClick={handleDuplicateIC}
+                disabled={!activeIC}
               >
-                {ics.map((ic) => (
-                  <MenuItem key={ic.id} value={ic.id}>
-                    {getICDisplayName(ic)}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <IconButton
-              color="primary"
-              onClick={handleDuplicateIC}
-              title="Duplicate IC"
-              disabled={!activeIC}
-            >
-              <ContentCopyIcon />
-            </IconButton>
-
-            <IconButton
-              color="error"
-              onClick={handleDeleteClick}
-              title="Delete IC"
-              disabled={!activeIC}
-            >
-              <DeleteIcon />
-            </IconButton>
+                Duplicate
+              </KdsButton>
+              <KdsButton
+                kind="destructive"
+                onClick={handleDeleteClick}
+                disabled={!activeIC}
+              >
+                Delete
+              </KdsButton>
+            </div>
           </>
         )}
 
         {ics.length === 0 && (
-          <Typography variant="body1" color="text.secondary">
-            No ICs yet. Click "New IC" to get started.
-          </Typography>
+          <span style={{ color: '#6b7280', textAlign: 'left', display: 'block' }}>No ICs yet. Click "New IC" to get started.</span>
         )}
-      </Box>
+      </div>
 
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={handleDeleteCancel}
+      <MxModal
+        isOpened={deleteDialogOpen}
+        headercontent="Delete IC?"
+        footerPrimaryButtonText="Delete"
+        footerPrimaryButtonKind="destructive"
+        footerSecondaryButtonText="Cancel"
+        closeOnSecondaryButton
+        onApplyClick={handleDeleteConfirm}
+        onSecondaryClick={handleDeleteCancel}
+        onModalClose={handleDeleteCancel}
       >
-        <DialogTitle>Delete IC?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete "{activeIC ? getICDisplayName(activeIC) : 'this IC'}"? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDeleteCancel}>Cancel</Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
+        <MxModalBody>
+          Are you sure you want to delete "{activeIC ? getICDisplayName(activeIC) : 'this IC'}"? This action cannot be undone.
+        </MxModalBody>
+      </MxModal>
+    </div>
   );
 };
 

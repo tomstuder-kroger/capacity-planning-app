@@ -1,36 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { KdsToastController } from 'react-mx-web-components';
 import './index.css';
+import 'mx-web-components/dist/kds-reset.css';
+import 'mx-web-components/dist/kds-utils.css';
+import 'mx-web-components/dist/kds-components.css';
+import 'mx-web-components/dist/light.css';
+import 'mx-web-components/dist/mx-web-components/mx-web-components.css';
 import App from './App';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-    success: {
-      main: '#2e7d32',
-    },
-    warning: {
-      main: '#ed6c02',
-    },
-    error: {
-      main: '#d32f2f',
-    },
-  },
-});
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <KdsToastController />
+    <App />
   </React.StrictMode>
 );

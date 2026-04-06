@@ -1,6 +1,5 @@
 import React from 'react';
-import { Box, Button, Typography, Paper } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { KdsButton, KdsMessage } from 'react-mx-web-components';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
 import DomainForm from './DomainForm';
@@ -24,32 +23,25 @@ const DomainList = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Domains & Planned Work
-      </Typography>
+    <div>
+      <h2 className="kds-Heading kds-Heading--s section-heading">Domains &amp; Planned Work</h2>
 
       {activeIC.domains.length === 0 ? (
-        <Paper sx={{ p: 3, mb: 2, textAlign: 'center', bgcolor: 'grey.50' }}>
-          <Typography color="text.secondary">
+        <div className="kds-Card kds-Card--m kds-card-section">
+          <KdsMessage kind="info">
             No domains added yet. Click "Add Domain" to start.
-          </Typography>
-        </Paper>
+          </KdsMessage>
+        </div>
       ) : (
         activeIC.domains.map(domain => (
           <DomainForm key={domain.id} domain={domain} />
         ))
       )}
 
-      <Button
-        variant="outlined"
-        startIcon={<Add />}
-        onClick={handleAddDomain}
-        fullWidth
-      >
-        Add Domain
-      </Button>
-    </Box>
+      <KdsButton kind="secondary" style={{ width: '100%' }} onClick={handleAddDomain}>
+        + Add Domain
+      </KdsButton>
+    </div>
   );
 };
 
