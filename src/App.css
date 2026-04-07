@@ -14,13 +14,12 @@ body {
 .app-shell {
   min-height: 100vh;
   background-color: #f4f4f4;
-  padding: 2rem 0;
 }
 
 .app-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 2rem 1.5rem;
 }
 
 .app-title {

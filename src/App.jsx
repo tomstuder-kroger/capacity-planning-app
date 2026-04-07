@@ -3,6 +3,7 @@ import { KdsMessage } from 'react-mx-web-components';
 import { CapacityProvider, useCapacity } from './context/CapacityContext';
 import ICSelector from './components/ICSelector';
 import EmptyState from './components/EmptyState';
+import GlobalNavBar from './components/GlobalNavBar';
 import QuarterInfoForm from './components/QuarterInfoForm';
 import ICInfoForm from './components/ICInfoForm';
 import TimeOffForm from './components/TimeOffForm';
@@ -15,9 +16,8 @@ function AppContent() {
 
   return (
     <div className="app-shell">
+      <GlobalNavBar />
       <div className="app-container">
-        <h1 className="kds-Heading kds-Heading--xl app-title">IC Capacity Planning</h1>
-
         {saveError && (
           <KdsMessage kind="warning" className="mb-16">
             Auto-save disabled - data won't persist across sessions
@@ -27,9 +27,9 @@ function AppContent() {
         <ICSelector />
 
         {!activeIC ? (
-          <EmptyState />
+          <EmptyState key="empty" />
         ) : (
-          <div className="capacity-layout-grid">
+          <div key={activeIC.id} className="capacity-layout-grid">
             <div className="forms-column">
               <QuarterInfoForm />
               <ICInfoForm />
