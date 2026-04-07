@@ -33,6 +33,18 @@ body {
   margin-top: 1rem;
 }
 
+@media (max-width: 900px) {
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .team-member-card {
   cursor: pointer;
   transition: box-shadow 0.2s ease;

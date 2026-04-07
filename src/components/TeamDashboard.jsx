@@ -16,7 +16,7 @@ const TeamDashboard = ({ onSelectMember }) => {
         <h2 className="kds-Heading kds-Heading--l" style={{ margin: 0 }}>My Team</h2>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           {ics.length > 0 && (
-            <KdsButton kind="secondary" onClick={() => setIsEditMode(!isEditMode)}>
+            <KdsButton key={isEditMode ? 'done' : 'edit'} kind="secondary" onClick={() => setIsEditMode(!isEditMode)}>
               {isEditMode ? 'Done' : 'Edit'}
             </KdsButton>
           )}

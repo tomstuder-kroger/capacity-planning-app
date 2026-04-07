@@ -2,7 +2,6 @@ import React from 'react';
 import { KdsButton } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import QuarterInfoForm from './QuarterInfoForm';
-import ICInfoForm from './ICInfoForm';
 import TimeOffForm from './TimeOffForm';
 import DomainList from './DomainList';
 import CapacityDashboard from './CapacityDashboard';
@@ -22,7 +21,6 @@ const PlanningView = ({ onBack }) => {
       <div className="capacity-layout-grid">
         <div className="forms-column">
           <QuarterInfoForm />
-          <ICInfoForm />
           <TimeOffForm />
           <DomainList />
         </div>

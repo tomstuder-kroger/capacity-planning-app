@@ -26,6 +26,8 @@ module.exports = {
   KdsToastController: makeComponent('KdsToastController'),
   KdsToast: makeComponent('KdsToast'),
   KdsIconEye: makeComponent('KdsIconEye'),
+  KdsIconTrash: makeComponent('KdsIconTrash'),
+  MxSingleSelect: makeComponent('MxSingleSelect'),
   MxModal: makeComponent('MxModal'),
   MxModalBody: makeComponent('MxModalBody'),
   MxModalHeader: makeComponent('MxModalHeader'),

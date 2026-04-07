@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KdsButton } from 'react-mx-web-components';
+import { KdsButton, KdsIconTrash, MxInputTextBox, MxSingleSelect } from 'react-mx-web-components';
 import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 
@@ -10,7 +10,7 @@ const STATUS_COLORS = {
 };
 
 const TeamMemberCard = ({ ic, onSelect, isEditMode }) => {
-  const { deleteIC, calculateResults } = useCapacity();
+  const { deleteIC, updateIC, calculateResults } = useCapacity();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const calculated = calculateResults(ic);
@@ -28,30 +28,62 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode }) => {
     setDeleteDialogOpen(false);
   };
 
+  const handleNameChange = (e) => {
+    updateIC(ic.id, { icName: e.target.value });
+  };
+
+  const handleRoleChange = (e) => {
+    updateIC(ic.id, { icRole: e.detail });
+  };
+
   return (
     <>
       <div
         className="kds-Card kds-Card--m kds-card-section team-member-card"
-        onClick={onSelect}
+        onClick={!isEditMode ? onSelect : undefined}
+        style={{ cursor: isEditMode ? 'default' : 'pointer' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <div className="team-card-name">{ic.icName || 'Unnamed'}</div>
-            <div className="team-card-role">{ic.icRole || 'No role set'}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {isEditMode ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
+                <MxInputTextBox
+                  label="Name"
+                  value={ic.icName}
+                  onChange={handleNameChange}
+                  mask="none"
+                  isClearable={false}
+                />
+                <MxSingleSelect
+                  label="Role"
+                  items={['APD', 'PD', 'SPD']}
+                  value={ic.icRole}
+                  emitOnlyValue
+                  onValueUpdate={handleRoleChange}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="team-card-name">{ic.icName || 'Unnamed'}</div>
+                <div className="team-card-role">{ic.icRole || 'No role set'}</div>
+              </>
+            )}
           </div>
           {isEditMode && (
             <KdsButton
-              kind="destructive"
+              palette="negative"
+              kind="subtle"
               variant="minimal"
               onClick={handleDeleteClick}
               aria-label="Remove team member"
+              style={{ marginLeft: '0.5rem', flexShrink: 0 }}
             >
-              ✕
+              <KdsIconTrash size="s" />
             </KdsButton>
           )}
         </div>
 
-        {hasUtilization && (
+        {!isEditMode && hasUtilization && (
           <div style={{
             marginTop: '12px',
             fontSize: '22px',

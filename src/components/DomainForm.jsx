@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KdsButton, MxInputTextBox } from 'react-mx-web-components';
+import { KdsButton, KdsIconTrash, MxInputTextBox } from 'react-mx-web-components';
 import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import { calculateDomainEffort } from '../utils/calculations';
@@ -47,8 +47,8 @@ const DomainForm = ({ domain }) => {
       <div className="kds-Card kds-Card--m kds-card-section">
         <div className="domain-header">
           <h2 className="kds-Heading kds-Heading--s" style={{ margin: 0 }}>Domain</h2>
-          <KdsButton kind="destructive" variant="minimal" onClick={handleRemove} aria-label="Remove domain">
-            ✕
+          <KdsButton palette="negative" kind="subtle" variant="minimal" onClick={handleRemove} aria-label="Remove domain">
+            <KdsIconTrash size="s" />
           </KdsButton>
         </div>
 
