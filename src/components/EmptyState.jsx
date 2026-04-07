@@ -1,7 +1,10 @@
 import React from 'react';
 import { KdsAccentIconAddToList } from 'react-mx-web-components';
 
-const EmptyState = () => {
+const EmptyState = ({
+  title = 'No IC plans yet',
+  subtitle = 'Create your first IC capacity plan by clicking "New IC" above',
+}) => {
   return (
     <div style={{
       display: 'flex',
@@ -20,7 +23,7 @@ const EmptyState = () => {
         textAlign: 'center',
         margin: 0,
       }}>
-        No IC plans yet
+        {title}
       </p>
       <p style={{
         fontFamily: 'Roboto, sans-serif',
@@ -31,7 +34,7 @@ const EmptyState = () => {
         textAlign: 'center',
         margin: 0,
       }}>
-        Create your first IC capacity plan by clicking "New IC" above
+        {subtitle}
       </p>
     </div>
   );

@@ -1,18 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { KdsMessage } from 'react-mx-web-components';
 import { CapacityProvider, useCapacity } from './context/CapacityContext';
-import ICSelector from './components/ICSelector';
-import EmptyState from './components/EmptyState';
 import GlobalNavBar from './components/GlobalNavBar';
-import QuarterInfoForm from './components/QuarterInfoForm';
-import ICInfoForm from './components/ICInfoForm';
-import TimeOffForm from './components/TimeOffForm';
-import DomainList from './components/DomainList';
-import CapacityDashboard from './components/CapacityDashboard';
+import TeamDashboard from './components/TeamDashboard';
+import PlanningView from './components/PlanningView';
 import './App.css';
 
 function AppContent() {
-  const { activeIC, saveError } = useCapacity();
+  const { activeIC, setActiveIC, saveError } = useCapacity();
+  const [currentView, setCurrentView] = useState('team');
+
+  const navigateToPlanning = (icId) => {
+    setActiveIC(icId);
+    setCurrentView('planning');
+  };
+
+  const navigateToTeam = () => {
+    setCurrentView('team');
+  };
 
   return (
     <div className="app-shell">
@@ -24,22 +29,10 @@ function AppContent() {
           </KdsMessage>
         )}
 
-        <ICSelector />
-
-        {!activeIC ? (
-          <EmptyState key="empty" />
+        {currentView === 'team' ? (
+          <TeamDashboard onSelectMember={navigateToPlanning} />
         ) : (
-          <div key={activeIC.id} className="capacity-layout-grid">
-            <div className="forms-column">
-              <QuarterInfoForm />
-              <ICInfoForm />
-              <TimeOffForm />
-              <DomainList />
-            </div>
-            <div className="dashboard-column">
-              <CapacityDashboard />
-            </div>
-          </div>
+          <PlanningView key={activeIC?.id} onBack={navigateToTeam} />
         )}
       </div>
     </div>

@@ -26,6 +26,42 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.team-member-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.team-member-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.team-card-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 4px;
+}
+
+.team-card-role {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.planning-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
 .capacity-layout-grid {
   display: grid;
   grid-template-columns: 7fr 5fr;
