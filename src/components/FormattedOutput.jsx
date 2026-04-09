@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { marked } from 'marked';
 import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import { generateSummary } from '../utils/calculations';
@@ -16,11 +18,33 @@ const FormattedOutput = ({ open, onClose }) => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(summary);
+      // Convert markdown to HTML
+      const html = marked(summary);
+
+      // Create a blob for HTML
+      const htmlBlob = new Blob([html], { type: 'text/html' });
+      const textBlob = new Blob([summary], { type: 'text/plain' });
+
+      // Copy both formats to clipboard
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': htmlBlob,
+          'text/plain': textBlob,
+        }),
+      ]);
+
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 3000);
     } catch (error) {
       console.error('Failed to copy:', error);
+      // Fallback to plain text if clipboard.write fails
+      try {
+        await navigator.clipboard.writeText(summary);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 3000);
+      } catch (fallbackError) {
+        console.error('Fallback copy also failed:', fallbackError);
+      }
     }
   };
 
@@ -36,7 +60,9 @@ const FormattedOutput = ({ open, onClose }) => {
       onModalClose={onClose}
     >
       <MxModalBody>
-        <pre className="summary-pre">{summary}</pre>
+        <div className="summary-markdown">
+          <ReactMarkdown>{summary}</ReactMarkdown>
+        </div>
       </MxModalBody>
     </MxModal>
   );
