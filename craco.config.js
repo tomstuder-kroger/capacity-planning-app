@@ -1,16 +1,16 @@
-const path = require('path');
-
 module.exports = {
   webpack: {
-    alias: {
-      react: path.resolve('./node_modules/react'),
-      'react-dom': path.resolve('./node_modules/react-dom'),
-    },
     configure: (webpackConfig) => {
-      // Remove ModuleScopePlugin so aliased paths outside src/ are allowed
-      webpackConfig.resolve.plugins = webpackConfig.resolve.plugins.filter(
-        (plugin) => plugin.constructor.name !== 'ModuleScopePlugin'
+      // Find the source-map-loader rule
+      const sourceMapLoader = webpackConfig.module.rules.find(
+        (rule) => rule.loader && rule.loader.includes('source-map-loader')
       );
+
+      if (sourceMapLoader) {
+        // Exclude react-mx-web-components from source map processing
+        sourceMapLoader.exclude = /node_modules\/react-mx-web-components/;
+      }
+
       return webpackConfig;
     },
   },
