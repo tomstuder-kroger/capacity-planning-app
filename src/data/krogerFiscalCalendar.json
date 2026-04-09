@@ -1,0 +1,119 @@
+{
+  "calendar_type": "Kroger Fiscal Calendar",
+  "pattern": "4-5-4",
+  "notes": [
+    "Each quarter is 13 weeks in a standard year",
+    "Some fiscal years include a 53rd week, typically added to Q4",
+    "53-week years must be confirmed by Finance"
+  ],
+  "fiscal_years": [
+    {
+      "fiscal_year": 2026,
+      "weeks_in_year": 52,
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 13 }
+      }
+    },
+    {
+      "fiscal_year": 2027,
+      "weeks_in_year": 52,
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 13 }
+      }
+    },
+    {
+      "fiscal_year": 2028,
+      "weeks_in_year": 53,
+      "extra_week": {
+        "applies_to": "Q4",
+        "reason": "Retail calendar realignment"
+      },
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 14 }
+      }
+    },
+    {
+      "fiscal_year": 2029,
+      "weeks_in_year": 52,
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 13 }
+      }
+    },
+    {
+      "fiscal_year": 2030,
+      "weeks_in_year": 52,
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 13 }
+      }
+    },
+    {
+      "fiscal_year": 2031,
+      "weeks_in_year": 52,
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 13 }
+      }
+    },
+    {
+      "fiscal_year": 2032,
+      "weeks_in_year": 53,
+      "extra_week": {
+        "applies_to": "Q4",
+        "reason": "Retail calendar realignment"
+      },
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 14 }
+      }
+    },
+    {
+      "fiscal_year": 2033,
+      "weeks_in_year": 52,
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 13 }
+      }
+    },
+    {
+      "fiscal_year": 2034,
+      "weeks_in_year": 52,
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 13 }
+      }
+    },
+    {
+      "fiscal_year": 2035,
+      "weeks_in_year": 52,
+      "quarters": {
+        "Q1": { "weeks": 13 },
+        "Q2": { "weeks": 13 },
+        "Q3": { "weeks": 13 },
+        "Q4": { "weeks": 13 }
+      }
+    }
+  ]
+}

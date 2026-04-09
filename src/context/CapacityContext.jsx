@@ -144,6 +144,18 @@ export const CapacityProvider = ({ children }) => {
     saveTeamName(name);
   }, []);
 
+  const reorderICs = useCallback((fromId, toId) => {
+    setICs(prev => {
+      const from = prev.findIndex(ic => ic.id === fromId);
+      const to = prev.findIndex(ic => ic.id === toId);
+      if (from === -1 || to === -1 || from === to) return prev;
+      const updated = [...prev];
+      const [moved] = updated.splice(from, 1);
+      updated.splice(to, 0, moved);
+      return updated;
+    });
+  }, []);
+
   const importIC = useCallback((icData) => {
     const newIC = {
       ...icData,
@@ -226,6 +238,7 @@ export const CapacityProvider = ({ children }) => {
     clearIC,
     importIC,
     updateTeamName,
+    reorderICs,
     calculateResults
   };
 

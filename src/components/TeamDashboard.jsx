@@ -1,15 +1,29 @@
 import React, { useState } from 'react';
 import { KdsButton, MxInputTextBox } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
+import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 import EmptyState from './EmptyState';
 import TeamMemberCard from './TeamMemberCard';
 import CreateMemberModal from './CreateMemberModal';
 
+const currentPeriod = getCurrentFiscalPeriod();
+
 const TeamDashboard = ({ onSelectMember }) => {
-  const { ics, teamName, updateTeamName, calculateResults } = useCapacity();
+  const { ics, teamName, updateTeamName, calculateResults, reorderICs } = useCapacity();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingTeamName, setEditingTeamName] = useState(false);
+  const [draggedId, setDraggedId] = useState(null);
+  const [dragOverId, setDragOverId] = useState(null);
+
+  const handleDragStart = (id) => setDraggedId(id);
+  const handleDragOver = (id) => setDragOverId(id);
+  const handleDrop = (toId) => {
+    if (draggedId && toId && draggedId !== toId) reorderICs(draggedId, toId);
+    setDraggedId(null);
+    setDragOverId(null);
+  };
+  const handleDragEnd = () => { setDraggedId(null); setDragOverId(null); };
   const { totalAvailable, totalPlanned } = ics.reduce((acc, ic) => {
     const result = calculateResults(ic);
     const avail = result?.totalWeeksAvailable;
@@ -65,6 +79,7 @@ const TeamDashboard = ({ onSelectMember }) => {
                 placeholder="Enter team name"
                 mask="none"
                 isClearable={false}
+                style={{ width: '320px' }}
               />
             ) : (
               <h2
@@ -91,6 +106,15 @@ const TeamDashboard = ({ onSelectMember }) => {
             </div>
             <div style={{ width: '1px', background: '#e5e7eb' }} />
             <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+                {currentPeriod ? `${currentPeriod.quarter} FY${currentPeriod.fiscalYear}` : '—'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                {currentPeriod ? `${currentPeriod.weeksInQuarter} weeks` : 'Quarter'}
+              </div>
+            </div>
+            <div style={{ width: '1px', background: '#e5e7eb' }} />
+            <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1, color: utilizationColor }}>
                 {totalUtilization !== null ? `${totalUtilization.toFixed(0)}%` : '—'}
               </div>
@@ -113,6 +137,12 @@ const TeamDashboard = ({ onSelectMember }) => {
               ic={ic}
               onSelect={() => !isEditMode && onSelectMember(ic.id)}
               isEditMode={isEditMode}
+              isDragging={draggedId === ic.id}
+              isDragOver={dragOverId === ic.id}
+              onDragStart={() => handleDragStart(ic.id)}
+              onDragOver={() => handleDragOver(ic.id)}
+              onDrop={() => handleDrop(ic.id)}
+              onDragEnd={handleDragEnd}
             />
           ))}
         </div>

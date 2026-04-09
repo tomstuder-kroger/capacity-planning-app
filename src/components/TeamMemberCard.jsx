@@ -9,7 +9,7 @@ const STATUS_COLORS = {
   over:  '#c0392b',
 };
 
-const TeamMemberCard = ({ ic, onSelect, isEditMode }) => {
+const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDragStart, onDragOver, onDrop, onDragEnd }) => {
   const { deleteIC, updateIC, calculateResults } = useCapacity();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -53,9 +53,22 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode }) => {
       <div
         className="kds-Card kds-Card--m kds-card-section team-member-card"
         onClick={!isEditMode ? onSelect : undefined}
-        style={{ cursor: isEditMode ? 'default' : 'pointer' }}
+        draggable={isEditMode}
+        onDragStart={onDragStart}
+        onDragOver={(e) => { e.preventDefault(); onDragOver?.(); }}
+        onDrop={(e) => { e.preventDefault(); onDrop?.(); }}
+        onDragEnd={onDragEnd}
+        style={{
+          cursor: isEditMode ? 'grab' : 'pointer',
+          opacity: isDragging ? 0.4 : 1,
+          outline: isDragOver ? '2px dashed #0F52A2' : 'none',
+          transition: 'opacity 0.2s',
+        }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {isEditMode && (
+            <div style={{ color: '#9ca3af', fontSize: '1.1rem', marginRight: '0.5rem', flexShrink: 0, userSelect: 'none', cursor: 'grab' }}>⠿</div>
+          )}
           <div style={{ flex: 1, minWidth: 0 }}>
             {isEditMode ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }} onClick={(e) => e.stopPropagation()}>

@@ -1,8 +1,9 @@
 import React from 'react';
-import { KdsButton, KdsMessage } from 'react-mx-web-components';
+import { KdsButton } from 'react-mx-web-components';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
 import DomainForm from './DomainForm';
+import EmptyState from './EmptyState';
 
 const DomainList = () => {
   const { activeIC, updateIC } = useCapacity();
@@ -28,9 +29,10 @@ const DomainList = () => {
 
       {activeIC.domains.length === 0 ? (
         <div className="kds-Card kds-Card--m kds-card-section">
-          <KdsMessage kind="info">
-            No domains added yet. Click "Add Domain" to start.
-          </KdsMessage>
+          <EmptyState
+            title="No domains added yet"
+            subtitle='Click "+ Add Domain" below to start planning your work'
+          />
         </div>
       ) : (
         activeIC.domains.map(domain => (
