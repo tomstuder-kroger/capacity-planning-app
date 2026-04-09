@@ -1,67 +1,61 @@
-import React from 'react';
-import { MxInputTextBox, MxSingleSelect } from 'react-mx-web-components';
+import React, { useEffect } from 'react';
 import { useCapacity } from '../context/CapacityContext';
+import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 
-const QUARTER_ITEMS = ['Q1', 'Q2', 'Q3', 'Q4'];
-const CURRENT_YEAR = new Date().getFullYear();
-const YEAR_ITEMS = Array.from({ length: 2036 - CURRENT_YEAR + 1 }, (_, i) => String(CURRENT_YEAR + i));
-
-const parseQuarter = (quarter) => {
-  const [q = '', y = ''] = (quarter || '').split(' ');
-  return { q, y };
-};
+const currentPeriod = getCurrentFiscalPeriod();
 
 const QuarterInfoForm = () => {
   const { activeIC, updateIC } = useCapacity();
 
+  // Must be before any early return — rules of hooks
+  useEffect(() => {
+    if (!activeIC || !currentPeriod) return;
+    const quarter = `${currentPeriod.quarter} ${currentPeriod.fiscalYear}`;
+    if (activeIC.weeksInQuarter !== currentPeriod.weeksInQuarter || activeIC.quarter !== quarter) {
+      updateIC(activeIC.id, {
+        quarter,
+        weeksInQuarter: currentPeriod.weeksInQuarter,
+      });
+    }
+  }, [activeIC?.id]);
+
   if (!activeIC) return null;
 
-  const { q: selectedQ, y: selectedYear } = parseQuarter(activeIC.quarter);
-
-  const handleQChange = (e) => {
-    updateIC(activeIC.id, { quarter: `${e.detail} ${selectedYear}`.trim() });
-  };
-
-  const handleYearChange = (e) => {
-    updateIC(activeIC.id, { quarter: `${selectedQ} ${e.detail}`.trim() });
-  };
-
-  const handleWeeksChange = (e) => {
-    const value = e.target.value === '' ? 0 : Number(e.target.value);
-    updateIC(activeIC.id, { weeksInQuarter: value });
-  };
-
   return (
-    <div className="kds-Card kds-Card--m kds-card-section">
-      <h2 className="kds-Heading kds-Heading--s section-heading">Quarter Information</h2>
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
+    <div className="kds-Card kds-Card--m kds-card-section" style={{ background: 'linear-gradient(135deg, #e8f0fe 0%, #dbeafe 100%)', border: '1.5px solid #0F52A2', boxShadow: '0 2px 8px rgba(15, 82, 162, 0.15)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <MxSingleSelect
-            label="Quarter"
-            items={QUARTER_ITEMS}
-            value={selectedQ}
-            emitOnlyValue
-            onValueUpdate={handleQChange}
-          />
+          <div style={{ fontSize: '1.75rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif' }}>
+            {activeIC.icName || 'Unnamed'}
+          </div>
+          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '2px' }}>
+            {activeIC.icRole || ''}
+          </div>
         </div>
-        <div>
-          <MxSingleSelect
-            label="Year"
-            items={YEAR_ITEMS}
-            value={selectedYear}
-            emitOnlyValue
-            onValueUpdate={handleYearChange}
-          />
-        </div>
-        <div>
-          <MxInputTextBox
-            label="Weeks in Quarter"
-            placeholder="e.g., 13"
-            value={String(activeIC.weeksInQuarter)}
-            onChange={handleWeeksChange}
-            mask="none"
-            isClearable={false}
-          />
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.5rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Current Quarter
+          </div>
+          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'flex-end' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+                {currentPeriod ? currentPeriod.quarter : '—'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Quarter</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+                {currentPeriod ? `FY${currentPeriod.fiscalYear}` : '—'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Fiscal Year</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+                {currentPeriod ? `${currentPeriod.weeksInQuarter}w` : '—'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Weeks</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -13,14 +13,12 @@ const PlanningView = ({ onBack }) => {
     <div>
       <div className="planning-header">
         <KdsButton kind="secondary" onClick={onBack}>← Back to Team</KdsButton>
-        <h2 className="kds-Heading kds-Heading--l" style={{ margin: 0 }}>
-          {activeIC?.icName || 'Unnamed'}
-        </h2>
       </div>
+
+      <QuarterInfoForm />
 
       <div className="capacity-layout-grid">
         <div className="forms-column">
-          <QuarterInfoForm />
           <TimeOffForm />
           <DomainList />
         </div>
