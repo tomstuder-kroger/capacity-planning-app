@@ -1,7 +1,8 @@
 const STORAGE_KEYS = {
   ICS: 'capacity-planning-ics',
   ACTIVE_ID: 'capacity-planning-active-id',
-  VERSION: 'capacity-planning-version'
+  VERSION: 'capacity-planning-version',
+  TEAM_NAME: 'capacity-planning-team-name'
 };
 
 const CURRENT_VERSION = 1;
@@ -55,6 +56,29 @@ export const saveActiveICId = (id) => {
     return true;
   } catch (error) {
     console.error('Failed to save active IC ID:', error);
+    return false;
+  }
+};
+
+/**
+ * Load team name from localStorage
+ */
+export const loadTeamName = () => {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.TEAM_NAME) || '';
+  } catch (error) {
+    return '';
+  }
+};
+
+/**
+ * Save team name to localStorage
+ */
+export const saveTeamName = (name) => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.TEAM_NAME, name);
+    return true;
+  } catch (error) {
     return false;
   }
 };

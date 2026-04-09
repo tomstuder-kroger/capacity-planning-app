@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsIconTrash, MxInputTextBox, MxSingleSelect } from 'react-mx-web-components';
+import { KdsButton, KdsIconTrash, KdsTag, MxInputTextBox, MxSingleSelect } from 'react-mx-web-components';
 import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 
@@ -17,6 +17,18 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode }) => {
   const utilization = calculated?.capacityUtilization;
   const status = calculated?.status;
   const hasUtilization = typeof utilization === 'number' && isFinite(utilization);
+
+  const totalSmall = ic.domains.reduce((sum, d) => sum + (Number(d.smallProjects) || 0), 0);
+  const totalMedium = ic.domains.reduce((sum, d) => sum + (Number(d.mediumProjects) || 0), 0);
+  const totalLarge = ic.domains.reduce((sum, d) => sum + (Number(d.largeProjects) || 0), 0);
+  const projectSummary = [
+    totalLarge > 0 && `${totalLarge} Large`,
+    totalMedium > 0 && `${totalMedium} Medium`,
+    totalSmall > 0 && `${totalSmall} Small`,
+  ].filter(Boolean).join(', ');
+  const totalProjects = totalSmall + totalMedium + totalLarge;
+
+  const statusKind = status === 'over' ? 'negative' : status === 'fully' ? 'callout' : 'positive';
 
   const handleDeleteClick = (e) => {
     e.stopPropagation();
@@ -43,7 +55,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode }) => {
         onClick={!isEditMode ? onSelect : undefined}
         style={{ cursor: isEditMode ? 'default' : 'pointer' }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             {isEditMode ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
@@ -69,7 +81,8 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode }) => {
               </>
             )}
           </div>
-          {isEditMode && (
+
+          {isEditMode ? (
             <KdsButton
               palette="negative"
               kind="subtle"
@@ -80,21 +93,28 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode }) => {
             >
               <KdsIconTrash size="s" />
             </KdsButton>
+          ) : hasUtilization && (
+            <div style={{ textAlign: 'center', marginLeft: '1rem', flexShrink: 0 }}>
+              <div style={{
+                fontSize: '2rem',
+                fontWeight: 700,
+                fontFamily: 'Nunito, sans-serif',
+                lineHeight: 1,
+                color: STATUS_COLORS[status] || '#000',
+              }}>
+                {utilization.toFixed(0)}%
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>Capacity</div>
+            </div>
           )}
         </div>
 
-        {!isEditMode && hasUtilization && (
-          <div style={{
-            marginTop: '12px',
-            fontSize: '22px',
-            fontWeight: 700,
-            color: STATUS_COLORS[status] || '#000',
-            fontFamily: 'Nunito, sans-serif',
-          }}>
-            {utilization.toFixed(0)}%
-            <span style={{ fontSize: '12px', fontWeight: 400, color: '#6b7280', marginLeft: '4px' }}>
-              capacity
-            </span>
+        {!isEditMode && ic.domains.length > 0 && (
+          <div className="tag-row" style={{ marginTop: '0.75rem' }}>
+            <KdsTag kind={statusKind}>{ic.domains.length} Domain(s)</KdsTag>
+            {totalProjects > 0 && (
+              <KdsTag kind="default">{projectSummary}</KdsTag>
+            )}
           </div>
         )}
       </div>

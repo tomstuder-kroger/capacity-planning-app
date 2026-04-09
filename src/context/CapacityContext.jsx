@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { loadICs, saveICs, loadActiveICId, saveActiveICId } from '../utils/storage';
+import { loadICs, saveICs, loadActiveICId, saveActiveICId, loadTeamName, saveTeamName } from '../utils/storage';
 import {
   calculateTimeOff,
   calculateDomainEffort,
@@ -39,6 +39,7 @@ export const CapacityProvider = ({ children }) => {
   const [ics, setICs] = useState([]);
   const [activeICId, setActiveICIdState] = useState(null);
   const [saveError, setSaveError] = useState(false);
+  const [teamName, setTeamNameState] = useState('');
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -49,6 +50,8 @@ export const CapacityProvider = ({ children }) => {
       setICs(loadedICs);
       setActiveICIdState(loadedActiveId || loadedICs[0].id);
     }
+
+    setTeamNameState(loadTeamName());
   }, []);
 
   // Save to localStorage whenever ics or activeICId changes (debounced)
@@ -136,6 +139,11 @@ export const CapacityProvider = ({ children }) => {
     });
   }, [updateIC]);
 
+  const updateTeamName = useCallback((name) => {
+    setTeamNameState(name);
+    saveTeamName(name);
+  }, []);
+
   const importIC = useCallback((icData) => {
     const newIC = {
       ...icData,
@@ -209,6 +217,7 @@ export const CapacityProvider = ({ children }) => {
     activeICId,
     activeIC,
     saveError,
+    teamName,
     createIC,
     updateIC,
     deleteIC,
@@ -216,6 +225,7 @@ export const CapacityProvider = ({ children }) => {
     duplicateIC,
     clearIC,
     importIC,
+    updateTeamName,
     calculateResults
   };
 
