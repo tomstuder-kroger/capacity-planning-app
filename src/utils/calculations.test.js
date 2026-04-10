@@ -105,6 +105,26 @@ describe('Capacity Planning Calculations', () => {
       expect(result).toBe(22);
     });
 
+    test('calculates domain effort with all task sizes including extra large', () => {
+      const result = calculateDomainEffort({
+        small: 2,
+        medium: 1,
+        large: 1,
+        extraLarge: 1,
+      });
+      expect(result).toBe(25); // 2*2 + 1*4 + 1*8 + 1*9 = 4 + 4 + 8 + 9 = 25
+    });
+
+    test('calculates domain effort with only extra large tasks', () => {
+      const result = calculateDomainEffort({
+        small: 0,
+        medium: 0,
+        large: 0,
+        extraLarge: 3,
+      });
+      expect(result).toBe(27); // 3 * 9 = 27
+    });
+
     test('calculates domain effort with only small tasks', () => {
       const result = calculateDomainEffort({
         small: 5,
@@ -153,6 +173,16 @@ describe('Capacity Planning Calculations', () => {
         large: 1.9,
       });
       expect(result).toBe(24); // floor(2.7) * 2 + floor(3.2) * 4 + floor(1.9) * 8 = 2*2 + 3*4 + 1*8 = 4 + 12 + 8 = 24
+    });
+
+    test('converts float values to integers including extra large', () => {
+      const result = calculateDomainEffort({
+        small: 1.5,
+        medium: 2.8,
+        large: 1.2,
+        extraLarge: 2.9,
+      });
+      expect(result).toBe(36); // floor(1.5)*2 + floor(2.8)*4 + floor(1.2)*8 + floor(2.9)*9 = 1*2 + 2*4 + 1*8 + 2*9 = 2 + 8 + 8 + 18 = 36
     });
   });
 
@@ -316,7 +346,8 @@ describe('Capacity Planning Calculations', () => {
             name: 'TEST',
             smallProjects: 0,
             mediumProjects: 0,
-            largeProjects: 2
+            largeProjects: 2,
+            extraLargeProjects: 0
           }
         ]
       };
@@ -330,7 +361,7 @@ describe('Capacity Planning Calculations', () => {
             domainId: '1',
             domainName: 'TEST',
             totalWeeks: 16,
-            breakdown: { smallWeeks: 0, mediumWeeks: 0, largeWeeks: 16 }
+            breakdown: { smallWeeks: 0, mediumWeeks: 0, largeWeeks: 16, extraLargeWeeks: 0 }
           }
         ],
         totalPlannedWork: 16,

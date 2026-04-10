@@ -192,7 +192,8 @@ export const CapacityProvider = ({ children }) => {
       const totalWeeks = calculateDomainEffort({
         small: domain.smallProjects,
         medium: domain.mediumProjects,
-        large: domain.largeProjects
+        large: domain.largeProjects,
+        extraLarge: domain.extraLargeProjects ?? 0
       });
       return {
         domainId: domain.id,
@@ -201,7 +202,8 @@ export const CapacityProvider = ({ children }) => {
         breakdown: {
           smallWeeks: (domain.smallProjects || 0) * 2,
           mediumWeeks: (domain.mediumProjects || 0) * 4,
-          largeWeeks: (domain.largeProjects || 0) * 8
+          largeWeeks: (domain.largeProjects || 0) * 8,
+          extraLargeWeeks: (domain.extraLargeProjects ?? 0) * 9
         }
       };
     });

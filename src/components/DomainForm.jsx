@@ -12,7 +12,7 @@ const DomainForm = ({ domain }) => {
 
   const handleDomainChange = (field, value) => {
     let processedValue = value;
-    if (['smallProjects', 'mediumProjects', 'largeProjects'].includes(field)) {
+    if (['smallProjects', 'mediumProjects', 'largeProjects', 'extraLargeProjects'].includes(field)) {
       processedValue = value === '' ? 0 : Number(value);
     }
 
@@ -39,7 +39,8 @@ const DomainForm = ({ domain }) => {
   const totalWeeks = calculateDomainEffort({
     small: domain.smallProjects,
     medium: domain.mediumProjects,
-    large: domain.largeProjects
+    large: domain.largeProjects,
+    extraLarge: domain.extraLargeProjects ?? 0
   });
 
   return (
@@ -63,10 +64,10 @@ const DomainForm = ({ domain }) => {
           />
         </div>
 
-        <div className="form-grid-3col">
+        <div className="form-grid-4col">
           <div>
             <MxInputTextBox
-              label="Small Projects (2w ea)"
+              label="Sm. Projects (2w)"
               value={String(domain.smallProjects)}
               onChange={(e) => handleDomainChange('smallProjects', e.target.value)}
               mask="none"
@@ -75,7 +76,7 @@ const DomainForm = ({ domain }) => {
           </div>
           <div>
             <MxInputTextBox
-              label="Medium Projects (4w ea)"
+              label="Med. Projects (4w)"
               value={String(domain.mediumProjects)}
               onChange={(e) => handleDomainChange('mediumProjects', e.target.value)}
               mask="none"
@@ -84,9 +85,18 @@ const DomainForm = ({ domain }) => {
           </div>
           <div>
             <MxInputTextBox
-              label="Large Projects (8w ea)"
+              label="Lg. Projects (8w)"
               value={String(domain.largeProjects)}
               onChange={(e) => handleDomainChange('largeProjects', e.target.value)}
+              mask="none"
+              isClearable={false}
+            />
+          </div>
+          <div>
+            <MxInputTextBox
+              label="Ex Lg. Projects (9+w)"
+              value={String(domain.extraLargeProjects ?? 0)}
+              onChange={(e) => handleDomainChange('extraLargeProjects', e.target.value)}
               mask="none"
               isClearable={false}
             />

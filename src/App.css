@@ -111,6 +111,24 @@ body {
   }
 }
 
+.form-grid-4col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .form-grid-4col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-grid-4col {
+    grid-template-columns: 1fr;
+  }
+}
+
 .kds-card-section {
   margin-bottom: 1rem;
   padding: 1.5rem;

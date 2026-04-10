@@ -34,16 +34,18 @@ export function calculateTimeOff({ okrWeeks, okrDays, pto = 0, dev = 0, holiday 
  * @param {number} params.small - Number of small tasks (2 weeks each)
  * @param {number} params.medium - Number of medium tasks (4 weeks each)
  * @param {number} params.large - Number of large tasks (8 weeks each)
+ * @param {number} params.extraLarge - Number of extra large tasks (9 weeks each)
  * @returns {number} Total domain effort in weeks
  */
-export function calculateDomainEffort({ small = 0, medium = 0, large = 0 } = {}) {
+export function calculateDomainEffort({ small = 0, medium = 0, large = 0, extraLarge = 0 } = {}) {
   // Validate and sanitize inputs - ensure non-negative integers
   const sanitizedSmall = typeof small === 'number' && small >= 0 ? Math.floor(small) : 0;
   const sanitizedMedium = typeof medium === 'number' && medium >= 0 ? Math.floor(medium) : 0;
   const sanitizedLarge = typeof large === 'number' && large >= 0 ? Math.floor(large) : 0;
+  const sanitizedExtraLarge = typeof extraLarge === 'number' && extraLarge >= 0 ? Math.floor(extraLarge) : 0;
 
-  // Small = 2 weeks, Medium = 4 weeks, Large = 8 weeks
-  return (sanitizedSmall * 2) + (sanitizedMedium * 4) + (sanitizedLarge * 8);
+  // Small = 2 weeks, Medium = 4 weeks, Large = 8 weeks, Extra Large = 9 weeks
+  return (sanitizedSmall * 2) + (sanitizedMedium * 4) + (sanitizedLarge * 8) + (sanitizedExtraLarge * 9);
 }
 
 /**
@@ -127,18 +129,20 @@ export function generateSummary(ic, calculated) {
 
   // Count total projects
   const totalProjects = ic.domains.reduce((sum, d) =>
-    sum + (d.smallProjects || 0) + (d.mediumProjects || 0) + (d.largeProjects || 0), 0);
+    sum + (d.smallProjects || 0) + (d.mediumProjects || 0) + (d.largeProjects || 0) + (d.extraLargeProjects || 0), 0);
 
   // Count project sizes
   const totalSmall = ic.domains.reduce((sum, d) => sum + (d.smallProjects || 0), 0);
   const totalMedium = ic.domains.reduce((sum, d) => sum + (d.mediumProjects || 0), 0);
   const totalLarge = ic.domains.reduce((sum, d) => sum + (d.largeProjects || 0), 0);
+  const totalExtraLarge = ic.domains.reduce((sum, d) => sum + (d.extraLargeProjects || 0), 0);
 
   // Build size mix summary
   const sizeMix = [];
   if (totalSmall > 0) sizeMix.push(`${totalSmall} Small`);
   if (totalMedium > 0) sizeMix.push(`${totalMedium} Medium`);
   if (totalLarge > 0) sizeMix.push(`${totalLarge} Large`);
+  if (totalExtraLarge > 0) sizeMix.push(`${totalExtraLarge} Extra Large`);
   const sizeMixSummary = sizeMix.join(', ') || 'no projects';
 
   // Determine over/under text
@@ -203,6 +207,7 @@ export function generateSummary(ic, calculated) {
   - **Small:** ${effort.breakdown.smallWeeks / 2} = ${effort.breakdown.smallWeeks.toFixed(1)} weeks
   - **Medium:** ${effort.breakdown.mediumWeeks / 4} = ${effort.breakdown.mediumWeeks.toFixed(1)} weeks
   - **Large:** ${effort.breakdown.largeWeeks / 8} = ${effort.breakdown.largeWeeks.toFixed(1)} weeks
+  - **Extra Large:** ${effort.breakdown.extraLargeWeeks / 9} = ${effort.breakdown.extraLargeWeeks.toFixed(1)} weeks
 
 `;
   });

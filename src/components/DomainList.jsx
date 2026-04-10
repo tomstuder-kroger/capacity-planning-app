@@ -16,7 +16,8 @@ const DomainList = () => {
       name: '',
       smallProjects: 0,
       mediumProjects: 0,
-      largeProjects: 0
+      largeProjects: 0,
+      extraLargeProjects: 0
     };
     updateIC(activeIC.id, {
       domains: [...activeIC.domains, newDomain]
