@@ -1,6 +1,6 @@
 import React from 'react';
 
-const krogerLogo = 'https://www.figma.com/api/mcp/asset/3ca0332f-2dcf-4f1b-8de8-ce683e133277';
+const krogerLogo = '/kroger-logo.svg';
 
 const GlobalNavBar = () => {
   return (

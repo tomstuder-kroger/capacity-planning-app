@@ -207,3 +207,4 @@ Based on `/Users/ts73344/Desktop/pd_capacity/IC Capacity Methodology.md`:
 3. **Map property names when calling calculations** - IC structure ≠ calculation params
 4. **Use `calculateResults()` in CapacityContext** - don't call calculation functions directly from components
 5. **generateSummary signature changed** - now takes `(ic, calculated)` not individual fields
+6. **Avoid reading SVG files multiple times** - SVG files with long path definitions consume many tokens when read. Use Glob or Grep to locate them, then read once. Assets in `public/` directory don't need to be read unless modifying them.
