@@ -11,3 +11,11 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Hide MX web components until their custom element definitions are registered.
+   Prevents unstyled/uncolored flash on first page load (FOUCE). */
+kds-tag:not(:defined),
+kds-message:not(:defined),
+kds-button:not(:defined) {
+  visibility: hidden;
+}
