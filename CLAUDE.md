@@ -208,3 +208,4 @@ Based on `/Users/ts73344/Desktop/pd_capacity/IC Capacity Methodology.md`:
 4. **Use `calculateResults()` in CapacityContext** - don't call calculation functions directly from components
 5. **generateSummary signature changed** - now takes `(ic, calculated)` not individual fields
 6. **Avoid reading SVG files multiple times** - SVG files with long path definitions consume many tokens when read. Use Glob or Grep to locate them, then read once. Assets in `public/` directory don't need to be read unless modifying them.
+7. **Use KDS icons, don't draw SVGs** - When asked to use icons from the KDS design system (e.g., `KdsIconInfo`, `KdsIconTrash`), import and use the components directly from `react-mx-web-components`. Do NOT create custom SVG implementations.
