@@ -1,5 +1,5 @@
 import React from 'react';
-import { KdsLabel, KdsRadio, MxInputTextBox, KdsTooltippable } from 'react-mx-web-components';
+import { KdsLabel, KdsRadio, MxInputTextBox, KdsTooltippable, KdsIconInfo } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 
 // Tooltip component using KDS tooltippable
@@ -19,19 +19,13 @@ const Tooltip = ({ content }) => {
           cursor: 'pointer',
           marginLeft: '0.35rem',
           background: 'none',
-          border: '1px solid #6b7280',
-          borderRadius: '50%',
-          width: '1.2em',
-          height: '1.2em',
+          border: 'none',
           padding: '0',
           color: '#6b7280',
-          fontSize: '0.875rem',
-          fontWeight: 600,
-          lineHeight: 1,
           tabIndex: 0
         }}
       >
-        i
+        <KdsIconInfo size="s" />
       </button>
     </KdsTooltippable>
   );
