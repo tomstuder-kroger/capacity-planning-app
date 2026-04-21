@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders IC Capacity Planning title', () => {
+test('renders Design Capacity Planning title', () => {
   render(<App />);
-  const titleElement = screen.getByText(/IC Capacity Planning/i);
+  const titleElement = screen.getByText(/Design Capacity Planning/i);
   expect(titleElement).toBeInTheDocument();
 });
 
