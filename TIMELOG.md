@@ -4,8 +4,8 @@ Track hours spent on the IC Capacity Planning App.
 
 ## Summary
 
-| Person | Total Hours |
-|--------|-------------|
+| Person | Total Time |
+|--------|------------|
 | Tom Studer | TBD |
 | Rob Mohan | TBD |
 | **Combined** | **TBD** |
@@ -15,15 +15,17 @@ Track hours spent on the IC Capacity Planning App.
 Add entries in reverse chronological order (newest first). Format:
 
 ```
-| Date | Person | Task/Area | Hours | Notes |
+| Date | Person | Task/Area | Time | Notes |
 ```
 
-| Date | Person | Task/Area | Hours | Notes |
-|------|--------|-----------|-------|-------|
+Enter time in either format: `30m` (minutes) or `1.5h` (hours)
+
+| Date | Person | Task/Area | Time | Notes |
+|------|--------|-----------|------|-------|
 | | | | | |
 
 ## Notes
 
-- Log time spent on development, design, testing, and bug fixes
+- Log time in minutes (e.g., `45m`) or hours (e.g., `2h` or `1.5h`)
 - Keep task descriptions brief but descriptive
-- Update the summary totals periodically
+- Update the summary totals periodically (convert to consistent unit: e.g., all hours)
