@@ -344,10 +344,10 @@ describe('Capacity Planning Calculations', () => {
           {
             id: '1',
             name: 'TEST',
-            smallProjects: 0,
-            mediumProjects: 0,
-            largeProjects: 2,
-            extraLargeProjects: 0
+            projects: [
+              { id: 'p1', title: 'Alpha', startDate: null, weeksMode: 'fixed', weeks: 8, customEndDate: null },
+              { id: 'p2', title: 'Beta', startDate: null, weeksMode: 'fixed', weeks: 8, customEndDate: null }
+            ]
           }
         ]
       };
@@ -361,7 +361,10 @@ describe('Capacity Planning Calculations', () => {
             domainId: '1',
             domainName: 'TEST',
             totalWeeks: 16,
-            breakdown: { smallWeeks: 0, mediumWeeks: 0, largeWeeks: 16, extraLargeWeeks: 0 }
+            projects: [
+              { title: 'Alpha', weeks: 8 },
+              { title: 'Beta', weeks: 8 }
+            ]
           }
         ],
         totalPlannedWork: 16,

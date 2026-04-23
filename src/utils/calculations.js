@@ -29,6 +29,25 @@ export function calculateTimeOff({ okrWeeks, okrDays, pto = 0, dev = 0, holiday 
 }
 
 /**
+ * Calculates weeks for a single project based on its mode.
+ * Fixed mode uses the stored weeks value; custom mode derives weeks from date range.
+ * @param {Object} project - Project object
+ * @returns {number} Weeks for this project
+ */
+export function getProjectWeeks(project) {
+  if (!project) return 0;
+  if (project.weeksMode === 'custom') {
+    if (!project.startDate || !project.customEndDate) return 0;
+    const start = new Date(project.startDate);
+    const end = new Date(project.customEndDate);
+    const diffMs = end - start;
+    if (diffMs <= 0) return 0;
+    return Math.ceil(diffMs / (7 * 24 * 60 * 60 * 1000));
+  }
+  return typeof project.weeks === 'number' && project.weeks > 0 ? project.weeks : 0;
+}
+
+/**
  * Calculates domain effort based on task sizes
  * @param {Object} params - Domain effort parameters
  * @param {number} params.small - Number of small tasks (2 weeks each)
@@ -127,23 +146,8 @@ export function generateSummary(ic, calculated) {
   // Format domain names list
   const domainNames = ic.domains.map(d => d.name).join(', ') || 'None';
 
-  // Count total projects
-  const totalProjects = ic.domains.reduce((sum, d) =>
-    sum + (d.smallProjects || 0) + (d.mediumProjects || 0) + (d.largeProjects || 0) + (d.extraLargeProjects || 0), 0);
-
-  // Count project sizes
-  const totalSmall = ic.domains.reduce((sum, d) => sum + (d.smallProjects || 0), 0);
-  const totalMedium = ic.domains.reduce((sum, d) => sum + (d.mediumProjects || 0), 0);
-  const totalLarge = ic.domains.reduce((sum, d) => sum + (d.largeProjects || 0), 0);
-  const totalExtraLarge = ic.domains.reduce((sum, d) => sum + (d.extraLargeProjects || 0), 0);
-
-  // Build size mix summary
-  const sizeMix = [];
-  if (totalSmall > 0) sizeMix.push(`${totalSmall} Small`);
-  if (totalMedium > 0) sizeMix.push(`${totalMedium} Medium`);
-  if (totalLarge > 0) sizeMix.push(`${totalLarge} Large`);
-  if (totalExtraLarge > 0) sizeMix.push(`${totalExtraLarge} Extra Large`);
-  const sizeMixSummary = sizeMix.join(', ') || 'no projects';
+  // Count total projects across all domains
+  const totalProjects = ic.domains.reduce((sum, d) => sum + (d.projects ? d.projects.length : 0), 0);
 
   // Determine over/under text
   let overUnderText;
@@ -203,13 +207,14 @@ export function generateSummary(ic, calculated) {
 
   // Add each domain's breakdown
   domainEfforts.forEach((effort) => {
-    output += `- **${effort.domainName}:** ${effort.totalWeeks.toFixed(1)} weeks
-  - **Small:** ${effort.breakdown.smallWeeks / 2} = ${effort.breakdown.smallWeeks.toFixed(1)} weeks
-  - **Medium:** ${effort.breakdown.mediumWeeks / 4} = ${effort.breakdown.mediumWeeks.toFixed(1)} weeks
-  - **Large:** ${effort.breakdown.largeWeeks / 8} = ${effort.breakdown.largeWeeks.toFixed(1)} weeks
-  - **Extra Large:** ${effort.breakdown.extraLargeWeeks / 9} = ${effort.breakdown.extraLargeWeeks.toFixed(1)} weeks
-
-`;
+    output += `- **${effort.domainName}:** ${effort.totalWeeks.toFixed(1)} weeks\n`;
+    if (effort.projects && effort.projects.length > 0) {
+      effort.projects.forEach(p => {
+        const wks = p.weeks;
+        output += `  - **${p.title || 'Untitled'}:** ${wks} week${wks !== 1 ? 's' : ''}\n`;
+      });
+    }
+    output += '\n';
   });
 
   output += `## Total Planned Work
@@ -218,7 +223,7 @@ export function generateSummary(ic, calculated) {
 - **Is the IC over or under capacity?:** ${isOverUnder}
 
 ## Note for Team Discussion
-${ic.icName || 'This IC'} has **${totalTimeOffWeeks.toFixed(1)} weeks of total time off** this quarter, including **${timeOffDesc}**. They are supporting **${ic.domains.length} domain(s)** with **${totalProjects} planned work item(s)** across **${sizeMixSummary}**. At **${capacityUtilization.toFixed(0)}% utilization**, ${ic.icName || 'this IC'} is **${capacityDesc}`;
+${ic.icName || 'This IC'} has **${totalTimeOffWeeks.toFixed(1)} weeks of total time off** this quarter, including **${timeOffDesc}**. They are supporting **${ic.domains.length} domain(s)** with **${totalProjects} planned project(s)**. At **${capacityUtilization.toFixed(0)}% utilization**, ${ic.icName || 'this IC'} is **${capacityDesc}`;
 
   return output;
 }

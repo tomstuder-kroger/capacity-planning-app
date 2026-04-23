@@ -14,10 +14,7 @@ const DomainList = () => {
     const newDomain = {
       id: uuidv4(),
       name: '',
-      smallProjects: 0,
-      mediumProjects: 0,
-      largeProjects: 0,
-      extraLargeProjects: 0
+      projects: []
     };
     updateIC(activeIC.id, {
       domains: [...activeIC.domains, newDomain]

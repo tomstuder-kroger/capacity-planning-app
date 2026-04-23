@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { loadICs, saveICs, loadActiveICId, saveActiveICId, loadTeamName, saveTeamName } from '../utils/storage';
 import {
   calculateTimeOff,
-  calculateDomainEffort,
+  getProjectWeeks,
   calculateTotalPlanned,
   calculateUtilization,
   calculateStatus
@@ -189,22 +189,16 @@ export const CapacityProvider = ({ children }) => {
     const totalWeeksAvailable = totalWeeksInQuarter - totalTimeOffWeeks;
 
     const domainEfforts = ic.domains.map(domain => {
-      const totalWeeks = calculateDomainEffort({
-        small: domain.smallProjects,
-        medium: domain.mediumProjects,
-        large: domain.largeProjects,
-        extraLarge: domain.extraLargeProjects ?? 0
-      });
+      const projects = (domain.projects || []).map(p => ({
+        title: p.title,
+        weeks: getProjectWeeks(p)
+      }));
+      const totalWeeks = projects.reduce((sum, p) => sum + p.weeks, 0);
       return {
         domainId: domain.id,
         domainName: domain.name,
         totalWeeks,
-        breakdown: {
-          smallWeeks: (domain.smallProjects || 0) * 2,
-          mediumWeeks: (domain.mediumProjects || 0) * 4,
-          largeWeeks: (domain.largeProjects || 0) * 8,
-          extraLargeWeeks: (domain.extraLargeProjects ?? 0) * 9
-        }
+        projects
       };
     });
 

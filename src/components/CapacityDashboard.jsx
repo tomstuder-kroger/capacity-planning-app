@@ -57,17 +57,7 @@ const CapacityDashboard = () => {
   const utilizationValue = Math.min(capacityUtilization, 200);
   const showInfinityWarning = !isFinite(capacityUtilization);
 
-  const totalProjects = activeIC.domains.reduce((sum, d) =>
-    sum + (Number(d.smallProjects) || 0) + (Number(d.mediumProjects) || 0) + (Number(d.largeProjects) || 0), 0);
-
-  const projectSummary = [];
-  const totalSmall = activeIC.domains.reduce((sum, d) => sum + (Number(d.smallProjects) || 0), 0);
-  const totalMedium = activeIC.domains.reduce((sum, d) => sum + (Number(d.mediumProjects) || 0), 0);
-  const totalLarge = activeIC.domains.reduce((sum, d) => sum + (Number(d.largeProjects) || 0), 0);
-
-  if (totalLarge > 0) projectSummary.push(`${totalLarge} Large`);
-  if (totalMedium > 0) projectSummary.push(`${totalMedium} Medium`);
-  if (totalSmall > 0) projectSummary.push(`${totalSmall} Small`);
+  const totalProjects = activeIC.domains.reduce((sum, d) => sum + (d.projects ? d.projects.length : 0), 0);
 
   return (
     <>
@@ -116,7 +106,7 @@ const CapacityDashboard = () => {
         <div className="tag-row">
           <KdsTag kind={getStatusKind()}>{activeIC.domains.length} Domain(s)</KdsTag>
           {totalProjects > 0 && (
-            <KdsTag kind="default">{projectSummary.join(', ')}</KdsTag>
+            <KdsTag kind="default">{totalProjects} Project(s)</KdsTag>
           )}
         </div>
 
