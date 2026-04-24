@@ -32,7 +32,7 @@ const ICInfoForm = () => {
         <div>
           <MxSingleSelect
             label="IC Role"
-            items={['APD', 'PD', 'SPD']}
+            items={['Associate Product Designer', 'Product Designer', 'Senior Product Designer', 'User Researcher', 'Senior User Researcher', 'Service Designer', 'Senior Service Designer', 'Journey Architect']}
             value={activeIC.icRole}
             emitOnlyValue
             onValueUpdate={handleRoleChange}

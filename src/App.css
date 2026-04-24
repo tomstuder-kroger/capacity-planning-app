@@ -282,3 +282,18 @@ body {
   font-family: monospace;
   font-size: 0.85em;
 }
+
+/* Fix MxSingleSelect dropdown positioning inside modals */
+mx-modal {
+  --mx-modal-body-overflow: visible;
+}
+
+mx-modal-body {
+  overflow: visible !important;
+}
+
+/* Ensure dropdown menu can overflow modal bounds */
+mx-single-select {
+  position: relative;
+  z-index: 1000;
+}
