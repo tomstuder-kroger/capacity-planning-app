@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { MxInputTextBox, MxSingleSelect } from 'react-mx-web-components';
+import { MxInputTextBox } from 'react-mx-web-components';
 import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 
 const CreateMemberModal = ({ isOpen, onClose, onCreated }) => {
   const { createIC, updateIC } = useCapacity();
   const [icName, setIcName] = useState('');
-  const [icRole, setIcRole] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setIcName('');
-      setIcRole('');
     }
   }, [isOpen]);
 
   const handleCreate = () => {
     if (!icName.trim()) return;
     const newId = createIC();
-    updateIC(newId, { icName: icName.trim(), icRole });
+    updateIC(newId, { icName: icName.trim() });
     onClose();
     onCreated(newId);
   };
@@ -43,16 +41,11 @@ const CreateMemberModal = ({ isOpen, onClose, onCreated }) => {
           onChange={(e) => setIcName(e.target.value)}
           mask="none"
           isClearable={false}
+          autoFocus
         />
-        <div style={{ marginTop: '1rem' }}>
-          <MxSingleSelect
-            label="Role"
-            items={['APD', 'PD', 'SPD']}
-            value={icRole}
-            emitOnlyValue
-            onValueUpdate={(e) => setIcRole(e.detail)}
-          />
-        </div>
+        <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
+          You can set their role and other details after creating them.
+        </p>
       </MxModalBody>
     </MxModal>
   );

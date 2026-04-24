@@ -73,7 +73,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
                 />
                 <MxSingleSelect
                   label="Role"
-                  items={['APD', 'PD', 'SPD']}
+                  items={['Associate Product Designer', 'Product Designer', 'Senior Product Designer', 'User Researcher', 'Senior User Researcher', 'Service Designer', 'Senior Service Designer', 'Journey Architect']}
                   value={ic.icRole}
                   emitOnlyValue
                   onValueUpdate={handleRoleChange}
