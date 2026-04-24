@@ -224,7 +224,7 @@ export function generateSummary(ic, calculated) {
 - **Is the IC over or under capacity?:** ${isOverUnder}
 
 ## Note for Team Discussion
-${ic.icName || 'This IC'} has **${totalTimeOffWeeks.toFixed(1)} weeks of total time off** this quarter, including **${timeOffDesc}**. They are supporting **${ic.domains.length} domain(s)** with **${totalProjects} planned project(s)**. At **${capacityUtilization.toFixed(0)}% utilization**, ${ic.icName || 'this IC'} is **${capacityDesc}`;
+${ic.icName || 'This IC'} has ${totalTimeOffWeeks.toFixed(1)} weeks of total time off this quarter, including ${timeOffDesc}. They are supporting ${ic.domains.length} domain(s) with ${totalProjects} planned project(s). At ${capacityUtilization.toFixed(0)}% utilization, ${ic.icName || 'this IC'} is ${capacityDesc}`;
 
   return output;
 }
