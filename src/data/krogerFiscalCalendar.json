@@ -9,22 +9,24 @@
   "fiscal_years": [
     {
       "fiscal_year": 2026,
+      "start_date": "2026-01-25",
       "weeks_in_year": 52,
       "quarters": {
-        "Q1": { "weeks": 13 },
-        "Q2": { "weeks": 13 },
-        "Q3": { "weeks": 13 },
-        "Q4": { "weeks": 13 }
+        "Q1": { "weeks": 13, "start_date": "2026-02-01" },
+        "Q2": { "weeks": 13, "start_date": "2026-05-03" },
+        "Q3": { "weeks": 13, "start_date": "2026-08-02" },
+        "Q4": { "weeks": 13, "start_date": "2026-11-01" }
       }
     },
     {
       "fiscal_year": 2027,
+      "start_date": "2027-01-31",
       "weeks_in_year": 52,
       "quarters": {
-        "Q1": { "weeks": 13 },
-        "Q2": { "weeks": 13 },
-        "Q3": { "weeks": 13 },
-        "Q4": { "weeks": 13 }
+        "Q1": { "weeks": 13, "start_date": "2027-01-31" },
+        "Q2": { "weeks": 13, "start_date": "2027-05-02" },
+        "Q3": { "weeks": 13, "start_date": "2027-08-01" },
+        "Q4": { "weeks": 13, "start_date": "2027-10-31" }
       }
     },
     {

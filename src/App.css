@@ -223,7 +223,7 @@ body {
 .project-item-fields {
   display: flex;
   gap: 0.75rem;
-  align-items: flex-end;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
 
@@ -238,6 +238,23 @@ body {
   font-weight: 500;
   color: #374151;
   margin-bottom: 0.4rem;
+}
+
+.project-date-input {
+  width: 100%;
+  padding: 0 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background: white;
+  height: 40px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.project-date-input:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 1px;
 }
 
 .project-weeks-select {
@@ -354,4 +371,417 @@ body {
   border-radius: 3px;
   font-family: monospace;
   font-size: 0.85em;
+}
+
+/* ── View Toggle ─────────────────────────────────────────────────────────── */
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.view-toggle-btn {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: white;
+  border: none;
+  cursor: pointer;
+  color: #374151;
+  transition: background 0.15s, color 0.15s;
+}
+
+.view-toggle-btn + .view-toggle-btn {
+  border-left: 1px solid #d1d5db;
+}
+
+.view-toggle-btn--active {
+  background: #0F52A2;
+  color: white;
+}
+
+.view-toggle-btn:not(.view-toggle-btn--active):hover {
+  background: #f3f4f6;
+}
+
+/* ── Gantt Chart ─────────────────────────────────────────────────────────── */
+
+/* Outer wrapper: provides border, border-radius, and clips the scroll container */
+.gantt-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  background: white;
+}
+
+/* Inner scroll container — only this scrolls horizontally */
+.gantt-chart {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+/* ── Sticky left columns ────────────────────────────────────────────────── */
+.gantt-sticky-left {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+}
+
+.gantt-sticky-domain {
+  position: sticky;
+  left: 150px;
+  z-index: 6;
+}
+
+/* Ensure sticky cells have opaque backgrounds matching their row */
+.gantt-quarter-header-row .gantt-sticky-left,
+.gantt-quarter-header-row .gantt-sticky-domain {
+  background: #0F52A2;
+}
+
+.gantt-period-header .gantt-sticky-left,
+.gantt-period-header .gantt-sticky-domain {
+  background: #eef2f9;
+}
+
+.gantt-header-row .gantt-sticky-left,
+.gantt-header-row .gantt-sticky-domain {
+  background: #f9fafb;
+}
+
+.gantt-member-section .gantt-sticky-left {
+  background: white;
+}
+
+.gantt-domain-row .gantt-sticky-domain {
+  background: white;
+}
+
+/* Shadow on domain col to mark the sticky/scroll boundary */
+.gantt-sticky-domain {
+  box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Quarter label matching nav color */
+.gantt-quarter-label-cell {
+  background: #0F52A2 !important;
+}
+
+/* ── Quarter boundary overlay (continuous vertical lines) ───────────────── */
+.gantt-boundary-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gantt-boundary-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(15, 82, 162, 0.25);
+  transform: translateX(-50%);
+}
+
+/* ── Quarter header row ─────────────────────────────────────────────────── */
+.gantt-quarter-header-row {
+  display: flex;
+  align-items: stretch;
+  background: #0F52A2;
+}
+
+.gantt-quarter-label-cell {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+}
+
+.gantt-flex-track {
+  display: flex;
+  width: calc(var(--gantt-total-weeks, 52) * 40px);
+  flex-shrink: 0;
+  background: #0F52A2;
+  border-bottom: 2px solid #0a3d80;
+}
+
+.gantt-quarter-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.8);
+  border-left: 2px solid rgba(255,255,255,0.2);
+  letter-spacing: 0.04em;
+  background: #0F52A2;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.gantt-quarter-cell:first-child {
+  border-left: none;
+}
+
+.gantt-quarter-cell--current {
+  color: white;
+  background: rgba(255,255,255,0.15);
+}
+
+/* ── Period header row ──────────────────────────────────────────────────── */
+.gantt-period-header {
+  display: flex;
+  align-items: stretch;
+  background: #eef2f9;
+}
+
+.gantt-period-track {
+  display: flex;
+  width: calc(var(--gantt-total-weeks, 52) * 40px);
+  flex-shrink: 0;
+  background: #eef2f9;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.gantt-period-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #374151;
+  border-left: 1px solid #d1d5db;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.gantt-period-cell:first-child {
+  border-left: none;
+}
+
+/* ── Week header row ────────────────────────────────────────────────────── */
+.gantt-header-row {
+  display: flex;
+  align-items: stretch;
+  background: #f9fafb;
+}
+
+.gantt-header-cell {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #374151;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.gantt-label-col {
+  width: 150px;
+  flex-shrink: 0;
+  padding: 0.625rem 0.75rem;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.gantt-domain-col {
+  width: 80px;
+  flex-shrink: 0;
+  padding: 0.375rem 0.5rem;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.gantt-week-header {
+  position: relative;
+  display: flex;
+  width: calc(var(--gantt-total-weeks, 52) * 40px);
+  flex-shrink: 0;
+  background-image: none;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.gantt-week-tick {
+  flex: 0 0 40px;
+  text-align: center;
+  padding: 0.5rem 0;
+  font-size: 0.5625rem;
+  font-weight: 400;
+  color: #9ca3af;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.gantt-week-tick:first-child {
+  border-left: none;
+}
+
+.gantt-week-date {
+  font-size: 0.5625rem;
+  color: #9ca3af;
+}
+
+.gantt-today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ef4444;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.gantt-today-label {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ef4444;
+  color: white;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* ── IC rows ────────────────────────────────────────────────────────────── */
+.gantt-member-section {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.gantt-member-section:last-child {
+  border-bottom: none;
+}
+
+.gantt-member-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-member-role {
+  font-size: 0.6875rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.gantt-domain-rows {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.gantt-domain-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid #f3f4f6;
+  min-height: 40px;
+  flex: 1;
+}
+
+.gantt-domain-row:last-child {
+  border-bottom: none;
+}
+
+/* Bars track: week grid + today line */
+.gantt-bars-track {
+  position: relative;
+  min-height: 40px;
+  width: calc(var(--gantt-total-weeks, 52) * 40px);
+  flex-shrink: 0;
+  background-image:
+    /* Today marker */
+    linear-gradient(to right,
+      transparent var(--today-pct, -1px),
+      rgba(239,68,68,0.15) var(--today-pct, -1px),
+      rgba(239,68,68,0.15) calc(var(--today-pct, -1px) + 2px),
+      transparent calc(var(--today-pct, -1px) + 2px)
+    ),
+    /* Weekly grid lines */
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(40px - 1px),
+      #f3f4f6 calc(40px - 1px),
+      #f3f4f6 40px
+    );
+}
+
+.gantt-bar {
+  position: absolute;
+  top: 6px;
+  height: 28px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  min-width: 4px;
+  box-sizing: border-box;
+}
+
+.gantt-bar--unscheduled {
+  border-style: dashed;
+  opacity: 0.55;
+}
+
+.gantt-bar-label {
+  padding: 0 6px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-bar--unscheduled .gantt-bar-label {
+  color: #6b7280;
+}
+
+.gantt-no-projects {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 8px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.gantt-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
 }

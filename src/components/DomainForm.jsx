@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsIconTrash, MxInputTextBox, MxDatePicker } from 'react-mx-web-components';
+import { KdsButton, KdsIconTrash, MxInputTextBox } from 'react-mx-web-components';
 import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
@@ -13,21 +13,21 @@ const WEEK_OPTIONS = [
   { value: 'custom', label: 'Custom (date range)' }
 ];
 
+const DateField = ({ label, value, onChange }) => (
+  <div className="project-field">
+    <label className="project-field-label">{label}</label>
+    <input
+      type="date"
+      value={value || ''}
+      onChange={(e) => onChange(e.target.value || null)}
+      className="project-date-input"
+    />
+  </div>
+);
+
 const ProjectRow = ({ project, onUpdate, onRemove }) => {
   const weeksValue = project.weeksMode === 'custom' ? 'custom' : String(project.weeks || 1);
   const calculatedWeeks = getProjectWeeks(project);
-
-  const handleStartDateChange = (e) => {
-    const date = e.detail;
-    const iso = date ? date.toISOString().split('T')[0] : null;
-    onUpdate(project.id, { startDate: iso });
-  };
-
-  const handleEndDateChange = (e) => {
-    const date = e.detail;
-    const iso = date ? date.toISOString().split('T')[0] : null;
-    onUpdate(project.id, { customEndDate: iso });
-  };
 
   const handleWeeksChange = (value) => {
     if (value === 'custom') {
@@ -64,13 +64,11 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
       </div>
 
       <div className="project-item-fields">
-        <div className="project-field">
-          <MxDatePicker
-            label="Start Date"
-            value={project.startDate || ''}
-            onDateChanged={handleStartDateChange}
-          />
-        </div>
+        <DateField
+          label="Start Date"
+          value={project.startDate}
+          onChange={(iso) => onUpdate(project.id, { startDate: iso })}
+        />
         <div className="project-field">
           <label className="project-field-label">Duration</label>
           <select
@@ -84,13 +82,11 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
           </select>
         </div>
         {project.weeksMode === 'custom' && (
-          <div className="project-field">
-            <MxDatePicker
-              label="End Date"
-              value={project.customEndDate || ''}
-              onDateChanged={handleEndDateChange}
-            />
-          </div>
+          <DateField
+            label="End Date"
+            value={project.customEndDate}
+            onChange={(iso) => onUpdate(project.id, { customEndDate: iso })}
+          />
         )}
       </div>
 

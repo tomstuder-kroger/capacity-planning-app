@@ -44,7 +44,8 @@ export function getProjectWeeks(project) {
     if (diffMs <= 0) return 0;
     return Math.ceil(diffMs / (7 * 24 * 60 * 60 * 1000));
   }
-  return typeof project.weeks === 'number' && project.weeks > 0 ? project.weeks : 0;
+  const weeks = Number(project.weeks);
+  return !isNaN(weeks) && weeks > 0 ? weeks : 0;
 }
 
 /**

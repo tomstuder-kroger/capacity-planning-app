@@ -4,6 +4,7 @@ import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 import EmptyState from './EmptyState';
 import TeamMemberCard from './TeamMemberCard';
+import GanttChart from './GanttChart';
 import CreateMemberModal from './CreateMemberModal';
 
 const currentPeriod = getCurrentFiscalPeriod();
@@ -12,6 +13,7 @@ const TeamDashboard = ({ onSelectMember }) => {
   const { ics, teamName, updateTeamName, calculateResults, reorderICs } = useCapacity();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [view, setView] = useState('cards');
   const [editingTeamName, setEditingTeamName] = useState(false);
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
@@ -53,8 +55,8 @@ const TeamDashboard = ({ onSelectMember }) => {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <h2 className="kds-Heading kds-Heading--l" style={{ margin: 0 }}>Team Overview</h2>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {ics.length > 0 && (
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          {ics.length > 0 && view === 'cards' && (
             <KdsButton key={isEditMode ? 'done' : 'edit'} kind="secondary" onClick={() => setIsEditMode(!isEditMode)}>
               {isEditMode ? 'Done' : 'Edit'}
             </KdsButton>
@@ -124,11 +126,32 @@ const TeamDashboard = ({ onSelectMember }) => {
         </div>
       </div>
 
+      {ics.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <div className="view-toggle">
+            <button
+              className={`view-toggle-btn${view === 'cards' ? ' view-toggle-btn--active' : ''}`}
+              onClick={() => { setView('cards'); setIsEditMode(false); }}
+            >
+              Cards
+            </button>
+            <button
+              className={`view-toggle-btn${view === 'gantt' ? ' view-toggle-btn--active' : ''}`}
+              onClick={() => { setView('gantt'); setIsEditMode(false); }}
+            >
+              Gantt
+            </button>
+          </div>
+        </div>
+      )}
+
       {ics.length === 0 ? (
         <EmptyState
           title="No team members yet"
           subtitle="Add your first team member to get started"
         />
+      ) : view === 'gantt' ? (
+        <GanttChart />
       ) : (
         <div className="team-grid">
           {ics.map((ic) => (

@@ -18,15 +18,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
   const status = calculated?.status;
   const hasUtilization = typeof utilization === 'number' && isFinite(utilization);
 
-  const totalSmall = ic.domains.reduce((sum, d) => sum + (Number(d.smallProjects) || 0), 0);
-  const totalMedium = ic.domains.reduce((sum, d) => sum + (Number(d.mediumProjects) || 0), 0);
-  const totalLarge = ic.domains.reduce((sum, d) => sum + (Number(d.largeProjects) || 0), 0);
-  const projectSummary = [
-    totalLarge > 0 && `${totalLarge} Large`,
-    totalMedium > 0 && `${totalMedium} Medium`,
-    totalSmall > 0 && `${totalSmall} Small`,
-  ].filter(Boolean).join(', ');
-  const totalProjects = totalSmall + totalMedium + totalLarge;
+  const totalProjects = ic.domains.reduce((sum, d) => sum + (d.projects ? d.projects.length : 0), 0);
 
   const statusKind = status === 'over' ? 'negative' : status === 'fully' ? 'callout' : 'positive';
 
@@ -126,7 +118,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
           <div className="tag-row" style={{ marginTop: '0.75rem' }}>
             <KdsTag kind={statusKind}>{ic.domains.length} Domain(s)</KdsTag>
             {totalProjects > 0 && (
-              <KdsTag kind="default">{projectSummary}</KdsTag>
+              <KdsTag kind="default">{totalProjects} Project(s)</KdsTag>
             )}
           </div>
         )}
