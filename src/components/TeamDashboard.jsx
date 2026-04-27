@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KdsButton, MxInputTextBox } from 'react-mx-web-components';
+import { KdsButton, KdsIconCardView, KdsIconGanttChart, MxInputTextBox } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 import EmptyState from './EmptyState';
@@ -132,14 +132,16 @@ const TeamDashboard = ({ onSelectMember }) => {
             <button
               className={`view-toggle-btn${view === 'cards' ? ' view-toggle-btn--active' : ''}`}
               onClick={() => { setView('cards'); setIsEditMode(false); }}
+              title="Card view"
             >
-              Cards
+              <KdsIconCardView size="s" />
             </button>
             <button
               className={`view-toggle-btn${view === 'gantt' ? ' view-toggle-btn--active' : ''}`}
               onClick={() => { setView('gantt'); setIsEditMode(false); }}
+              title="Gantt view"
             >
-              Gantt
+              <KdsIconGanttChart size="s" />
             </button>
           </div>
         </div>
