@@ -7,8 +7,8 @@ test('renders Design Capacity Planning title', () => {
   expect(titleElement).toBeInTheDocument();
 });
 
-test('renders New IC button', () => {
+test('renders Add Team Member button', () => {
   render(<App />);
-  const buttonElement = screen.getByRole('button', { name: /New IC/i });
+  const buttonElement = screen.getByRole('button', { name: /Add Team Member/i });
   expect(buttonElement).toBeInTheDocument();
 });
