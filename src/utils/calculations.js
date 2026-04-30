@@ -220,7 +220,13 @@ export function generateSummary(ic, calculated) {
   } else if (ic.timeOff.okrTime.unit === 'days' && ic.timeOff.okrTime.value > 0) {
     timeOffParts.push(`${ic.timeOff.okrTime.value} days of OKR time`);
   }
-  if (ic.timeOff.ptoDays > 0) timeOffParts.push(`${ic.timeOff.ptoDays} PTO days`);
+  // Add scheduled PTO instances to timeOffParts
+  if (ic.ptoInstances && ic.ptoInstances.length > 0) {
+    ic.ptoInstances.forEach(p => {
+      const dateRange = `${p.startDate} to ${p.endDate}`;
+      timeOffParts.push(`${p.type} (${dateRange})`);
+    });
+  }
   if (ic.timeOff.devDays > 0) timeOffParts.push(`${ic.timeOff.devDays} development days`);
   if (ic.timeOff.holidayDays > 0) timeOffParts.push(`${ic.timeOff.holidayDays} holiday days`);
   const timeOffDesc = timeOffParts.join(', ') || 'no time off';
