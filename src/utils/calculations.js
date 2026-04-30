@@ -49,6 +49,55 @@ export function getProjectWeeks(project) {
 }
 
 /**
+ * Calculates total PTO weeks from an array of PTO instances
+ * @param {Array} ptoInstances - Array of PTO instances
+ * @param {string} ptoInstances[].startDate - Start date in ISO format
+ * @param {string} ptoInstances[].endDate - End date in ISO format
+ * @returns {number} Total PTO weeks, calculated using Math.ceil from date ranges
+ */
+export function calculateTotalPTO(ptoInstances) {
+  // Validate input is an array
+  if (!Array.isArray(ptoInstances)) {
+    return 0;
+  }
+
+  // Explicitly handle empty array
+  if (ptoInstances.length === 0) {
+    return 0;
+  }
+
+  return ptoInstances.reduce((totalWeeks, pto) => {
+    // Skip if not a valid object
+    if (!pto || typeof pto !== 'object') {
+      return totalWeeks;
+    }
+
+    // Skip if either startDate or endDate is missing/invalid
+    if (!pto.startDate || !pto.endDate) {
+      return totalWeeks;
+    }
+
+    // Parse dates
+    const startDate = new Date(pto.startDate);
+    const endDate = new Date(pto.endDate);
+
+    // Skip if dates are invalid or invalid range (start > end)
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate > endDate) {
+      return totalWeeks;
+    }
+
+    // Calculate days difference (inclusive: same day counts as 1 day)
+    const diffMs = endDate - startDate;
+    const daysDiff = Math.floor(diffMs / (24 * 60 * 60 * 1000)) + 1;
+
+    // Convert days to weeks using Math.ceil
+    const weeksForPto = Math.ceil(daysDiff / 7);
+
+    return totalWeeks + weeksForPto;
+  }, 0);
+}
+
+/**
  * Calculates domain effort based on task sizes
  * @param {Object} params - Domain effort parameters
  * @param {number} params.small - Number of small tasks (2 weeks each)
