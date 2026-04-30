@@ -235,3 +235,12 @@ Sarah Chen
 2. Should there be a "PTO type" preset list with suggestions (Summer, Conference, Sick, etc.)?
 3. Should recurring PTO (e.g., every Friday off) be supported?
 4. Should PTO instances affect individual project capacity or just overall IC capacity?
+
+## Future Build: Business Day PTO Calculations
+
+**Note for Future Development:** Currently, PTO calculations include all dates selected (including weekends). A future enhancement should consider:
+- **Business Day Only Calculation:** Count only Monday-Friday as working days when calculating PTO duration
+- **Impact on Capacity:** This would affect how much capacity is actually lost (e.g., selecting July 4-8 with July 4-6 being Fri-Sun would only reduce capacity for 2 business days, not 5)
+- **Implementation Approach:** Add business day calculation utility function that excludes weekends (and potentially company holidays)
+- **Configuration:** Could be team/org-level setting to apply business day logic across all ICs
+- **Current Behavior:** App currently treats all days equally; users should manually account for weekends when entering date ranges if business day precision is needed
