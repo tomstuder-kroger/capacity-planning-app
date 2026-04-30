@@ -1,6 +1,7 @@
 import React from 'react';
 import { KdsLabel, KdsRadio, MxInputTextBox, KdsTooltippable, KdsIconInfo } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
+import PTOScheduling from './PTOScheduling';
 
 // Tooltip component using KDS tooltippable
 const Tooltip = ({ content }) => {
@@ -60,13 +61,6 @@ const TimeOffForm = () => {
     });
   };
 
-  const handlePTOChange = (e) => {
-    const value = e.target.value === '' ? 0 : Number(e.target.value);
-    updateIC(activeIC.id, {
-      timeOff: { ...activeIC.timeOff, ptoDays: value }
-    });
-  };
-
   const handleDevChange = (e) => {
     const value = e.target.value === '' ? 0 : Number(e.target.value);
     updateIC(activeIC.id, {
@@ -87,7 +81,7 @@ const TimeOffForm = () => {
   return (
     <div className="kds-Card kds-Card--m kds-card-section">
       <h2 className="kds-Heading kds-Heading--s section-heading">
-        Quarterly Planning & PTO
+        Quarterly Planning
       </h2>
       <div className="form-grid-2col">
         <div>
@@ -133,21 +127,6 @@ const TimeOffForm = () => {
 
         <div>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>PTO Days</label>
-            <Tooltip content="Provide the number of days or weeks planned out of office." />
-          </div>
-          <div onKeyDown={allowNumericOnly}>
-            <MxInputTextBox
-              value={String(activeIC.timeOff.ptoDays)}
-              onChange={handlePTOChange}
-              mask="none"
-              isClearable={false}
-            />
-          </div>
-        </div>
-
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>Dev / L&D Days</label>
             <Tooltip content="KTD provides Learning and Development days for FTE Associates only. Provide the number of days you will use during the quarter" />
           </div>
@@ -176,6 +155,8 @@ const TimeOffForm = () => {
           </div>
         </div>
       </div>
+
+      <PTOScheduling />
 
       <div className="summary-box">
         <span>Total time off: <strong>{totalTimeOff} weeks</strong></span>
