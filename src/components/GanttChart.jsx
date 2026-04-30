@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod, getQuarterStartDate, getQuarterWeeks } from '../utils/fiscalCalendar';
-import { getProjectWeeks, calculateTotalPTO } from '../utils/calculations';
+import { getProjectWeeks } from '../utils/calculations';
 
 const DOMAIN_COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6',
