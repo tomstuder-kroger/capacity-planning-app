@@ -27,10 +27,10 @@ const createEmptyIC = () => ({
   weeksInQuarter: '',
   timeOff: {
     okrTime: { value: '', unit: 'days' },
-    ptoDays: '',
     devDays: '',
     holidayDays: ''
   },
+  ptoInstances: [],
   domains: [],
   lastModified: new Date().toISOString()
 });
