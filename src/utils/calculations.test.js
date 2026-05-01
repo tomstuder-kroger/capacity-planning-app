@@ -1,5 +1,6 @@
 import {
   calculateTimeOff,
+  calculateTotalPTO,
   calculateDomainEffort,
   calculateTotalPlanned,
   calculateUtilization,
@@ -92,6 +93,249 @@ describe('Capacity Planning Calculations', () => {
         holiday: undefined,
       });
       expect(result).toBe(0);
+    });
+  });
+
+  describe('calculateTotalPTO', () => {
+    test('returns 0 for empty array', () => {
+      const result = calculateTotalPTO([]);
+      expect(result).toBe(0);
+    });
+
+    test('returns 0 for null input', () => {
+      const result = calculateTotalPTO(null);
+      expect(result).toBe(0);
+    });
+
+    test('returns 0 for undefined input', () => {
+      const result = calculateTotalPTO(undefined);
+      expect(result).toBe(0);
+    });
+
+    test('calculates single day PTO (start equals end date)', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: '2024-01-15',
+          type: 'vacation'
+        }
+      ]);
+      // Single day = 1 day = Math.ceil(1 / 7) = 1 week
+      expect(result).toBe(1);
+    });
+
+    test('calculates multi-day PTO (5 days)', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: '2024-01-19',
+          type: 'vacation'
+        }
+      ]);
+      // 5 days = Math.ceil(5 / 7) = 1 week
+      expect(result).toBe(1);
+    });
+
+    test('calculates full week PTO (7 days)', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: '2024-01-21',
+          type: 'vacation'
+        }
+      ]);
+      // 7 days = Math.ceil(7 / 7) = 1 week
+      expect(result).toBe(1);
+    });
+
+    test('calculates full week PTO (8 days)', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: '2024-01-22',
+          type: 'vacation'
+        }
+      ]);
+      // 8 days = Math.ceil(8 / 7) = 2 weeks
+      expect(result).toBe(2);
+    });
+
+    test('aggregates multiple PTO instances correctly', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: '2024-01-19',
+          type: 'vacation'
+        },
+        {
+          id: 'pto2',
+          startDate: '2024-02-05',
+          endDate: '2024-02-11',
+          type: 'vacation'
+        }
+      ]);
+      // First: 5 days = Math.ceil(5 / 7) = 1 week
+      // Second: 7 days = Math.ceil(7 / 7) = 1 week
+      // Total: 2 weeks
+      expect(result).toBe(2);
+    });
+
+    test('aggregates multiple PTO instances with different day ranges', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: '2024-01-21',
+          type: 'vacation'
+        },
+        {
+          id: 'pto2',
+          startDate: '2024-02-01',
+          endDate: '2024-02-08',
+          type: 'vacation'
+        },
+        {
+          id: 'pto3',
+          startDate: '2024-03-10',
+          endDate: '2024-03-12',
+          type: 'sick'
+        }
+      ]);
+      // First: 7 days = Math.ceil(7 / 7) = 1 week
+      // Second: 8 days = Math.ceil(8 / 7) = 2 weeks
+      // Third: 3 days = Math.ceil(3 / 7) = 1 week
+      // Total: 4 weeks
+      expect(result).toBe(4);
+    });
+
+    test('ignores PTO instances with missing startDate', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: null,
+          endDate: '2024-01-19',
+          type: 'vacation'
+        },
+        {
+          id: 'pto2',
+          startDate: '2024-02-05',
+          endDate: '2024-02-11',
+          type: 'vacation'
+        }
+      ]);
+      // First instance ignored due to missing startDate
+      // Second: 7 days = Math.ceil(7 / 7) = 1 week
+      expect(result).toBe(1);
+    });
+
+    test('ignores PTO instances with missing endDate', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: null,
+          type: 'vacation'
+        },
+        {
+          id: 'pto2',
+          startDate: '2024-02-05',
+          endDate: '2024-02-11',
+          type: 'vacation'
+        }
+      ]);
+      // First instance ignored due to missing endDate
+      // Second: 7 days = Math.ceil(7 / 7) = 1 week
+      expect(result).toBe(1);
+    });
+
+    test('ignores PTO instances with missing both dates', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: undefined,
+          endDate: undefined,
+          type: 'vacation'
+        }
+      ]);
+      // Instance ignored due to missing dates
+      expect(result).toBe(0);
+    });
+
+    test('ignores PTO instances with invalid range (start > end)', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-19',
+          endDate: '2024-01-15',
+          type: 'vacation'
+        },
+        {
+          id: 'pto2',
+          startDate: '2024-02-05',
+          endDate: '2024-02-11',
+          type: 'vacation'
+        }
+      ]);
+      // First instance ignored due to invalid range
+      // Second: 7 days = Math.ceil(7 / 7) = 1 week
+      expect(result).toBe(1);
+    });
+
+    test('handles mixed valid and invalid PTO instances', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: '2024-01-19',
+          type: 'vacation'
+        },
+        {
+          id: 'pto2',
+          startDate: null,
+          endDate: '2024-02-11',
+          type: 'vacation'
+        },
+        {
+          id: 'pto3',
+          startDate: '2024-03-05',
+          endDate: '2024-03-10',
+          type: 'sick'
+        }
+      ]);
+      // First: 5 days = Math.ceil(5 / 7) = 1 week
+      // Second: ignored (missing startDate)
+      // Third: 6 days = Math.ceil(6 / 7) = 1 week
+      // Total: 2 weeks
+      expect(result).toBe(2);
+    });
+
+    test('ignores array elements that are not objects', () => {
+      const result = calculateTotalPTO([
+        {
+          id: 'pto1',
+          startDate: '2024-01-15',
+          endDate: '2024-01-19',
+          type: 'vacation'
+        },
+        null,
+        undefined,
+        'invalid',
+        123
+      ]);
+      // Only first element is valid
+      // First: 5 days = Math.ceil(5 / 7) = 1 week
+      expect(result).toBe(1);
+    });
+
+    test('handles non-array input (returns 0)', () => {
+      expect(calculateTotalPTO('invalid')).toBe(0);
+      expect(calculateTotalPTO(123)).toBe(0);
+      expect(calculateTotalPTO({})).toBe(0);
     });
   });
 

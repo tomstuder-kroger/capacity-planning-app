@@ -63,6 +63,47 @@ const GanttBar = ({ project, domainColor, fyStart, totalWeeks }) => {
   );
 };
 
+const GanttPTOBar = ({ pto, fyStart, totalWeeks }) => {
+  if (!pto.startDate || !pto.endDate) return null;
+
+  const startDate = new Date(pto.startDate);
+  const endDate = new Date(pto.endDate);
+
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate > endDate) {
+    return null;
+  }
+
+  const startWeeks = (startDate - fyStart) / MS_PER_WEEK;
+  const endWeeks = (endDate - fyStart) / MS_PER_WEEK;
+  const weeks = endWeeks - startWeeks;
+
+  const rawLeft = (startWeeks / totalWeeks) * 100;
+  const rawRight = rawLeft + (weeks / totalWeeks) * 100;
+  const clampedLeft = Math.max(0, Math.min(rawLeft, 100));
+  const clampedRight = Math.max(0, Math.min(rawRight, 100));
+  const leftPct = clampedLeft;
+  const widthPct = clampedRight - clampedLeft;
+
+  if (widthPct <= 0) return null;
+
+  const tooltip = `PTO: ${pto.type} · ${pto.startDate} to ${pto.endDate} · ${weeks.toFixed(1)}w`;
+
+  return (
+    <div
+      className="gantt-bar gantt-pto-bar"
+      style={{
+        left: `${leftPct}%`,
+        width: `${widthPct}%`,
+        backgroundColor: '#ff282f',
+        borderColor: '#ff282f',
+      }}
+      title={tooltip}
+    >
+      <span className="gantt-bar-label">{pto.type}</span>
+    </div>
+  );
+};
+
 const GanttMemberSection = ({ ic, fyStart, totalWeeks }) => {
   const rows = [];
   ic.domains.forEach((domain, di) => {
@@ -74,6 +115,8 @@ const GanttMemberSection = ({ ic, fyStart, totalWeeks }) => {
   });
 
   const isEmpty = rows.length === 0;
+  const ptoInstances = ic.ptoInstances || [];
+  const hasPTO = ptoInstances.length > 0;
 
   return (
     <div className="gantt-member-section">
@@ -83,7 +126,25 @@ const GanttMemberSection = ({ ic, fyStart, totalWeeks }) => {
       </div>
 
       <div className="gantt-domain-rows">
-        {isEmpty ? (
+        {/* PTO Row - always shows if there are PTO instances */}
+        {hasPTO && (
+          <div className="gantt-domain-row">
+            <div className="gantt-domain-col gantt-sticky-domain">PTO</div>
+            <div className="gantt-bars-track">
+              {ptoInstances.map((pto, idx) => (
+                <GanttPTOBar
+                  key={idx}
+                  pto={pto}
+                  fyStart={fyStart}
+                  totalWeeks={totalWeeks}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Domain/Project Rows */}
+        {isEmpty && !hasPTO ? (
           <div className="gantt-domain-row">
             <div className="gantt-domain-col gantt-sticky-domain" />
             <div className="gantt-bars-track">
