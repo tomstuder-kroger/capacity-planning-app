@@ -8,13 +8,41 @@ const STORAGE_KEYS = {
 const CURRENT_VERSION = 1;
 
 /**
+ * Migrate IC data to support new ptoInstances format
+ * Checks if IC already has ptoInstances property
+ * If not, initializes it as empty array and removes ptoDays if present
+ */
+export const migrateICData = (ic) => {
+  // If already migrated, return unchanged
+  if (ic.ptoInstances) {
+    return ic;
+  }
+
+  // Migrate by initializing ptoInstances and cleaning up old ptoDays
+  const migratedIC = {
+    ...ic,
+    ptoInstances: []
+  };
+
+  // Remove ptoDays from timeOff object if present
+  if (migratedIC.timeOff && migratedIC.timeOff.ptoDays) {
+    const { ptoDays, ...timeOffWithoutPTO } = migratedIC.timeOff;
+    migratedIC.timeOff = timeOffWithoutPTO;
+  }
+
+  return migratedIC;
+};
+
+/**
  * Load all ICs from localStorage
  */
 export const loadICs = () => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.ICS);
     if (!data) return [];
-    return JSON.parse(data);
+    const ics = JSON.parse(data);
+    // Apply migration to all ICs
+    return ics.map(ic => migrateICData(ic));
   } catch (error) {
     console.error('Failed to load ICs from localStorage:', error);
     return [];

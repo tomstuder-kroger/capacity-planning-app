@@ -14,4 +14,11 @@ module.exports = {
       return webpackConfig;
     },
   },
+  jest: {
+    configure: {
+      transformIgnorePatterns: [
+        "node_modules/(?!(uuid|react-markdown|markdown-table|hast-util-to-jsx-runtime|devlop|micromark|decode-named-character-reference|character-entities|escape-string-regexp|mdast-util-from-markdown|mdast-util-to-markdown|unist-util-stringify-position|unist-util-visit|unified))"
+      ]
+    }
+  }
 };

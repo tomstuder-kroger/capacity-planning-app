@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { loadICs, saveICs, loadActiveICId, saveActiveICId, loadTeamName, saveTeamName } from '../utils/storage';
 import {
   calculateTimeOff,
+  calculateTotalPTO,
   getProjectWeeks,
   calculateTotalPlanned,
   calculateUtilization,
@@ -27,10 +28,10 @@ const createEmptyIC = () => ({
   weeksInQuarter: '',
   timeOff: {
     okrTime: { value: '', unit: 'days' },
-    ptoDays: '',
     devDays: '',
     holidayDays: ''
   },
+  ptoInstances: [],
   domains: [],
   lastModified: new Date().toISOString()
 });
@@ -171,9 +172,12 @@ export const CapacityProvider = ({ children }) => {
 
     const totalWeeksInQuarter = Number(ic.weeksInQuarter) || 0;
 
+    // Get PTO from scheduled instances
+    const ptoWeeks = calculateTotalPTO(ic.ptoInstances || []);
+
     // Transform timeOff data to match calculateTimeOff expectations
     const timeOffParams = {
-      pto: Number(ic.timeOff.ptoDays) || 0,
+      pto: 0, // PTO now comes from scheduled instances
       dev: Number(ic.timeOff.devDays) || 0,
       holiday: Number(ic.timeOff.holidayDays) || 0
     };
@@ -185,7 +189,8 @@ export const CapacityProvider = ({ children }) => {
       timeOffParams.okrDays = Number(ic.timeOff.okrTime.value) || 0;
     }
 
-    const totalTimeOffWeeks = calculateTimeOff(timeOffParams);
+    const otherTimeOffWeeks = calculateTimeOff(timeOffParams);
+    const totalTimeOffWeeks = otherTimeOffWeeks + ptoWeeks;
     const totalWeeksAvailable = totalWeeksInQuarter - totalTimeOffWeeks;
 
     const domainEfforts = ic.domains.map(domain => {
