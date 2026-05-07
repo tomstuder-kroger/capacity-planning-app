@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
 import { calculateTotalPTO } from '../utils/calculations';
 import PTORow from './PTORow';
+import EmptyState from './EmptyState';
 
 const PTOScheduling = () => {
   const { activeIC, updateIC } = useCapacity();
@@ -39,15 +40,16 @@ const PTOScheduling = () => {
   const totalPTOWeeks = calculateTotalPTO(ptoInstances);
 
   return (
-    <div>
+    <div style={{ marginTop: '1.5rem' }}>
       <h2 className="kds-Heading kds-Heading--s section-heading">Scheduled PTO</h2>
 
       <div className="kds-Card kds-Card--m kds-card-section">
         <div className="project-list">
           {ptoInstances.length === 0 ? (
-            <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
-              No PTO instances scheduled
-            </div>
+            <EmptyState
+              title="No PTO scheduled"
+              subtitle='Click "+ Add PTO Instance" below to schedule time off'
+            />
           ) : (
             ptoInstances.map(pto => (
               <PTORow

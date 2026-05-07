@@ -183,15 +183,22 @@ const GanttChart = () => {
 
   const { fiscalYear, quarter: currentQuarter } = currentPeriod;
 
-  const allQuarters = ['Q1', 'Q2', 'Q3', 'Q4'].map(q => {
-    const weeks = getQuarterWeeks(fiscalYear, q);
-    return {
-      quarter: q,
-      startDate: getQuarterStartDate(fiscalYear, q),
-      weeks,
-      periods: getPeriodsForQuarter(q, weeks),
-      isCurrent: q === currentQuarter,
-    };
+  const rawQuarters = ['Q1', 'Q2', 'Q3', 'Q4'].map(q => ({
+    quarter: q,
+    startDate: getQuarterStartDate(fiscalYear, q),
+    nominalWeeks: getQuarterWeeks(fiscalYear, q),
+    isCurrent: q === currentQuarter,
+  }));
+
+  const allQuarters = rawQuarters.map((qData, i) => {
+    const nextQ = rawQuarters[i + 1];
+    const actualWeeks = nextQ
+      ? (nextQ.startDate - qData.startDate) / MS_PER_WEEK
+      : qData.nominalWeeks;
+    const rawPeriods = getPeriodsForQuarter(qData.quarter, qData.nominalWeeks);
+    const scale = actualWeeks / qData.nominalWeeks;
+    const periods = rawPeriods.map(p => ({ ...p, weeks: p.weeks * scale }));
+    return { ...qData, weeks: actualWeeks, periods };
   });
 
   const fyStart = allQuarters[0].startDate;
@@ -260,7 +267,7 @@ const GanttChart = () => {
           <div className="gantt-label-col gantt-header-cell gantt-sticky-left" />
           <div className="gantt-domain-col gantt-header-cell gantt-sticky-domain" />
           <div className="gantt-bars-track gantt-week-header">
-            {Array.from({ length: totalWeeks }, (_, i) => {
+            {Array.from({ length: Math.round(totalWeeks) }, (_, i) => {
               const weekDate = new Date(fyStart.getTime() + i * MS_PER_WEEK);
               const dateLabel = weekDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               return (

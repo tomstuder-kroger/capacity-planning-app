@@ -83,7 +83,7 @@ const TimeOffForm = () => {
       <h2 className="kds-Heading kds-Heading--s section-heading">
         Quarterly Planning
       </h2>
-      <div className="form-grid-2col">
+      <div className="form-grid-timeoff">
         <div>
           <div className="okr-row">
             <div className="okr-input">
