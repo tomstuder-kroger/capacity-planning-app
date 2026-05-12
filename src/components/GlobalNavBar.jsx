@@ -28,7 +28,7 @@ const GlobalNavBar = () => {
           color: '#ffffff',
           whiteSpace: 'nowrap',
         }}>
-          Design Capacity Planning
+          PD Capacity Planner
         </span>
       </div>
 
