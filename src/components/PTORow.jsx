@@ -3,7 +3,7 @@ import { KdsButton, KdsIconTrash, MxInputTextBox } from 'react-mx-web-components
 
 const DateField = ({ label, value, onChange }) => (
   <div className="project-field">
-    <label className="project-field-label">{label}</label>
+    <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>{label}</label>
     <input
       type="date"
       value={value || ''}
@@ -14,27 +14,6 @@ const DateField = ({ label, value, onChange }) => (
 );
 
 const PTORow = ({ pto, onUpdate, onRemove }) => {
-  // Calculate duration in weeks from start and end dates
-  const calculateDuration = () => {
-    if (!pto.startDate || !pto.endDate) {
-      return null;
-    }
-
-    const start = new Date(pto.startDate);
-    const end = new Date(pto.endDate);
-
-    // Check for invalid date range
-    if (start > end) {
-      return null;
-    }
-
-    const diffMs = end - start;
-    const weeks = Math.ceil((diffMs + 1) / (7 * 24 * 60 * 60 * 1000));
-
-    return weeks;
-  };
-
-  const duration = calculateDuration();
 
   return (
     <div className="project-item">
@@ -68,14 +47,6 @@ const PTORow = ({ pto, onUpdate, onRemove }) => {
           value={pto.startDate}
           onChange={(iso) => onUpdate(pto.id, { startDate: iso })}
         />
-        <div className="project-field">
-          <label className="project-field-label">Duration</label>
-          <div className="project-custom-weeks">
-            {duration > 0
-              ? `${duration} week${duration !== 1 ? 's' : ''}`
-              : 'Select dates to calculate duration'}
-          </div>
-        </div>
         <DateField
           label="End Date"
           value={pto.endDate}

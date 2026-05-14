@@ -68,7 +68,7 @@ const TeamDashboard = ({ onSelectMember }) => {
       </div>
 
       {/* Team summary card */}
-      <div className="kds-Card kds-Card--m kds-card-section" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem', background: 'linear-gradient(135deg, #e8f0fe 0%, #dbeafe 100%)', border: '1.5px solid #0F52A2', boxShadow: '0 2px 8px rgba(15, 82, 162, 0.15)' }}>
+      <div className="kds-Card kds-Card--m kds-card-section" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem', background: 'rgb(239, 247, 253)', border: '1px solid rgb(15, 82, 162)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {editingTeamName || isEditMode ? (

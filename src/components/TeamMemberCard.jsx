@@ -5,7 +5,7 @@ import { useCapacity } from '../context/CapacityContext';
 
 const STATUS_COLORS = {
   under: '#1a7f3c',
-  fully: '#b45309',
+  fully: '#1a7f3c',
   over:  '#c0392b',
 };
 
@@ -20,7 +20,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
 
   const totalProjects = ic.domains.reduce((sum, d) => sum + (d.projects ? d.projects.length : 0), 0);
 
-  const statusKind = status === 'over' ? 'negative' : status === 'fully' ? 'callout' : 'positive';
+  const statusKind = status === 'over' ? 'negative' : 'positive';
 
   const handleDeleteClick = (e) => {
     e.stopPropagation();
@@ -105,7 +105,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
                 fontWeight: 700,
                 fontFamily: 'Nunito, sans-serif',
                 lineHeight: 1,
-                color: STATUS_COLORS[status] || '#000',
+                color: utilization === 0 ? '#9ca3af' : STATUS_COLORS[status] || '#000',
               }}>
                 {utilization.toFixed(0)}%
               </div>

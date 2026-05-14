@@ -28,14 +28,13 @@ const CapacityDashboard = () => {
   } = calculated;
 
   const getStatusColor = () => {
+    if (capacityUtilization === 0) return '#9ca3af';
     if (status === 'over') return '#d32f2f';
-    if (status === 'fully') return '#ed6c02';
     return '#2e7d32';
   };
 
   const getStatusKind = () => {
     if (status === 'over') return 'negative';
-    if (status === 'fully') return 'callout';
     return 'positive';
   };
 

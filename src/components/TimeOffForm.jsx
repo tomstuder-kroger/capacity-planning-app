@@ -87,8 +87,8 @@ const TimeOffForm = () => {
         <div>
           <div className="okr-row">
             <div className="okr-input">
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>OKR Time</label>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>OKR Time</label>
                 <Tooltip content="Provide the time spent during OKR Planning with your team." />
               </div>
               <div onKeyDown={allowNumericOnly}>
@@ -126,8 +126,8 @@ const TimeOffForm = () => {
         </div>
 
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>Dev / L&D Days</label>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Dev / L&D Days</label>
             <Tooltip content="KTD provides Learning and Development days for FTE Associates only. Provide the number of days you will use during the quarter" />
           </div>
           <div onKeyDown={allowNumericOnly}>
@@ -141,8 +141,8 @@ const TimeOffForm = () => {
         </div>
 
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>Holiday Days</label>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Holiday Days</label>
             <Tooltip content="Provide the number of Holidays during the quarter." />
           </div>
           <div onKeyDown={allowNumericOnly}>

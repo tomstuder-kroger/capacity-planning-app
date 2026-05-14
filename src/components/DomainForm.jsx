@@ -15,7 +15,7 @@ const WEEK_OPTIONS = [
 
 const DateField = ({ label, value, onChange }) => (
   <div className="project-field">
-    <label className="project-field-label">{label}</label>
+    <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>{label}</label>
     <input
       type="date"
       value={value || ''}
@@ -70,7 +70,7 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
           onChange={(iso) => onUpdate(project.id, { startDate: iso })}
         />
         <div className="project-field">
-          <label className="project-field-label">Duration</label>
+          <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Duration</label>
           <select
             value={weeksValue}
             onChange={(e) => handleWeeksChange(e.target.value)}
