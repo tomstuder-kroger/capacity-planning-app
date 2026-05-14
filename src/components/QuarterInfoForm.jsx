@@ -17,7 +17,7 @@ const QuarterInfoForm = () => {
         weeksInQuarter: currentPeriod.weeksInQuarter,
       });
     }
-  }, [activeIC?.id]);
+  }, [activeIC?.id, activeIC?.weeksInQuarter, activeIC?.quarter, updateIC]);
 
   if (!activeIC) return null;
 
