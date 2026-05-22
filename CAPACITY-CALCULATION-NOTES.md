@@ -98,3 +98,143 @@ The team is aware of this limitation. The current simplified approach is accepta
 - Fixed mode projects don't have an end date, only a start date and week count
 - The methodology assumes projects are scoped per quarter, so this may be less of an issue in practice
 - If multi-quarter projects become common, this should be revisited
+
+## Overlapping/Concurrent Projects with Split Focus
+
+### Issue Discovered
+**Date:** 2026-05-19
+
+During team testing, users identified a gap in how the app handles concurrent/overlapping projects. Currently, there's no way to represent when an IC is working on multiple projects simultaneously with split focus/attention.
+
+### Current Workaround
+
+Team members are manually adding percentage annotations to project titles:
+- Example: "Customer Portal Redesign - 60%"
+- Example: "Bug Fixes - 40%"
+
+This is a manual text-based hack with no calculation support.
+
+### User Requirements
+
+**1. Overlapping Definition**
+- Multiple projects running in the SAME time period concurrently
+- NOT projects with partial date overlap
+- Same 2-week, 4-week, or 8-week period with 2+ projects in flight
+
+**2. Focus Allocation Percentages**
+- Team members estimate % of attention on each concurrent project
+- Example: "Project A: 60% of my time, Project B: 40% of my time for weeks 3-6"
+- Percentages MUST sum to 100% across all overlapping work
+- This is a SWAG/ballpark estimation (not precise tracking)
+
+**3. Time vs Focus Distinction - CRITICAL UNDERSTANDING**
+- Projects still take their standard duration (Small=2w, Medium=4w, Large=8w)
+- The percentage represents **FOCUS/ATTENTION split**, not time extension
+- Reality: "This Large project is 8 weeks of work but I'm only giving it 50% attention, so it'll take 16 calendar weeks"
+
+**4. Desired Output Format**
+
+Team wants to see in the summary:
+```
+Project Name: "Title"
+  Size: Medium
+  Date start & end: [dates]
+  Focus: 60%
+
+Project Name: "Title"
+  Size: Small
+  Date start & end: [dates]
+  Focus: 40%
+```
+
+### Open Question: What Problem Does Percentage Tracking Solve?
+
+**Option A: Calendar/Timeline Realism** 🕒
+- **Problem:** "I have 4 weeks available, but I'm running 2 Medium projects (8 weeks of work total) concurrently because I'm splitting my time"
+- **Current behavior:** 8 weeks planned, 4 weeks available = 200% utilization ❌ WRONG
+- **Reality:** Both will complete in 4 weeks because they're parallel
+- **Fix needed:** Adjust calculation logic so concurrent projects don't over-count capacity
+
+**Option B: Communication/Documentation Only** 📄
+- **Problem:** Stakeholders/managers need visibility into multitasking
+- **Current behavior:** The math is actually correct (8 weeks of effort squeezed into 4 weeks IS overallocated)
+- **Reality:** IC is intentionally choosing to multitask and accepts the tradeoffs
+- **Fix needed:** Just display the percentages in the summary for transparency (no calc changes)
+
+**Option C: Capacity Risk Assessment** ⚠️
+- **Problem:** Want to visualize when someone is juggling too many things
+- **Current behavior:** No way to flag high-risk scenarios
+- **Reality:** Splitting focus across projects increases risk/reduces throughput
+- **Fix needed:** Add warnings/indicators when total concurrent projects exceed thresholds
+
+### Potential Implementation Approaches
+
+**If Option A (Adjust Calculations):**
+- **UI Changes Needed:**
+  - Add percentage input per project
+  - Add date range inputs (start/end) per project
+  - Concurrent project detection logic
+- **Calculation Changes:**
+  - Identify projects with overlapping date ranges
+  - Apply percentage multipliers to project sizes
+  - OR: Calculate effective calendar weeks instead of effort weeks
+- **Data Structure:**
+  ```javascript
+  {
+    title: "Customer Portal",
+    size: "medium", // 4 weeks base
+    focusPercentage: 60,
+    startDate: "2026-Q2-W1",
+    endDate: "2026-Q2-W4"
+  }
+  ```
+
+**If Option B (Display Only):**
+- **UI Changes Needed:**
+  - Add optional percentage input per project
+  - No calculation changes
+- **Summary Output Changes:**
+  - Show focus % alongside project details
+  - Keep current utilization calculations unchanged
+
+**If Option C (Risk Assessment):**
+- **UI Changes Needed:**
+  - Same as Option A (need overlapping detection)
+- **Calculation Changes:**
+  - Add "multitasking factor" or "complexity score"
+  - Flag scenarios where concurrent projects > X
+  - Potentially adjust utilization thresholds
+
+### Implications for Current Methodology
+
+**From CLAUDE.md - Current calculation:**
+1. Total Available = Weeks in quarter - Total time off
+2. Domain Effort = (Small × 2) + (Medium × 4) + (Large × 8) weeks
+3. Total Planned = Sum of all domain efforts
+4. Utilization = (Total planned / Total available) × 100
+
+**Potential conflict if Option A chosen:**
+- Current methodology assumes **sequential work** (one thing at a time)
+- Overlapping projects with split focus implies **concurrent work**
+- Need to clarify: Does a 60% focus on a Medium project count as 2.4 weeks or 4 weeks?
+
+### Testing Scenarios to Validate
+
+Once approach is decided, test these scenarios:
+
+1. **100% focus single project** (baseline - should match current behavior)
+2. **Two 50/50 concurrent projects** (same size, same duration)
+3. **Three-way split** (33/33/34)
+4. **Uneven split** (70/30)
+5. **Partial overlap** (Project A weeks 1-4, Project B weeks 3-6, overlap weeks 3-4)
+6. **Projects in different domains** (Customer 60%, Platform 40%)
+
+### Decision
+
+**Status:** In Progress - Awaiting user decision on Option A, B, C, or combination
+
+### Notes
+
+- User must choose which problem they're solving before implementation can begin
+- The three options have very different implications for UI and calculation complexity
+- Current workaround (manual text in title) suggests low urgency for full implementation
