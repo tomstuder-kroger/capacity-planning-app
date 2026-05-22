@@ -101,4 +101,31 @@ export function getQuarterStartDate(fiscalYear, quarter) {
   return start;
 }
 
+/**
+ * Returns the period definitions for a fiscal quarter.
+ * Uses explicit periods from calendar JSON when available; falls back to 4-5-4 pattern.
+ */
+export function getQuarterPeriods(fiscalYear, quarter) {
+  const fyData = getFiscalYearData(fiscalYear);
+  const qData = fyData?.quarters?.[quarter];
+
+  if (qData?.periods) {
+    return qData.periods;
+  }
+
+  // Fallback: standard 4-5-4 pattern
+  const qIndex = { Q1: 0, Q2: 1, Q3: 2, Q4: 3 }[quarter] ?? 0;
+  const firstPeriod = qIndex * 3 + 1;
+  const weeks = qData?.weeks ?? 13;
+  const base = [
+    { name: `P${firstPeriod}`, weeks: 4 },
+    { name: `P${firstPeriod + 1}`, weeks: 5 },
+    { name: `P${firstPeriod + 2}`, weeks: 4 },
+  ];
+  if (quarter === 'Q4' && weeks > 13) {
+    base.push({ name: `P${firstPeriod + 3}`, weeks: weeks - 13 });
+  }
+  return base;
+}
+
 export default calendar;

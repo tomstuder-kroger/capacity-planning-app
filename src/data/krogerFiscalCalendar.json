@@ -12,10 +12,27 @@
       "start_date": "2026-02-01",
       "weeks_in_year": 52,
       "quarters": {
-        "Q1": { "weeks": 13, "start_date": "2026-02-01" },
-        "Q2": { "weeks": 13, "start_date": "2026-05-24" },
-        "Q3": { "weeks": 13, "start_date": "2026-07-16" },
-        "Q4": { "weeks": 13, "start_date": "2026-11-08" }
+        "Q1": { "weeks": 16, "start_date": "2026-02-01", "periods": [
+          { "name": "P1", "weeks": 4 },
+          { "name": "P2", "weeks": 4 },
+          { "name": "P3", "weeks": 4 },
+          { "name": "P4", "weeks": 4 }
+        ]},
+        "Q2": { "weeks": 12, "start_date": "2026-05-24", "periods": [
+          { "name": "P5", "weeks": 4 },
+          { "name": "P6", "weeks": 4 },
+          { "name": "P7", "weeks": 4 }
+        ]},
+        "Q3": { "weeks": 12, "start_date": "2026-08-16", "periods": [
+          { "name": "P8", "weeks": 4 },
+          { "name": "P9", "weeks": 4 },
+          { "name": "P10", "weeks": 4 }
+        ]},
+        "Q4": { "weeks": 12, "start_date": "2026-11-08", "periods": [
+          { "name": "P11", "weeks": 4 },
+          { "name": "P12", "weeks": 4 },
+          { "name": "P13", "weeks": 4 }
+        ]}
       }
     },
     {

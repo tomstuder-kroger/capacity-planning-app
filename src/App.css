@@ -518,7 +518,7 @@ body {
 
 .gantt-flex-track {
   display: flex;
-  width: calc(var(--gantt-total-weeks, 52) * 40px);
+  width: calc(var(--gantt-total-weeks, 52) * var(--gantt-week-width, 40px));
   flex-shrink: 0;
   background: #0F52A2;
   border-bottom: 2px solid #0a3d80;
@@ -557,7 +557,7 @@ body {
 
 .gantt-period-track {
   display: flex;
-  width: calc(var(--gantt-total-weeks, 52) * 40px);
+  width: calc(var(--gantt-total-weeks, 52) * var(--gantt-week-width, 40px));
   flex-shrink: 0;
   background: #eef2f9;
   border-bottom: 1px solid #d1d5db;
@@ -625,7 +625,7 @@ body {
 .gantt-week-header {
   position: relative;
   display: flex;
-  width: calc(var(--gantt-total-weeks, 52) * 40px);
+  width: calc(var(--gantt-total-weeks, 52) * var(--gantt-week-width, 40px));
   flex-shrink: 0;
   background-image: none;
   background: #f9fafb;
@@ -633,7 +633,7 @@ body {
 }
 
 .gantt-week-tick {
-  flex: 0 0 40px;
+  flex: 0 0 var(--gantt-week-width, 40px);
   text-align: center;
   padding: 0.5rem 0;
   font-size: 0.5625rem;
@@ -728,7 +728,7 @@ body {
 .gantt-bars-track {
   position: relative;
   min-height: 40px;
-  width: calc(var(--gantt-total-weeks, 52) * 40px);
+  width: calc(var(--gantt-total-weeks, 52) * var(--gantt-week-width, 40px));
   flex-shrink: 0;
   background-image:
     /* Today marker */
@@ -742,9 +742,9 @@ body {
     repeating-linear-gradient(
       to right,
       transparent 0,
-      transparent calc(40px - 1px),
-      #f3f4f6 calc(40px - 1px),
-      #f3f4f6 40px
+      transparent calc(var(--gantt-week-width, 40px) - 1px),
+      #f3f4f6 calc(var(--gantt-week-width, 40px) - 1px),
+      #f3f4f6 var(--gantt-week-width, 40px)
     );
 }
 

@@ -14,6 +14,7 @@ const TeamDashboard = ({ onSelectMember }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [view, setView] = useState('cards');
+  const [ganttQuarter, setGanttQuarter] = useState(null);
   const [editingTeamName, setEditingTeamName] = useState(false);
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
@@ -128,21 +129,36 @@ const TeamDashboard = ({ onSelectMember }) => {
 
       {ics.length > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <div className="view-toggle">
-            <button
-              className={`view-toggle-btn${view === 'cards' ? ' view-toggle-btn--active' : ''}`}
-              onClick={() => { setView('cards'); setIsEditMode(false); }}
-              title="Card view"
-            >
-              <KdsIconCardView size="s" />
-            </button>
-            <button
-              className={`view-toggle-btn${view === 'gantt' ? ' view-toggle-btn--active' : ''}`}
-              onClick={() => { setView('gantt'); setIsEditMode(false); }}
-              title="Gantt view"
-            >
-              <KdsIconGanttChart size="s" />
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="view-toggle">
+              <button
+                className={`view-toggle-btn${view === 'cards' ? ' view-toggle-btn--active' : ''}`}
+                onClick={() => { setView('cards'); setIsEditMode(false); }}
+                title="Card view"
+              >
+                <KdsIconCardView size="s" />
+              </button>
+              <button
+                className={`view-toggle-btn${view === 'gantt' ? ' view-toggle-btn--active' : ''}`}
+                onClick={() => { setView('gantt'); setIsEditMode(false); }}
+                title="Gantt view"
+              >
+                <KdsIconGanttChart size="s" />
+              </button>
+            </div>
+            {view === 'gantt' && (
+              <div className="view-toggle">
+                {[null, 'Q1', 'Q2', 'Q3', 'Q4'].map((q) => (
+                  <button
+                    key={q ?? 'all'}
+                    className={`view-toggle-btn${ganttQuarter === q ? ' view-toggle-btn--active' : ''}`}
+                    onClick={() => setGanttQuarter(q)}
+                  >
+                    {q ?? 'All'}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -153,7 +169,7 @@ const TeamDashboard = ({ onSelectMember }) => {
           subtitle="Add your first team member to get started"
         />
       ) : view === 'gantt' ? (
-        <GanttChart />
+        <GanttChart quarterFilter={ganttQuarter} />
       ) : (
         <div className="team-grid">
           {ics.map((ic) => (
