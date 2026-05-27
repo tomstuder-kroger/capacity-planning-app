@@ -121,8 +121,8 @@ describe('Capacity Planning Calculations', () => {
           type: 'vacation'
         }
       ]);
-      // Single day = 1 day = Math.ceil(1 / 7) = 1 week
-      expect(result).toBe(1);
+      // Single day = 1 day / 5 = 0.2 weeks
+      expect(result).toBeCloseTo(0.2, 10);
     });
 
     test('calculates multi-day PTO (5 days)', () => {
@@ -134,7 +134,7 @@ describe('Capacity Planning Calculations', () => {
           type: 'vacation'
         }
       ]);
-      // 5 days = Math.ceil(5 / 7) = 1 week
+      // 5 days / 5 = 1 week
       expect(result).toBe(1);
     });
 
@@ -147,8 +147,8 @@ describe('Capacity Planning Calculations', () => {
           type: 'vacation'
         }
       ]);
-      // 7 days = Math.ceil(7 / 7) = 1 week
-      expect(result).toBe(1);
+      // 7 days / 5 = 1.4 weeks
+      expect(result).toBeCloseTo(1.4, 10);
     });
 
     test('calculates full week PTO (8 days)', () => {
@@ -160,8 +160,8 @@ describe('Capacity Planning Calculations', () => {
           type: 'vacation'
         }
       ]);
-      // 8 days = Math.ceil(8 / 7) = 2 weeks
-      expect(result).toBe(2);
+      // 8 days / 5 = 1.6 weeks
+      expect(result).toBeCloseTo(1.6, 10);
     });
 
     test('aggregates multiple PTO instances correctly', () => {
@@ -179,10 +179,10 @@ describe('Capacity Planning Calculations', () => {
           type: 'vacation'
         }
       ]);
-      // First: 5 days = Math.ceil(5 / 7) = 1 week
-      // Second: 7 days = Math.ceil(7 / 7) = 1 week
-      // Total: 2 weeks
-      expect(result).toBe(2);
+      // First: 5 days / 5 = 1 week
+      // Second: 7 days / 5 = 1.4 weeks
+      // Total: 2.4 weeks
+      expect(result).toBeCloseTo(2.4, 10);
     });
 
     test('aggregates multiple PTO instances with different day ranges', () => {
@@ -206,11 +206,11 @@ describe('Capacity Planning Calculations', () => {
           type: 'sick'
         }
       ]);
-      // First: 7 days = Math.ceil(7 / 7) = 1 week
-      // Second: 8 days = Math.ceil(8 / 7) = 2 weeks
-      // Third: 3 days = Math.ceil(3 / 7) = 1 week
-      // Total: 4 weeks
-      expect(result).toBe(4);
+      // First: 7 days / 5 = 1.4 weeks
+      // Second: 8 days / 5 = 1.6 weeks
+      // Third: 3 days / 5 = 0.6 weeks
+      // Total: 3.6 weeks
+      expect(result).toBeCloseTo(3.6, 10);
     });
 
     test('ignores PTO instances with missing startDate', () => {
@@ -229,8 +229,8 @@ describe('Capacity Planning Calculations', () => {
         }
       ]);
       // First instance ignored due to missing startDate
-      // Second: 7 days = Math.ceil(7 / 7) = 1 week
-      expect(result).toBe(1);
+      // Second: 7 days / 5 = 1.4 weeks
+      expect(result).toBeCloseTo(1.4, 10);
     });
 
     test('ignores PTO instances with missing endDate', () => {
@@ -249,8 +249,8 @@ describe('Capacity Planning Calculations', () => {
         }
       ]);
       // First instance ignored due to missing endDate
-      // Second: 7 days = Math.ceil(7 / 7) = 1 week
-      expect(result).toBe(1);
+      // Second: 7 days / 5 = 1.4 weeks
+      expect(result).toBeCloseTo(1.4, 10);
     });
 
     test('ignores PTO instances with missing both dates', () => {
@@ -282,8 +282,8 @@ describe('Capacity Planning Calculations', () => {
         }
       ]);
       // First instance ignored due to invalid range
-      // Second: 7 days = Math.ceil(7 / 7) = 1 week
-      expect(result).toBe(1);
+      // Second: 7 days / 5 = 1.4 weeks
+      expect(result).toBeCloseTo(1.4, 10);
     });
 
     test('handles mixed valid and invalid PTO instances', () => {
@@ -307,11 +307,11 @@ describe('Capacity Planning Calculations', () => {
           type: 'sick'
         }
       ]);
-      // First: 5 days = Math.ceil(5 / 7) = 1 week
+      // First: 5 days / 5 = 1 week
       // Second: ignored (missing startDate)
-      // Third: 6 days = Math.ceil(6 / 7) = 1 week
-      // Total: 2 weeks
-      expect(result).toBe(2);
+      // Third: 6 days / 5 = 1.2 weeks
+      // Total: 2.2 weeks
+      expect(result).toBeCloseTo(2.2, 10);
     });
 
     test('ignores array elements that are not objects', () => {
@@ -328,7 +328,7 @@ describe('Capacity Planning Calculations', () => {
         123
       ]);
       // Only first element is valid
-      // First: 5 days = Math.ceil(5 / 7) = 1 week
+      // First: 5 days / 5 = 1 week
       expect(result).toBe(1);
     });
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { KdsLabel, KdsRadio, MxInputTextBox, KdsTooltippable, KdsIconInfo } from 'react-mx-web-components';
 import { useCapacity } from '../context/CapacityContext';
+import { formatWeeksAndDays } from '../utils/calculations';
 import PTOScheduling from './PTOScheduling';
 
 // Tooltip component using KDS tooltippable
@@ -76,7 +77,7 @@ const TimeOffForm = () => {
   };
 
   const calculated = calculateResults(activeIC);
-  const totalTimeOff = calculated ? calculated.totalTimeOffWeeks.toFixed(1) : '0.0';
+  const totalTimeOff = calculated ? formatWeeksAndDays(calculated.totalTimeOffWeeks) : '0 days';
 
   return (
     <div className="kds-Card kds-Card--m kds-card-section">
@@ -159,7 +160,7 @@ const TimeOffForm = () => {
       <PTOScheduling />
 
       <div className="summary-box">
-        <span>Total time off: <strong>{totalTimeOff} weeks</strong></span>
+        <span>Total time off: <strong>{totalTimeOff}</strong></span>
       </div>
     </div>
   );

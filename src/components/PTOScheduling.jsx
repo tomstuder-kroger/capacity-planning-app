@@ -2,7 +2,7 @@ import React from 'react';
 import { KdsButton } from 'react-mx-web-components';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
-import { calculateTotalPTO } from '../utils/calculations';
+import { calculateTotalPTO, formatWeeksAndDays } from '../utils/calculations';
 import PTORow from './PTORow';
 import EmptyState from './EmptyState';
 
@@ -64,7 +64,7 @@ const PTOScheduling = () => {
 
         <div className="summary-box">
           <div className="domain-header">
-            <span>PTO total: {totalPTOWeeks.toFixed(1)} weeks</span>
+            <span>PTO total: {formatWeeksAndDays(totalPTOWeeks)}</span>
           </div>
         </div>
       </div>
