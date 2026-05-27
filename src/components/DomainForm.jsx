@@ -4,6 +4,7 @@ import { MxModal, MxModalBody } from 'react-mx-web-components';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
 import { getProjectWeeks } from '../utils/calculations';
+import SupportNeedsSelector from './SupportNeedsSelector';
 
 const WEEK_OPTIONS = [
   ...Array.from({ length: 13 }, (_, i) => ({
@@ -81,6 +82,10 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
             ))}
           </select>
         </div>
+        <SupportNeedsSelector
+          value={project.supportNeeds || []}
+          onChange={(selected) => onUpdate(project.id, { supportNeeds: selected })}
+        />
         {project.weeksMode === 'custom' && (
           <DateField
             label="End Date"
@@ -133,7 +138,8 @@ const DomainForm = ({ domain }) => {
       startDate: null,
       weeksMode: 'fixed',
       weeks: 1,
-      customEndDate: null
+      customEndDate: null,
+      supportNeeds: []
     };
     updateDomain({ projects: [...(domain.projects || []), newProject] });
   };
