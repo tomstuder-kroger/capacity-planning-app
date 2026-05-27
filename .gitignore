@@ -63,3 +63,5 @@ temp/
 
 # Data backups
 ts-backup/
+public/restore.html
+public/restore-backup.html
