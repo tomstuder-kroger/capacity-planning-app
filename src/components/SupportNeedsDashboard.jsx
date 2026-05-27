@@ -19,13 +19,13 @@ const SupportNeedsDashboard = () => {
       <h2 className="kds-Heading kds-Heading--s section-heading">Support Needed</h2>
 
       {userResearch.length > 0 && (
-        <div style={{ marginBottom: '1rem' }}>
-          <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '14px' }}>
+        <div className="support-section-group">
+          <div className="support-section-title">
             User Research:
           </div>
-          <ul style={{ margin: 0, paddingLeft: '20px', listStyle: 'disc' }}>
+          <ul className="support-section-list">
             {userResearch.map(project => (
-              <li key={project.id} style={{ marginBottom: '0.25rem', fontSize: '14px' }}>
+              <li key={project.id} className="support-section-item">
                 {project.title || 'Untitled Project'}
               </li>
             ))}
@@ -34,13 +34,13 @@ const SupportNeedsDashboard = () => {
       )}
 
       {serviceDesigner.length > 0 && (
-        <div>
-          <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '14px' }}>
+        <div className="support-section-group">
+          <div className="support-section-title">
             Service Designer:
           </div>
-          <ul style={{ margin: 0, paddingLeft: '20px', listStyle: 'disc' }}>
+          <ul className="support-section-list">
             {serviceDesigner.map(project => (
-              <li key={project.id} style={{ marginBottom: '0.25rem', fontSize: '14px' }}>
+              <li key={project.id} className="support-section-item">
                 {project.title || 'Untitled Project'}
               </li>
             ))}
