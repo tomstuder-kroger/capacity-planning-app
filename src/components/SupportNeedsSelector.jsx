@@ -28,15 +28,6 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
         onChange={handleChange}
         className="support-needs-select"
         aria-label="Support needed"
-        style={{
-          width: '100%',
-          minHeight: '60px',
-          padding: '8px',
-          border: '1px solid #d1d5db',
-          borderRadius: '4px',
-          fontFamily: 'inherit',
-          fontSize: '14px'
-        }}
       >
         {SUPPORT_OPTIONS.map(option => (
           <option key={option.value} value={option.value}>
@@ -45,7 +36,7 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
         ))}
       </select>
       {value.length > 0 && (
-        <div style={{ marginTop: '4px', fontSize: '12px', color: '#6b7280' }}>
+        <div className="support-needs-selected">
           Selected: {value.join(', ')}
         </div>
       )}
