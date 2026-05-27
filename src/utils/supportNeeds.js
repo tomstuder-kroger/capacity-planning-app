@@ -65,7 +65,7 @@ export const getTeamSupportNeeds = (ics) => {
       domain.projects.forEach(project => {
         const supportNeeds = project.supportNeeds || [];
         const projectWithContext = {
-          ...project,
+          projectTitle: project.title || 'Untitled Project',
           domainName: domain.name || '(No Domain)',
           icName: ic.icName || 'Unnamed IC'
         };
@@ -80,11 +80,9 @@ export const getTeamSupportNeeds = (ics) => {
     });
   });
 
-  // Sort alphabetically by title
+  // Sort alphabetically by projectTitle
   const sortByTitle = (a, b) => {
-    const titleA = a.title || 'Untitled Project';
-    const titleB = b.title || 'Untitled Project';
-    return titleA.localeCompare(titleB);
+    return a.projectTitle.localeCompare(b.projectTitle);
   };
 
   userResearch.sort(sortByTitle);
@@ -110,24 +108,24 @@ export const generateSupportSummary = (ic) => {
     return '';
   }
 
-  let summary = '## Support Needs\n\n';
+  let summary = '## Support Needed\n\n';
 
   if (userResearch.length > 0) {
-    summary += '### User Research\n\n';
+    summary += '**User Research:**\n';
     userResearch.forEach(project => {
       const title = project.title || 'Untitled Project';
       const domain = project.domainName || '(No Domain)';
-      summary += `- **${title}** (${domain})\n`;
+      summary += `- ${title} (Domain: ${domain})\n`;
     });
     summary += '\n';
   }
 
   if (serviceDesigner.length > 0) {
-    summary += '### Service Designer\n\n';
+    summary += '**Service Designer:**\n';
     serviceDesigner.forEach(project => {
       const title = project.title || 'Untitled Project';
       const domain = project.domainName || '(No Domain)';
-      summary += `- **${title}** (${domain})\n`;
+      summary += `- ${title} (Domain: ${domain})\n`;
     });
     summary += '\n';
   }

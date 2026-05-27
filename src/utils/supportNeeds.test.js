@@ -141,8 +141,10 @@ describe('getTeamSupportNeeds', () => {
 
     expect(result.userResearch).toHaveLength(1);
     expect(result.userResearch[0].icName).toBe('Alice');
+    expect(result.userResearch[0].projectTitle).toBe('Project A');
     expect(result.serviceDesigner).toHaveLength(1);
     expect(result.serviceDesigner[0].icName).toBe('Bob');
+    expect(result.serviceDesigner[0].projectTitle).toBe('Project B');
   });
 
   test('returns empty arrays for empty IC list', () => {
@@ -195,6 +197,8 @@ describe('getTeamSupportNeeds', () => {
     const result = getTeamSupportNeeds(ics);
 
     expect(result.userResearch[0].icName).toBe('Alice Smith');
+    expect(result.userResearch[0].projectTitle).toBe('Project A');
+    expect(result.userResearch[0].domainName).toBe('Engineering');
   });
 
   test('sorts projects alphabetically within each support type', () => {
@@ -218,9 +222,9 @@ describe('getTeamSupportNeeds', () => {
 
     const result = getTeamSupportNeeds(ics);
 
-    expect(result.userResearch[0].title).toBe('Alpha');
-    expect(result.userResearch[1].title).toBe('Beta');
-    expect(result.userResearch[2].title).toBe('Zebra');
+    expect(result.userResearch[0].projectTitle).toBe('Alpha');
+    expect(result.userResearch[1].projectTitle).toBe('Beta');
+    expect(result.userResearch[2].projectTitle).toBe('Zebra');
   });
 });
 
@@ -242,11 +246,11 @@ describe('generateSupportSummary', () => {
 
     const result = generateSupportSummary(ic);
 
-    expect(result).toContain('Support Needs');
-    expect(result).toContain('User Research');
-    expect(result).toContain('Project A');
-    expect(result).toContain('Service Designer');
-    expect(result).toContain('Project B');
+    expect(result).toContain('## Support Needed');
+    expect(result).toContain('**User Research:**');
+    expect(result).toContain('Project A (Domain: Engineering)');
+    expect(result).toContain('**Service Designer:**');
+    expect(result).toContain('Project B (Domain: Engineering)');
   });
 
   test('returns empty string when no support needs exist', () => {
