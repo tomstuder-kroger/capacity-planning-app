@@ -4,6 +4,7 @@ import { CapacityProvider, useCapacity } from './context/CapacityContext';
 import GlobalNavBar from './components/GlobalNavBar';
 import TeamDashboard from './components/TeamDashboard';
 import PlanningView from './components/PlanningView';
+import TeamSupportView from './components/TeamSupportView';
 import './App.css';
 
 function AppContent() {
@@ -19,9 +20,13 @@ function AppContent() {
     setCurrentView('team');
   };
 
+  const navigateToTeamSupport = () => {
+    setCurrentView('teamSupport');
+  };
+
   return (
     <div className="app-shell">
-      <GlobalNavBar />
+      <GlobalNavBar onNavigateToTeamSupport={navigateToTeamSupport} />
       <div className="app-container">
         {saveError && (
           <KdsMessage kind="warning" className="mb-16">
@@ -31,6 +36,8 @@ function AppContent() {
 
         {currentView === 'team' ? (
           <TeamDashboard onSelectMember={navigateToPlanning} />
+        ) : currentView === 'teamSupport' ? (
+          <TeamSupportView onBack={navigateToTeam} />
         ) : (
           <PlanningView key={activeIC?.id} onBack={navigateToTeam} />
         )}
