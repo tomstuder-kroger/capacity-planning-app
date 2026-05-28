@@ -1,3 +1,5 @@
+import { generateSupportSummary } from './supportNeeds';
+
 /**
  * Calculates total time off in weeks based on OKR period and time off days
  * @param {Object} params - Time off parameters
@@ -298,6 +300,13 @@ export function generateSummary(ic, calculated) {
 
 ## Note for Team Discussion
 ${ic.icName || 'This IC'} has ${totalTimeOffWeeks.toFixed(1)} weeks of total time off this quarter, including ${timeOffDesc}. They are supporting ${ic.domains.length} domain(s) with ${totalProjects} planned project(s). At ${capacityUtilization.toFixed(0)}% utilization, ${ic.icName || 'this IC'} is ${capacityDesc}`;
+
+  const supportSummary = generateSupportSummary(ic);
+  if (supportSummary) {
+    output += `
+
+${supportSummary}`;
+  }
 
   return output;
 }

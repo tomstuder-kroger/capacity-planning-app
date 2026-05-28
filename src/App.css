@@ -284,6 +284,77 @@ body {
   outline-offset: 1px;
 }
 
+.support-needs-selected {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Custom multi-select dropdown */
+.support-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.support-dropdown-button {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  text-align: left;
+  font-size: 0.875rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.support-dropdown-button:hover {
+  border-color: #9ca3af;
+}
+
+.support-dropdown-button:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 1px;
+  border-color: #0066cc;
+}
+
+.support-dropdown-arrow {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.support-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.support-dropdown-option {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.support-dropdown-option:hover {
+  background-color: #f3f4f6;
+}
+
 .project-custom-weeks {
   margin-top: 0.5rem;
   font-size: 0.875rem;
@@ -794,5 +865,27 @@ body {
   padding: 2rem;
   text-align: center;
   color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* ── Support Needs Dashboard ────────────────────────────────────────────────── */
+.support-section-group {
+  margin-bottom: 1rem;
+}
+
+.support-section-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.support-section-list {
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.support-section-item {
+  margin-bottom: 0.25rem;
   font-size: 0.875rem;
 }
