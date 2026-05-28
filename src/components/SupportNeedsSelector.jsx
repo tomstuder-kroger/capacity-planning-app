@@ -15,8 +15,10 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
 
   return (
     <div className="project-field">
+      <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>
+        Support Needed
+      </label>
       <MxMultiSelect
-        label="Support Needed"
         items={SUPPORT_OPTIONS}
         selectedItems={value}
         emitOnlyValue
