@@ -51,7 +51,7 @@ const GlobalNavBar = ({ onNavigateToTeamSupport }) => {
           onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
           onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
         >
-          Team Support
+          Shared Services Support
         </button>
       )}
     </header>
