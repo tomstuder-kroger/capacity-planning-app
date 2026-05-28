@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { loadICs, saveICs, loadActiveICId, saveActiveICId, loadTeamName, saveTeamName } from '../utils/storage';
+import { loadICs, saveICs, loadActiveICId, saveActiveICId, loadTeamName, saveTeamName, mergeImportedData } from '../utils/storage';
+import { muralImports } from '../data/muralImports';
 import {
   calculateTimeOff,
   calculateTotalPTO,
@@ -44,7 +45,7 @@ export const CapacityProvider = ({ children }) => {
 
   // Load from localStorage on mount
   useEffect(() => {
-    const loadedICs = loadICs();
+    const loadedICs = mergeImportedData(loadICs(), muralImports);
     const loadedActiveId = loadActiveICId();
 
     if (loadedICs.length > 0) {

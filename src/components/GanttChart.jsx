@@ -3,15 +3,26 @@ import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod, getQuarterStartDate, getQuarterWeeks, getQuarterPeriods } from '../utils/fiscalCalendar';
 import { getProjectWeeks } from '../utils/calculations';
 
-const DOMAIN_COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6',
-  '#ef4444', '#06b6d4', '#84cc16', '#f97316',
-];
+// One hue per person — spread around the color wheel
+const PERSON_HUES = [217, 158, 43, 271, 5, 185, 82, 316, 24, 340];
+
+// Lightness steps per domain — darker first, progressively lighter
+const DOMAIN_LIGHTNESS = [38, 50, 62, 70];
+
+function getDomainColor(personHue, domainIndex) {
+  const L = DOMAIN_LIGHTNESS[Math.min(domainIndex, DOMAIN_LIGHTNESS.length - 1)];
+  return `hsl(${personHue}, 65%, ${L}%)`;
+}
+
+function getDomainTextColor(domainIndex) {
+  const L = DOMAIN_LIGHTNESS[Math.min(domainIndex, DOMAIN_LIGHTNESS.length - 1)];
+  return L >= 55 ? '#1f2937' : 'white';
+}
 
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 
-const GanttBar = ({ project, domainColor, fyStart, totalWeeks }) => {
+const GanttBar = ({ project, domainColor, textColor, fyStart, totalWeeks }) => {
   const weeks = getProjectWeeks(project);
   if (weeks === 0) return null;
 
@@ -45,7 +56,7 @@ const GanttBar = ({ project, domainColor, fyStart, totalWeeks }) => {
       }}
       title={tooltip}
     >
-      <span className="gantt-bar-label">{label}</span>
+      <span className="gantt-bar-label" style={{ color: textColor }}>{label}</span>
     </div>
   );
 };
@@ -91,7 +102,9 @@ const GanttPTOBar = ({ pto, fyStart, totalWeeks }) => {
   );
 };
 
-const GanttMemberSection = ({ ic, fyStart, totalWeeks }) => {
+const GanttMemberSection = ({ ic, icIndex, fyStart, totalWeeks }) => {
+  const personHue = PERSON_HUES[icIndex % PERSON_HUES.length];
+  const personBaseColor = `hsl(${personHue}, 65%, 38%)`;
   const rows = [];
   ic.domains.forEach((domain, di) => {
     const validProjects = (domain.projects || []).filter(p => getProjectWeeks(p) > 0);
@@ -106,9 +119,9 @@ const GanttMemberSection = ({ ic, fyStart, totalWeeks }) => {
   const hasPTO = ptoInstances.length > 0;
 
   return (
-    <div className="gantt-member-section">
+    <div className="gantt-member-section" style={{ borderLeft: `4px solid ${personBaseColor}` }}>
       <div className="gantt-label-col gantt-sticky-left">
-        <div className="gantt-member-name">{ic.icName || 'Unnamed'}</div>
+        <div className="gantt-member-name" style={{ color: personBaseColor }}>{ic.icName || 'Unnamed'}</div>
         {ic.icRole && <div className="gantt-member-role">{ic.icRole}</div>}
       </div>
 
@@ -147,7 +160,8 @@ const GanttMemberSection = ({ ic, fyStart, totalWeeks }) => {
               <div className="gantt-bars-track">
                 <GanttBar
                   project={project}
-                  domainColor={DOMAIN_COLORS[domainIndex % DOMAIN_COLORS.length]}
+                  domainColor={getDomainColor(personHue, domainIndex)}
+                  textColor={getDomainTextColor(domainIndex)}
                   fyStart={fyStart}
                   totalWeeks={totalWeeks}
                 />
@@ -295,10 +309,11 @@ const GanttChart = ({ quarterFilter = null }) => {
         </div>
 
         {/* IC rows */}
-        {ics.map(ic => (
+        {ics.map((ic, icIndex) => (
           <GanttMemberSection
             key={ic.id}
             ic={ic}
+            icIndex={icIndex}
             fyStart={fyStart}
             totalWeeks={totalWeeks}
           />

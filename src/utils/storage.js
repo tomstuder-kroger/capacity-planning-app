@@ -1,8 +1,11 @@
+import { v4 as uuidv4 } from 'uuid';
+
 const STORAGE_KEYS = {
   ICS: 'capacity-planning-ics',
   ACTIVE_ID: 'capacity-planning-active-id',
   VERSION: 'capacity-planning-version',
-  TEAM_NAME: 'capacity-planning-team-name'
+  TEAM_NAME: 'capacity-planning-team-name',
+  APPLIED_IMPORTS: 'capacity-planning-applied-imports'
 };
 
 const CURRENT_VERSION = 1;
@@ -109,6 +112,96 @@ export const saveTeamName = (name) => {
   } catch (error) {
     return false;
   }
+};
+
+/**
+ * Merges mural import batches into the current IC list non-destructively.
+ * Each batch is only applied once (tracked by ID in localStorage).
+ * For each person: finds existing IC by name (case-insensitive) or creates one.
+ * For each domain: finds existing or creates it, then appends only new projects (matched by title).
+ *
+ * @param {Array} currentICs - ICs already loaded from localStorage
+ * @param {Array} importBatches - Array of { id, domain, people: [{ name, projects: [{ title, weeks }] }] }
+ * @returns {Array} Updated ICs (may be unchanged if all batches already applied)
+ */
+export const mergeImportedData = (currentICs, importBatches) => {
+  if (!Array.isArray(importBatches) || importBatches.length === 0) return currentICs;
+
+  let appliedIds;
+  try {
+    appliedIds = new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.APPLIED_IMPORTS) || '[]'));
+  } catch {
+    appliedIds = new Set();
+  }
+
+  let ics = [...currentICs];
+  let changed = false;
+
+  for (const batch of importBatches) {
+    if (!batch.id || appliedIds.has(batch.id)) continue;
+
+    for (const person of (batch.people || [])) {
+      const nameLower = (person.name || '').toLowerCase().trim();
+      if (!nameLower) continue;
+
+      let icIndex = ics.findIndex(ic => ic.icName.toLowerCase().trim() === nameLower);
+
+      if (icIndex === -1) {
+        ics.push({
+          id: uuidv4(),
+          icName: person.name,
+          icRole: '',
+          quarter: '',
+          weeksInQuarter: '',
+          timeOff: { okrTime: { value: '', unit: 'days' }, devDays: '', holidayDays: '' },
+          ptoInstances: [],
+          domains: [],
+          lastModified: new Date().toISOString()
+        });
+        icIndex = ics.length - 1;
+      }
+
+      const ic = { ...ics[icIndex], domains: [...ics[icIndex].domains] };
+      const domainName = batch.domain || 'Imported';
+      const domainNameLower = domainName.toLowerCase();
+      let domainIndex = ic.domains.findIndex(d => d.name.toLowerCase() === domainNameLower);
+
+      if (domainIndex === -1) {
+        ic.domains.push({ id: uuidv4(), name: domainName, projects: [] });
+        domainIndex = ic.domains.length - 1;
+      }
+
+      const domain = { ...ic.domains[domainIndex], projects: [...ic.domains[domainIndex].projects] };
+      const existingTitles = new Set(domain.projects.map(p => p.title.toLowerCase().trim()));
+
+      for (const proj of (person.projects || [])) {
+        if (!proj.title || existingTitles.has(proj.title.toLowerCase().trim())) continue;
+        domain.projects.push({
+          id: uuidv4(),
+          title: proj.title,
+          weeksMode: 'fixed',
+          weeks: proj.weeks || 1,
+          startDate: null,
+          customEndDate: null
+        });
+        existingTitles.add(proj.title.toLowerCase().trim());
+      }
+
+      ic.domains[domainIndex] = domain;
+      ic.lastModified = new Date().toISOString();
+      ics[icIndex] = ic;
+    }
+
+    appliedIds.add(batch.id);
+    changed = true;
+  }
+
+  if (changed) {
+    saveICs(ics);
+    localStorage.setItem(STORAGE_KEYS.APPLIED_IMPORTS, JSON.stringify([...appliedIds]));
+  }
+
+  return ics;
 };
 
 /**
