@@ -290,6 +290,12 @@ body {
   color: #6b7280;
 }
 
+/* Align MxMultiSelect label with other field labels */
+.project-field mx-multi-select::part(label) {
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
 .project-custom-weeks {
   margin-top: 0.5rem;
   font-size: 0.875rem;
