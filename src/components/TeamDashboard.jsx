@@ -6,12 +6,14 @@ import EmptyState from './EmptyState';
 import TeamMemberCard from './TeamMemberCard';
 import GanttChart from './GanttChart';
 import CreateMemberModal from './CreateMemberModal';
+import ImportMemberModal from './ImportMemberModal';
 
 const currentPeriod = getCurrentFiscalPeriod();
 
 const TeamDashboard = ({ onSelectMember }) => {
   const { ics, teamName, updateTeamName, calculateResults, reorderICs } = useCapacity();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [view, setView] = useState('cards');
   const [ganttQuarter, setGanttQuarter] = useState(null);
@@ -62,6 +64,9 @@ const TeamDashboard = ({ onSelectMember }) => {
               {isEditMode ? 'Done' : 'Edit'}
             </KdsButton>
           )}
+          <KdsButton kind="secondary" onClick={() => setIsImportModalOpen(true)}>
+            Import Team Member
+          </KdsButton>
           <KdsButton kind="primary" onClick={() => setIsCreateModalOpen(true)}>
             + Add Team Member
           </KdsButton>
@@ -193,6 +198,11 @@ const TeamDashboard = ({ onSelectMember }) => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onCreated={onSelectMember}
+      />
+
+      <ImportMemberModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
       />
     </div>
   );
