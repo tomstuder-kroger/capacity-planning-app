@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { marked } from 'marked';
-import { MxModal, MxModalBody } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useCapacity } from '../context/CapacityContext';
 import { generateSummary } from '../utils/calculations';
 
@@ -18,14 +19,10 @@ const FormattedOutput = ({ open, onClose }) => {
 
   const handleCopy = async () => {
     try {
-      // Convert markdown to HTML
       const html = marked(summary);
-
-      // Create a blob for HTML
       const htmlBlob = new Blob([html], { type: 'text/html' });
       const textBlob = new Blob([summary], { type: 'text/plain' });
 
-      // Copy both formats to clipboard
       await navigator.clipboard.write([
         new ClipboardItem({
           'text/html': htmlBlob,
@@ -36,35 +33,31 @@ const FormattedOutput = ({ open, onClose }) => {
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 3000);
     } catch (error) {
-      console.error('Failed to copy:', error);
-      // Fallback to plain text if clipboard.write fails
       try {
         await navigator.clipboard.writeText(summary);
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 3000);
       } catch (fallbackError) {
-        console.error('Fallback copy also failed:', fallbackError);
+        console.error('Copy failed:', fallbackError);
       }
     }
   };
 
   return (
-    <MxModal
-      isOpened={open}
-      headercontent="Capacity Summary"
-      footerPrimaryButtonText={copySuccess ? 'Copied!' : 'Copy to Clipboard'}
-      footerSecondaryButtonText="Close"
-      closeOnSecondaryButton
-      onApplyClick={handleCopy}
-      onSecondaryClick={onClose}
-      onModalClose={onClose}
-    >
-      <MxModalBody>
-        <div className="summary-markdown">
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Capacity Summary</DialogTitle>
+        </DialogHeader>
+        <div className="summary-markdown overflow-y-auto flex-1">
           <ReactMarkdown>{summary}</ReactMarkdown>
         </div>
-      </MxModalBody>
-    </MxModal>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button onClick={handleCopy}>{copySuccess ? 'Copied!' : 'Copy to Clipboard'}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

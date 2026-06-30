@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { KdsCheckbox, KdsLabel } from 'react-mx-web-components';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 const SUPPORT_OPTIONS = [
   'User Research',
@@ -55,14 +56,16 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
         {isOpen && (
           <div className="support-dropdown-menu">
             {SUPPORT_OPTIONS.map(option => (
-              <KdsLabel key={option} className="support-dropdown-option">
-                <KdsCheckbox
+              <div key={option} className="support-dropdown-option flex items-center gap-2">
+                <Checkbox
+                  id={`support-${option}`}
                   checked={value.includes(option)}
-                  onChange={() => handleToggle(option)}
-                  compact
+                  onCheckedChange={() => handleToggle(option)}
                 />
-                {option}
-              </KdsLabel>
+                <Label htmlFor={`support-${option}`} className="font-normal cursor-pointer">
+                  {option}
+                </Label>
+              </div>
             ))}
           </div>
         )}

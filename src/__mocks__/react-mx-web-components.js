@@ -31,6 +31,8 @@ module.exports = {
   KdsIconInfo: makeComponent('KdsIconInfo'),
   KdsIconClose: makeComponent('KdsIconClose'),
   KdsIconChevronRight: makeComponent('KdsIconChevronRight'),
+  KdsIconCardView: makeComponent('KdsIconCardView'),
+  KdsIconGanttChart: makeComponent('KdsIconGanttChart'),
   MxSingleSelect: makeComponent('MxSingleSelect'),
   MxModal: makeComponent('MxModal'),
   MxModalBody: makeComponent('MxModalBody'),

@@ -1,5 +1,5 @@
 import React from 'react';
-import { KdsButton } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
 import { calculateTotalPTO, formatWeeksAndDays } from '../utils/calculations';
@@ -69,9 +69,9 @@ const PTOScheduling = () => {
         </div>
       </div>
 
-      <KdsButton kind="secondary" style={{ width: '100%', marginTop: '0.5rem' }} onClick={handleAddPTO}>
+      <Button variant="outline" style={{ width: '100%', marginTop: '0.5rem' }} onClick={handleAddPTO}>
         + Add PTO Instance
-      </KdsButton>
+      </Button>
     </div>
   );
 };

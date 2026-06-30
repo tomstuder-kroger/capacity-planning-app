@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsIconTrash, MxInputTextBox } from 'react-mx-web-components';
-import { MxModal, MxModalBody } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
 import { getProjectWeeks } from '../utils/calculations';
@@ -42,25 +46,23 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
     <div className="project-item">
       <div className="project-item-header">
         <span className="project-item-label">Project</span>
-        <KdsButton
-          palette="negative"
-          kind="subtle"
-          variant="minimal"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={() => onRemove(project.id)}
           aria-label="Remove project"
         >
-          <KdsIconTrash size="s" />
-        </KdsButton>
+          <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        </Button>
       </div>
 
-      <div style={{ marginBottom: '0.75rem' }}>
-        <MxInputTextBox
-          label="Title"
+      <div className="flex flex-col gap-1.5" style={{ marginBottom: '0.75rem' }}>
+        <Label>Title</Label>
+        <Input
           placeholder="Project title"
           value={project.title || ''}
           onChange={(e) => onUpdate(project.id, { title: e.target.value })}
-          mask="none"
-          isClearable={false}
         />
       </div>
 
@@ -157,25 +159,23 @@ const DomainForm = ({ domain }) => {
       <div className="kds-Card kds-Card--m kds-card-section">
         <div className="domain-header">
           <h2 className="kds-Heading kds-Heading--s" style={{ margin: 0 }}>Domain</h2>
-          <KdsButton
-            palette="negative"
-            kind="subtle"
-            variant="minimal"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={() => setDeleteDialogOpen(true)}
             aria-label="Remove domain"
           >
-            <KdsIconTrash size="s" />
-          </KdsButton>
+            <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+          </Button>
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <MxInputTextBox
-            label="Domain Name"
+        <div className="flex flex-col gap-1.5" style={{ marginBottom: '1rem' }}>
+          <Label>Domain Name</Label>
+          <Input
             placeholder="e.g., TEST"
             value={domain.name}
             onChange={(e) => updateDomain({ name: e.target.value })}
-            mask="none"
-            isClearable={false}
           />
         </div>
 
@@ -190,34 +190,32 @@ const DomainForm = ({ domain }) => {
           ))}
         </div>
 
-        <KdsButton
-          kind="secondary"
-          style={{ width: '100%', marginTop: '0.5rem' }}
+        <Button
+          variant="outline"
+          className="w-full"
+          style={{ marginTop: '0.5rem' }}
           onClick={handleAddProject}
         >
           + Add Project
-        </KdsButton>
+        </Button>
 
         <div className="summary-box">
           <span>Domain total: <strong>{totalWeeks.toFixed(1)} weeks</strong></span>
         </div>
       </div>
 
-      <MxModal
-        isOpened={deleteDialogOpen}
-        headercontent="Remove Domain"
-        footerPrimaryButtonText="Remove"
-        footerPrimaryButtonKind="destructive"
-        footerSecondaryButtonText="Cancel"
-        closeOnSecondaryButton
-        onApplyClick={handleRemoveConfirm}
-        onSecondaryClick={() => setDeleteDialogOpen(false)}
-        onModalClose={() => setDeleteDialogOpen(false)}
-      >
-        <MxModalBody>
-          Remove domain "{domain.name || 'Untitled'}"?
-        </MxModalBody>
-      </MxModal>
+      <Dialog open={deleteDialogOpen} onOpenChange={(open) => !open && setDeleteDialogOpen(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Domain</DialogTitle>
+          </DialogHeader>
+          <p>Remove domain "{domain.name || 'Untitled'}"?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleRemoveConfirm}>Remove</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

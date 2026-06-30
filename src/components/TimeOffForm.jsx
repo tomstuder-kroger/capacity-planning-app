@@ -1,37 +1,38 @@
 import React from 'react';
-import { KdsLabel, KdsRadio, MxInputTextBox, KdsTooltippable, KdsIconInfo } from 'react-mx-web-components';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { InformationCircleIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import { formatWeeksAndDays } from '../utils/calculations';
 import PTOScheduling from './PTOScheduling';
 
-// Tooltip component using KDS tooltippable
-const Tooltip = ({ content }) => {
-  return (
-    <KdsTooltippable
-      side="bottom"
-      align="center"
-      tooltipText={content}
-      tooltipType="description"
-    >
-      <button
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          marginLeft: '0.35rem',
-          background: 'none',
-          border: 'none',
-          padding: '0',
-          color: '#6b7280',
-          tabIndex: 0
-        }}
-      >
-        <KdsIconInfo size="s" />
-      </button>
-    </KdsTooltippable>
-  );
-};
+const InfoTooltip = ({ content }) => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            marginLeft: '0.35rem',
+            background: 'none',
+            border: 'none',
+            padding: '0',
+            color: '#6b7280',
+          }}
+        >
+          <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} size={16} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">{content}</TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
 
 const allowNumericOnly = (e) => {
   const allowed = ['0','1','2','3','4','5','6','7','8','9','.','Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
@@ -49,15 +50,6 @@ const TimeOffForm = () => {
       timeOff: {
         ...activeIC.timeOff,
         okrTime: { ...activeIC.timeOff.okrTime, value }
-      }
-    });
-  };
-
-  const handleOKRUnitChange = (e) => {
-    updateIC(activeIC.id, {
-      timeOff: {
-        ...activeIC.timeOff,
-        okrTime: { ...activeIC.timeOff.okrTime, unit: e.target.value }
       }
     });
   };
@@ -90,68 +82,58 @@ const TimeOffForm = () => {
             <div className="okr-input">
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>OKR Time</label>
-                <Tooltip content="Provide the time spent during OKR Planning with your team." />
+                <InfoTooltip content="Provide the time spent during OKR Planning with your team." />
               </div>
               <div onKeyDown={allowNumericOnly}>
-                <MxInputTextBox
+                <Input
                   value={String(activeIC.timeOff.okrTime.value)}
                   onChange={handleOKRValueChange}
-                  mask="none"
-                  isClearable={false}
                 />
               </div>
             </div>
             <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-              <div className="okr-units">
-                <KdsLabel leftOfInput>
-                  <KdsRadio
-                    name="okrUnit"
-                    value="days"
-                    checked={activeIC.timeOff.okrTime.unit === 'days'}
-                    onChange={handleOKRUnitChange}
-                  />
-                  Days
-                </KdsLabel>
-                <KdsLabel leftOfInput>
-                  <KdsRadio
-                    name="okrUnit"
-                    value="weeks"
-                    checked={activeIC.timeOff.okrTime.unit === 'weeks'}
-                    onChange={handleOKRUnitChange}
-                  />
-                  Weeks
-                </KdsLabel>
-              </div>
+              <RadioGroup
+                value={activeIC.timeOff.okrTime.unit}
+                onValueChange={(unit) => updateIC(activeIC.id, {
+                  timeOff: { ...activeIC.timeOff, okrTime: { ...activeIC.timeOff.okrTime, unit } }
+                })}
+                className="okr-units"
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="days" id="okr-days" />
+                  <Label htmlFor="okr-days">Days</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="weeks" id="okr-weeks" />
+                  <Label htmlFor="okr-weeks">Weeks</Label>
+                </div>
+              </RadioGroup>
             </fieldset>
           </div>
         </div>
 
-        <div>
+        <div className="flex flex-col gap-1.5">
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Dev / L&D Days</label>
-            <Tooltip content="KTD provides Learning and Development days for FTE Associates only. Provide the number of days you will use during the quarter" />
+            <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Dev / L&amp;D Days</label>
+            <InfoTooltip content="KTD provides Learning and Development days for FTE Associates only. Provide the number of days you will use during the quarter" />
           </div>
           <div onKeyDown={allowNumericOnly}>
-            <MxInputTextBox
+            <Input
               value={String(activeIC.timeOff.devDays)}
               onChange={handleDevChange}
-              mask="none"
-              isClearable={false}
             />
           </div>
         </div>
 
-        <div>
+        <div className="flex flex-col gap-1.5">
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Holiday Days</label>
-            <Tooltip content="Provide the number of Holidays during the quarter." />
+            <InfoTooltip content="Provide the number of Holidays during the quarter." />
           </div>
           <div onKeyDown={allowNumericOnly}>
-            <MxInputTextBox
+            <Input
               value={String(activeIC.timeOff.holidayDays)}
               onChange={handleHolidayChange}
-              mask="none"
-              isClearable={false}
             />
           </div>
         </div>

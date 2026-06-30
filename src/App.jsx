@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KdsMessage } from 'react-mx-web-components';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CapacityProvider, useCapacity } from './context/CapacityContext';
 import GlobalNavBar from './components/GlobalNavBar';
 import TeamDashboard from './components/TeamDashboard';
@@ -29,9 +29,9 @@ function AppContent() {
       <GlobalNavBar onNavigateToTeamSupport={navigateToTeamSupport} />
       <div className="app-container">
         {saveError && (
-          <KdsMessage kind="warning" className="mb-16">
-            Auto-save disabled - data won't persist across sessions
-          </KdsMessage>
+          <Alert className="mb-4 border-warning/30 bg-warning/10 text-warning-foreground">
+            <AlertDescription>Auto-save disabled - data won't persist across sessions</AlertDescription>
+          </Alert>
         )}
 
         {currentView === 'team' ? (

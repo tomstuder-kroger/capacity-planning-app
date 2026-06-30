@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { MxInputTextBox } from 'react-mx-web-components';
-import { MxModal, MxModalBody } from 'react-mx-web-components';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useCapacity } from '../context/CapacityContext';
 
 const CreateMemberModal = ({ isOpen, onClose, onCreated }) => {
@@ -21,33 +23,36 @@ const CreateMemberModal = ({ isOpen, onClose, onCreated }) => {
     onCreated(newId);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && icName.trim()) handleCreate();
+  };
+
   return (
-    <MxModal
-      isOpened={isOpen}
-      headercontent="Add Team Member"
-      footerPrimaryButtonText="Create"
-      footerPrimaryButtonDisabled={!icName.trim()}
-      footerSecondaryButtonText="Cancel"
-      closeOnSecondaryButton
-      onApplyClick={handleCreate}
-      onSecondaryClick={onClose}
-      onModalClose={onClose}
-    >
-      <MxModalBody>
-        <MxInputTextBox
-          label="Name"
-          placeholder="e.g., Jane Smith"
-          value={icName}
-          onChange={(e) => setIcName(e.target.value)}
-          mask="none"
-          isClearable={false}
-          autoFocus
-        />
-        <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
-          You can set their role and other details after creating them.
-        </p>
-      </MxModalBody>
-    </MxModal>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Team Member</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-1.5 py-2">
+          <Label htmlFor="create-name">Name</Label>
+          <Input
+            id="create-name"
+            placeholder="e.g., Jane Smith"
+            value={icName}
+            onChange={(e) => setIcName(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
+          <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
+            You can set their role and other details after creating them.
+          </p>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleCreate} disabled={!icName.trim()}>Create</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

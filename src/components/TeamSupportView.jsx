@@ -1,5 +1,5 @@
 import React from 'react';
-import { KdsButton } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
 import { useCapacity } from '../context/CapacityContext';
 import { getTeamSupportNeeds } from '../utils/supportNeeds';
 
@@ -13,9 +13,9 @@ const TeamSupportView = ({ onBack }) => {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
       <div style={{ marginBottom: '24px' }}>
-        <KdsButton kind="secondary" onClick={onBack}>
+        <Button variant="outline" onClick={onBack}>
           ← Back to Capacity Planning
-        </KdsButton>
+        </Button>
       </div>
 
       <div className="kds-Card kds-Card--m" style={{ padding: '24px' }}>

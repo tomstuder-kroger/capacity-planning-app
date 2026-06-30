@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsTag, KdsMessage, KdsIconEye } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { EyeIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import FormattedOutput from './FormattedOutput';
 import SupportNeedsDashboard from './SupportNeedsDashboard';
@@ -34,11 +38,6 @@ const CapacityDashboard = () => {
     return '#2e7d32';
   };
 
-  const getStatusKind = () => {
-    if (status === 'over') return 'negative';
-    return 'positive';
-  };
-
   const getStatusLabel = () => {
     if (status === 'over') return 'Over Capacity';
     if (status === 'fully') return 'Fully Allocated';
@@ -59,15 +58,18 @@ const CapacityDashboard = () => {
 
   const totalProjects = activeIC.domains.reduce((sum, d) => sum + (d.projects ? d.projects.length : 0), 0);
 
+  const statusBadgeVariant = status === 'over' ? 'destructive' : 'default';
+  const statusBadgeClass = status !== 'over' ? 'bg-success/15 text-success border-success/20 hover:bg-success/20' : '';
+
   return (
     <>
       <div className="kds-Card kds-Card--m kds-card-section">
         <h2 className="kds-Heading kds-Heading--s section-heading">Capacity Status</h2>
 
         {showInfinityWarning ? (
-          <KdsMessage kind="warning" style={{ marginBottom: '1rem' }}>
-            Cannot calculate utilization - no available time
-          </KdsMessage>
+          <Alert className="mb-4 border-warning/30 bg-warning/10 text-warning-foreground">
+            <AlertDescription>Cannot calculate utilization - no available time</AlertDescription>
+          </Alert>
         ) : (
           <div className="utilization-display">
             <div className="utilization-percent" style={{ color: getStatusColor() }}>
@@ -104,15 +106,18 @@ const CapacityDashboard = () => {
         </div>
 
         <div className="tag-row">
-          <KdsTag kind={getStatusKind()}>{activeIC.domains.length} Domain(s)</KdsTag>
+          <Badge variant={statusBadgeVariant} className={statusBadgeClass}>
+            {activeIC.domains.length} Domain(s)
+          </Badge>
           {totalProjects > 0 && (
-            <KdsTag kind="default">{totalProjects} Project(s)</KdsTag>
+            <Badge variant="secondary">{totalProjects} Project(s)</Badge>
           )}
         </div>
 
-        <KdsButton kind="primary" style={{ width: '100%' }} onClick={() => setSummaryOpen(true)}>
-          <KdsIconEye /> View Summary
-        </KdsButton>
+        <Button className="w-full" style={{ marginTop: '1rem' }} onClick={() => setSummaryOpen(true)}>
+          <HugeiconsIcon icon={EyeIcon} strokeWidth={2} data-icon="inline-start" />
+          View Summary
+        </Button>
       </div>
 
       <SupportNeedsDashboard />

@@ -1,5 +1,9 @@
 import React from 'react';
-import { KdsButton, KdsIconTrash, MxInputTextBox } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Delete02Icon } from '@hugeicons/core-free-icons';
 
 const DateField = ({ label, value, onChange }) => (
   <div className="project-field">
@@ -14,30 +18,28 @@ const DateField = ({ label, value, onChange }) => (
 );
 
 const PTORow = ({ pto, onUpdate, onRemove }) => {
-
   return (
     <div className="project-item">
       <div className="project-item-header">
         <span className="project-item-label">PTO Instance</span>
-        <KdsButton
-          palette="negative"
-          kind="subtle"
-          variant="minimal"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={() => onRemove(pto.id)}
           aria-label="Remove PTO instance"
         >
-          <KdsIconTrash size="s" />
-        </KdsButton>
+          <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        </Button>
       </div>
 
-      <div style={{ marginBottom: '0.75rem' }}>
-        <MxInputTextBox
-          label="Type (e.g., PTO, Summer vacation, Conference)"
+      <div style={{ marginBottom: '0.75rem' }} className="flex flex-col gap-1.5">
+        <Label htmlFor={`pto-type-${pto.id}`}>Type (e.g., PTO, Summer vacation, Conference)</Label>
+        <Input
+          id={`pto-type-${pto.id}`}
           placeholder="PTO type"
           value={pto.type || ''}
           onChange={(e) => onUpdate(pto.id, { type: e.target.value })}
-          mask="none"
-          isClearable={false}
         />
       </div>
 

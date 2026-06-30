@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsIconCardView, KdsIconGanttChart, MxInputTextBox } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { GridViewIcon, ChartGanttIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 import EmptyState from './EmptyState';
@@ -29,6 +32,7 @@ const TeamDashboard = ({ onSelectMember }) => {
     setDragOverId(null);
   };
   const handleDragEnd = () => { setDraggedId(null); setDragOverId(null); };
+
   const { totalAvailable, totalPlanned } = ics.reduce((acc, ic) => {
     const result = calculateResults(ic);
     const avail = result?.totalWeeksAvailable;
@@ -47,9 +51,7 @@ const TeamDashboard = ({ onSelectMember }) => {
     : '#1a7f3c';
 
   const handleNameClick = () => setEditingTeamName(true);
-
   const handleNameBlur = () => setEditingTeamName(false);
-
   const handleNameKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
   };
@@ -60,34 +62,31 @@ const TeamDashboard = ({ onSelectMember }) => {
         <h2 className="kds-Heading kds-Heading--l" style={{ margin: 0 }}>Team Overview</h2>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           {ics.length > 0 && view === 'cards' && (
-            <KdsButton key={isEditMode ? 'done' : 'edit'} kind="secondary" onClick={() => setIsEditMode(!isEditMode)}>
+            <Button key={isEditMode ? 'done' : 'edit'} variant="outline" onClick={() => setIsEditMode(!isEditMode)}>
               {isEditMode ? 'Done' : 'Edit'}
-            </KdsButton>
+            </Button>
           )}
-          <KdsButton kind="secondary" onClick={() => setIsImportModalOpen(true)}>
+          <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
             Import Team Member
-          </KdsButton>
-          <KdsButton kind="primary" onClick={() => setIsCreateModalOpen(true)}>
+          </Button>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
             + Add Team Member
-          </KdsButton>
+          </Button>
         </div>
       </div>
 
-      {/* Team summary card */}
       <div className="kds-Card kds-Card--m kds-card-section" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem', background: 'rgb(239, 247, 253)', border: '1px solid rgb(15, 82, 162)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {editingTeamName || isEditMode ? (
-              <MxInputTextBox
-                label="Team Name"
+              <Input
                 value={teamName}
                 onChange={(e) => updateTeamName(e.target.value)}
                 onBlur={handleNameBlur}
                 onKeyDown={handleNameKeyDown}
                 placeholder="Enter team name"
-                mask="none"
-                isClearable={false}
                 style={{ width: '320px' }}
+                autoFocus={editingTeamName}
               />
             ) : (
               <h2
@@ -141,14 +140,14 @@ const TeamDashboard = ({ onSelectMember }) => {
                 onClick={() => { setView('cards'); setIsEditMode(false); }}
                 title="Card view"
               >
-                <KdsIconCardView size="s" />
+                <HugeiconsIcon icon={GridViewIcon} strokeWidth={2} size={16} />
               </button>
               <button
                 className={`view-toggle-btn${view === 'gantt' ? ' view-toggle-btn--active' : ''}`}
                 onClick={() => { setView('gantt'); setIsEditMode(false); }}
                 title="Gantt view"
               >
-                <KdsIconGanttChart size="s" />
+                <HugeiconsIcon icon={ChartGanttIcon} strokeWidth={2} size={16} />
               </button>
             </div>
             {view === 'gantt' && (

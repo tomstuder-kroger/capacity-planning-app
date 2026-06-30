@@ -1,5 +1,5 @@
 import React from 'react';
-import { KdsButton } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
 import DomainForm from './DomainForm';
@@ -38,9 +38,9 @@ const DomainList = () => {
         ))
       )}
 
-      <KdsButton kind="secondary" style={{ width: '100%' }} onClick={handleAddDomain}>
+      <Button variant="outline" style={{ width: '100%' }} onClick={handleAddDomain}>
         + Add Domain
-      </KdsButton>
+      </Button>
     </div>
   );
 };

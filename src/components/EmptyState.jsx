@@ -1,5 +1,6 @@
 import React from 'react';
-import { KdsAccentIconAddToList } from 'react-mx-web-components';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { AddToListIcon } from '@hugeicons/core-free-icons';
 
 const EmptyState = ({
   title = 'No IC plans yet',
@@ -13,7 +14,7 @@ const EmptyState = ({
       gap: '16px',
       padding: '48px 24px',
     }}>
-      <KdsAccentIconAddToList size="l" />
+      <HugeiconsIcon icon={AddToListIcon} strokeWidth={2} size={48} />
       <p style={{
         fontFamily: 'Nunito, sans-serif',
         fontSize: '20px',
