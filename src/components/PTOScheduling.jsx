@@ -14,15 +14,8 @@ const PTOScheduling = () => {
   const ptoInstances = activeIC.ptoInstances || [];
 
   const handleAddPTO = () => {
-    const newPTO = {
-      id: uuidv4(),
-      type: '',
-      startDate: null,
-      endDate: null
-    };
-    updateIC(activeIC.id, {
-      ptoInstances: [...ptoInstances, newPTO]
-    });
+    const newPTO = { id: uuidv4(), type: '', startDate: null, endDate: null };
+    updateIC(activeIC.id, { ptoInstances: [...ptoInstances, newPTO] });
   };
 
   const handlePTOUpdate = (ptoId, updates) => {
@@ -40,11 +33,11 @@ const PTOScheduling = () => {
   const totalPTOWeeks = calculateTotalPTO(ptoInstances);
 
   return (
-    <div style={{ marginTop: '1.5rem' }}>
-      <h2 className="kds-Heading kds-Heading--s section-heading">Scheduled PTO</h2>
+    <div className="mt-6">
+      <h2 className="mb-4 text-base font-bold">Scheduled PTO</h2>
 
-      <div className="kds-Card kds-Card--m kds-card-section">
-        <div className="project-list">
+      <div className="mb-4 p-6 bg-card rounded-lg border">
+        <div className="flex flex-col gap-0">
           {ptoInstances.length === 0 ? (
             <EmptyState
               title="No PTO scheduled"
@@ -62,14 +55,14 @@ const PTOScheduling = () => {
           )}
         </div>
 
-        <div className="summary-box">
-          <div className="domain-header">
+        <div className="mt-4 p-3 bg-muted rounded-md">
+          <div className="flex justify-between items-center">
             <span>PTO total: {formatWeeksAndDays(totalPTOWeeks)}</span>
           </div>
         </div>
       </div>
 
-      <Button variant="outline" style={{ width: '100%', marginTop: '0.5rem' }} onClick={handleAddPTO}>
+      <Button variant="outline" className="w-full mt-2" onClick={handleAddPTO}>
         + Add PTO Instance
       </Button>
     </div>

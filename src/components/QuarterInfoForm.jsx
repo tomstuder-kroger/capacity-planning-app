@@ -7,7 +7,6 @@ const currentPeriod = getCurrentFiscalPeriod();
 const QuarterInfoForm = () => {
   const { activeIC, updateIC } = useCapacity();
 
-  // Must be before any early return — rules of hooks
   useEffect(() => {
     if (!activeIC || !currentPeriod) return;
     const quarter = `${currentPeriod.quarter} ${currentPeriod.fiscalYear}`;
@@ -22,38 +21,38 @@ const QuarterInfoForm = () => {
   if (!activeIC) return null;
 
   return (
-    <div className="kds-Card kds-Card--m kds-card-section" style={{ background: 'rgb(239, 247, 253)', border: '1px solid rgb(15, 82, 162)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div className="mb-4 p-6 rounded-lg border" style={{ background: 'rgb(239, 247, 253)', borderColor: 'rgb(15, 82, 162)' }}>
+      <div className="flex items-center justify-between">
         <div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif' }}>
+          <div className="text-3xl font-bold font-sans leading-none">
             {activeIC.icName || 'Unnamed'}
           </div>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '2px' }}>
+          <div className="text-sm text-muted-foreground mt-0.5">
             {activeIC.icRole || ''}
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.5rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div className="text-right">
+          <div className="text-xs text-muted-foreground mb-2 font-semibold uppercase tracking-wider">
             Current Quarter
           </div>
-          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'flex-end' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+          <div className="flex gap-6 justify-end">
+            <div className="text-center">
+              <div className="text-2xl font-bold font-sans leading-none">
                 {currentPeriod ? currentPeriod.quarter : '—'}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Quarter</div>
+              <div className="text-xs text-muted-foreground mt-1">Quarter</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+            <div className="text-center">
+              <div className="text-2xl font-bold font-sans leading-none">
                 {currentPeriod ? `FY${currentPeriod.fiscalYear}` : '—'}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Fiscal Year</div>
+              <div className="text-xs text-muted-foreground mt-1">Fiscal Year</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+            <div className="text-center">
+              <div className="text-2xl font-bold font-sans leading-none">
                 {currentPeriod ? `${currentPeriod.weeksInQuarter}w` : '—'}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>Weeks</div>
+              <div className="text-xs text-muted-foreground mt-1">Weeks</div>
             </div>
           </div>
         </div>

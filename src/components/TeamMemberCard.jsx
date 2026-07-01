@@ -53,7 +53,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
   return (
     <>
       <div
-        className="kds-Card kds-Card--m kds-card-section team-member-card"
+        className="mb-4 p-6 bg-card rounded-lg border cursor-pointer transition-shadow hover:shadow-md"
         onClick={!isEditMode ? onSelect : undefined}
         draggable={isEditMode}
         onDragStart={onDragStart}
@@ -64,16 +64,16 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
           cursor: isEditMode ? 'grab' : 'pointer',
           opacity: isDragging ? 0.4 : 1,
           outline: isDragOver ? '2px dashed #0F52A2' : 'none',
-          transition: 'opacity 0.2s',
+          transition: 'opacity 0.2s, box-shadow 0.2s',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="flex justify-between items-center">
           {isEditMode && (
-            <div style={{ color: '#9ca3af', fontSize: '1.1rem', marginRight: '0.5rem', flexShrink: 0, userSelect: 'none', cursor: 'grab' }}>⠿</div>
+            <div className="text-muted-foreground text-lg mr-2 shrink-0 select-none cursor-grab">⠿</div>
           )}
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="flex-1 min-w-0">
             {isEditMode ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
                 <Input
                   value={ic.icName}
                   onChange={(e) => updateIC(ic.id, { icName: e.target.value })}
@@ -97,8 +97,8 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
               </div>
             ) : (
               <>
-                <div className="team-card-name">{ic.icName || 'Unnamed'}</div>
-                <div className="team-card-role">{ic.icRole || 'No role set'}</div>
+                <div className="font-sans text-base font-semibold text-foreground mb-1">{ic.icName || 'Unnamed'}</div>
+                <div className="text-sm text-muted-foreground">{ic.icRole || 'No role set'}</div>
               </>
             )}
           </div>
@@ -107,31 +107,27 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
             <Button
               variant="ghost"
               size="icon"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2 shrink-0"
               onClick={handleDeleteClick}
               aria-label="Remove team member"
-              style={{ marginLeft: '0.5rem', flexShrink: 0 }}
             >
               <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
             </Button>
           ) : hasUtilization && (
-            <div style={{ textAlign: 'center', marginLeft: '1rem', flexShrink: 0 }}>
-              <div style={{
-                fontSize: '2rem',
-                fontWeight: 700,
-                fontFamily: 'Nunito, sans-serif',
-                lineHeight: 1,
-                color: utilization === 0 ? '#9ca3af' : STATUS_COLORS[status] || '#000',
-              }}>
+            <div className="text-center ml-4 shrink-0">
+              <div
+                className="text-3xl font-bold font-sans leading-none"
+                style={{ color: utilization === 0 ? '#9ca3af' : STATUS_COLORS[status] || '#000' }}
+              >
                 {utilization.toFixed(0)}%
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>Capacity</div>
+              <div className="text-[0.7rem] text-muted-foreground mt-1">Capacity</div>
             </div>
           )}
         </div>
 
         {!isEditMode && ic.domains.length > 0 && (
-          <div className="tag-row" style={{ marginTop: '0.75rem' }}>
+          <div className="flex flex-wrap gap-2 mt-3">
             <Badge
               variant={status === 'over' ? 'destructive' : 'default'}
               className={statusBadgeClass}

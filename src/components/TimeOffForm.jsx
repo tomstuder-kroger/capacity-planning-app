@@ -13,19 +13,7 @@ const InfoTooltip = ({ content }) => (
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger asChild>
-        <button
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginLeft: '0.35rem',
-            background: 'none',
-            border: 'none',
-            padding: '0',
-            color: '#6b7280',
-          }}
-        >
+        <button type="button" className="inline-flex items-center justify-center ml-1.5 p-0 bg-transparent border-none cursor-pointer text-muted-foreground">
           <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} size={16} />
         </button>
       </TooltipTrigger>
@@ -56,48 +44,41 @@ const TimeOffForm = () => {
 
   const handleDevChange = (e) => {
     const value = e.target.value === '' ? 0 : Number(e.target.value);
-    updateIC(activeIC.id, {
-      timeOff: { ...activeIC.timeOff, devDays: value }
-    });
+    updateIC(activeIC.id, { timeOff: { ...activeIC.timeOff, devDays: value } });
   };
 
   const handleHolidayChange = (e) => {
     const value = e.target.value === '' ? 0 : Number(e.target.value);
-    updateIC(activeIC.id, {
-      timeOff: { ...activeIC.timeOff, holidayDays: value }
-    });
+    updateIC(activeIC.id, { timeOff: { ...activeIC.timeOff, holidayDays: value } });
   };
 
   const calculated = calculateResults(activeIC);
   const totalTimeOff = calculated ? formatWeeksAndDays(calculated.totalTimeOffWeeks) : '0 days';
 
   return (
-    <div className="kds-Card kds-Card--m kds-card-section">
-      <h2 className="kds-Heading kds-Heading--s section-heading">
-        Quarterly Planning
-      </h2>
-      <div className="form-grid-timeoff">
+    <div className="mb-4 p-6 bg-card rounded-lg border">
+      <h2 className="mb-4 text-base font-bold">Quarterly Planning</h2>
+
+      <div className="grid grid-cols-[2fr_1fr_1fr] gap-4 max-[768px]:grid-cols-1">
+        {/* OKR Time */}
         <div>
-          <div className="okr-row">
-            <div className="okr-input">
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>OKR Time</label>
+          <div className="flex items-end gap-4">
+            <div className="flex-1">
+              <div className="flex items-center mb-1.5">
+                <label className="text-xs font-semibold">OKR Time</label>
                 <InfoTooltip content="Provide the time spent during OKR Planning with your team." />
               </div>
               <div onKeyDown={allowNumericOnly}>
-                <Input
-                  value={String(activeIC.timeOff.okrTime.value)}
-                  onChange={handleOKRValueChange}
-                />
+                <Input value={String(activeIC.timeOff.okrTime.value)} onChange={handleOKRValueChange} />
               </div>
             </div>
-            <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+            <fieldset className="border-none p-0 m-0 pb-0.5">
               <RadioGroup
                 value={activeIC.timeOff.okrTime.unit}
                 onValueChange={(unit) => updateIC(activeIC.id, {
                   timeOff: { ...activeIC.timeOff, okrTime: { ...activeIC.timeOff.okrTime, unit } }
                 })}
-                className="okr-units"
+                className="flex gap-4 items-center"
               >
                 <div className="flex items-center gap-2">
                   <RadioGroupItem value="days" id="okr-days" />
@@ -112,36 +93,32 @@ const TimeOffForm = () => {
           </div>
         </div>
 
+        {/* Dev / L&D Days */}
         <div className="flex flex-col gap-1.5">
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Dev / L&amp;D Days</label>
+          <div className="flex items-center">
+            <label className="text-xs font-semibold">Dev / L&amp;D Days</label>
             <InfoTooltip content="KTD provides Learning and Development days for FTE Associates only. Provide the number of days you will use during the quarter" />
           </div>
           <div onKeyDown={allowNumericOnly}>
-            <Input
-              value={String(activeIC.timeOff.devDays)}
-              onChange={handleDevChange}
-            />
+            <Input value={String(activeIC.timeOff.devDays)} onChange={handleDevChange} />
           </div>
         </div>
 
+        {/* Holiday Days */}
         <div className="flex flex-col gap-1.5">
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Holiday Days</label>
+          <div className="flex items-center">
+            <label className="text-xs font-semibold">Holiday Days</label>
             <InfoTooltip content="Provide the number of Holidays during the quarter." />
           </div>
           <div onKeyDown={allowNumericOnly}>
-            <Input
-              value={String(activeIC.timeOff.holidayDays)}
-              onChange={handleHolidayChange}
-            />
+            <Input value={String(activeIC.timeOff.holidayDays)} onChange={handleHolidayChange} />
           </div>
         </div>
       </div>
 
       <PTOScheduling />
 
-      <div className="summary-box">
+      <div className="mt-4 p-3 bg-muted rounded-md">
         <span>Total time off: <strong>{totalTimeOff}</strong></span>
       </div>
     </div>

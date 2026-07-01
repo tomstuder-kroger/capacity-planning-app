@@ -1,16 +1,14 @@
 import * as React from "react"
-import { cva } from "class-variance-authority";
-
+import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+  "group/alert relative grid w-full gap-0.5 rounded-lg border px-2 py-1.5 text-left text-xs/relaxed has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-1.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
-        destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        default: "bg-card text-card-foreground",
+        destructive: "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
       },
     },
     defaultVariants: {
@@ -19,29 +17,35 @@ const alertVariants = cva(
   }
 )
 
-const Alert = React.forwardRef(({ className, variant, ...props }, ref) => (
-  <div
-    ref={ref}
-    role="alert"
-    className={cn(alertVariants({ variant }), className)}
-    {...props} />
-))
-Alert.displayName = "Alert"
+function Alert({ className, variant, ...props }) {
+  return (
+    <div
+      data-slot="alert"
+      role="alert"
+      className={cn(alertVariants({ variant }), className)}
+      {...props}
+    />
+  )
+}
 
-const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
-    {...props} />
-))
-AlertTitle.displayName = "AlertTitle"
+function AlertTitle({ className, ...props }) {
+  return (
+    <div
+      data-slot="alert-title"
+      className={cn("font-medium group-has-[>svg]/alert:col-start-2", className)}
+      {...props}
+    />
+  )
+}
 
-const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
-    {...props} />
-))
-AlertDescription.displayName = "AlertDescription"
+function AlertDescription({ className, ...props }) {
+  return (
+    <div
+      data-slot="alert-description"
+      className={cn("text-xs/relaxed text-muted-foreground", className)}
+      {...props}
+    />
+  )
+}
 
 export { Alert, AlertTitle, AlertDescription }

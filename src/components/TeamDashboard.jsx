@@ -44,7 +44,6 @@ const TeamDashboard = ({ onSelectMember }) => {
   }, { totalAvailable: 0, totalPlanned: 0 });
 
   const totalUtilization = totalAvailable > 0 ? (totalPlanned / totalAvailable) * 100 : null;
-
   const utilizationColor = totalUtilization === null ? '#6b7280'
     : totalUtilization > 100 ? '#c0392b'
     : totalUtilization >= 90 ? '#b45309'
@@ -58,9 +57,10 @@ const TeamDashboard = ({ onSelectMember }) => {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h2 className="kds-Heading kds-Heading--l" style={{ margin: 0 }}>Team Overview</h2>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold">Team Overview</h2>
+        <div className="flex gap-3 items-center">
           {ics.length > 0 && view === 'cards' && (
             <Button key={isEditMode ? 'done' : 'edit'} variant="outline" onClick={() => setIsEditMode(!isEditMode)}>
               {isEditMode ? 'Done' : 'Edit'}
@@ -75,9 +75,10 @@ const TeamDashboard = ({ onSelectMember }) => {
         </div>
       </div>
 
-      <div className="kds-Card kds-Card--m kds-card-section" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem', background: 'rgb(239, 247, 253)', border: '1px solid rgb(15, 82, 162)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      {/* Team summary card */}
+      <div className="mb-6 p-5 rounded-lg" style={{ background: 'rgb(239, 247, 253)', border: '1px solid rgb(15, 82, 162)' }}>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-2">
             {editingTeamName || isEditMode ? (
               <Input
                 value={teamName}
@@ -85,77 +86,81 @@ const TeamDashboard = ({ onSelectMember }) => {
                 onBlur={handleNameBlur}
                 onKeyDown={handleNameKeyDown}
                 placeholder="Enter team name"
-                style={{ width: '320px' }}
+                className="w-80"
                 autoFocus={editingTeamName}
               />
             ) : (
               <h2
-                className="kds-Heading kds-Heading--l"
+                className="text-xl font-bold cursor-text"
                 onClick={handleNameClick}
-                style={{ margin: 0, cursor: 'text' }}
                 title="Click to edit team name"
               >
                 {teamName || 'My Team'}
               </h2>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>{ics.length}</div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>Members</div>
+
+          <div className="flex gap-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold font-sans leading-none">{ics.length}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Members</div>
             </div>
-            <div style={{ width: '1px', background: '#e5e7eb' }} />
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+            <div className="w-px bg-border" />
+            <div className="text-center">
+              <div className="text-2xl font-bold font-sans leading-none">
                 {ics.length > 0 ? `${totalAvailable.toFixed(1)}w` : '—'}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>Total Available</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Total Available</div>
             </div>
-            <div style={{ width: '1px', background: '#e5e7eb' }} />
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
+            <div className="w-px bg-border" />
+            <div className="text-center">
+              <div className="text-2xl font-bold font-sans leading-none">
                 {currentPeriod ? `${currentPeriod.quarter} FY${currentPeriod.fiscalYear}` : '—'}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+              <div className="text-xs text-muted-foreground mt-0.5">
                 {currentPeriod ? `${currentPeriod.weeksInQuarter} weeks` : 'Quarter'}
               </div>
             </div>
-            <div style={{ width: '1px', background: '#e5e7eb' }} />
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1, color: utilizationColor }}>
+            <div className="w-px bg-border" />
+            <div className="text-center">
+              <div className="text-2xl font-bold font-sans leading-none" style={{ color: utilizationColor }}>
                 {totalUtilization !== null ? `${totalUtilization.toFixed(0)}%` : '—'}
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>Team Capacity</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Team Capacity</div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* View controls */}
       {ics.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="view-toggle">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            {/* View toggle */}
+            <div className="inline-flex border border-border rounded-md overflow-hidden bg-card">
               <button
-                className={`view-toggle-btn${view === 'cards' ? ' view-toggle-btn--active' : ''}`}
+                className={`px-2 py-1.5 flex items-center justify-center border-r border-border cursor-pointer transition-colors ${view === 'cards' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
                 onClick={() => { setView('cards'); setIsEditMode(false); }}
                 title="Card view"
               >
                 <HugeiconsIcon icon={GridViewIcon} strokeWidth={2} size={16} />
               </button>
               <button
-                className={`view-toggle-btn${view === 'gantt' ? ' view-toggle-btn--active' : ''}`}
+                className={`px-2 py-1.5 flex items-center justify-center cursor-pointer transition-colors ${view === 'gantt' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
                 onClick={() => { setView('gantt'); setIsEditMode(false); }}
                 title="Gantt view"
               >
                 <HugeiconsIcon icon={ChartGanttIcon} strokeWidth={2} size={16} />
               </button>
             </div>
+
+            {/* Quarter filter for Gantt */}
             {view === 'gantt' && (
-              <div className="view-toggle">
-                {[null, 'Q1', 'Q2', 'Q3', 'Q4'].map((q) => (
+              <div className="inline-flex border border-border rounded-md overflow-hidden bg-card">
+                {[null, 'Q1', 'Q2', 'Q3', 'Q4'].map((q, i) => (
                   <button
                     key={q ?? 'all'}
-                    className={`view-toggle-btn${ganttQuarter === q ? ' view-toggle-btn--active' : ''}`}
+                    className={`px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${i > 0 ? 'border-l border-border' : ''} ${ganttQuarter === q ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
                     onClick={() => setGanttQuarter(q)}
                   >
                     {q ?? 'All'}
@@ -167,6 +172,7 @@ const TeamDashboard = ({ onSelectMember }) => {
         </div>
       )}
 
+      {/* Content */}
       {ics.length === 0 ? (
         <EmptyState
           title="No team members yet"
@@ -175,7 +181,7 @@ const TeamDashboard = ({ onSelectMember }) => {
       ) : view === 'gantt' ? (
         <GanttChart quarterFilter={ganttQuarter} />
       ) : (
-        <div className="team-grid">
+        <div className="grid grid-cols-3 gap-4 mt-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
           {ics.map((ic) => (
             <TeamMemberCard
               key={ic.id}
@@ -198,7 +204,6 @@ const TeamDashboard = ({ onSelectMember }) => {
         onClose={() => setIsCreateModalOpen(false)}
         onCreated={onSelectMember}
       />
-
       <ImportMemberModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}

@@ -10,9 +10,7 @@ const CreateMemberModal = ({ isOpen, onClose, onCreated }) => {
   const [icName, setIcName] = useState('');
 
   useEffect(() => {
-    if (isOpen) {
-      setIcName('');
-    }
+    if (isOpen) setIcName('');
   }, [isOpen]);
 
   const handleCreate = () => {
@@ -43,7 +41,7 @@ const CreateMemberModal = ({ isOpen, onClose, onCreated }) => {
             onKeyDown={handleKeyDown}
             autoFocus
           />
-          <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
+          <p className="mt-2 text-sm text-muted-foreground">
             You can set their role and other details after creating them.
           </p>
         </div>

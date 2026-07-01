@@ -16,18 +16,13 @@ function AppContent() {
     setCurrentView('planning');
   };
 
-  const navigateToTeam = () => {
-    setCurrentView('team');
-  };
-
-  const navigateToTeamSupport = () => {
-    setCurrentView('teamSupport');
-  };
+  const navigateToTeam = () => setCurrentView('team');
+  const navigateToTeamSupport = () => setCurrentView('teamSupport');
 
   return (
-    <div className="app-shell">
+    <div className="min-h-screen bg-[#f4f4f4]">
       <GlobalNavBar onNavigateToTeamSupport={navigateToTeamSupport} />
-      <div className="app-container">
+      <div className="max-w-[1400px] mx-auto px-6 py-8">
         {saveError && (
           <Alert className="mb-4 border-warning/30 bg-warning/10 text-warning-foreground">
             <AlertDescription>Auto-save disabled - data won't persist across sessions</AlertDescription>

@@ -2,10 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
-const SUPPORT_OPTIONS = [
-  'User Research',
-  'Service Designer'
-];
+const SUPPORT_OPTIONS = ['User Research', 'Service Designer'];
 
 const SupportNeedsSelector = ({ value = [], onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,13 +14,8 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
         setIsOpen(false);
       }
     };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
   const handleToggle = (option) => {
@@ -38,25 +30,23 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
     : `${value.length} item${value.length !== 1 ? 's' : ''} selected`;
 
   return (
-    <div className="project-field" ref={dropdownRef}>
-      <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>
-        Support Needed
-      </label>
-      <div className="support-dropdown">
+    <div className="flex-1 min-w-[130px] relative" ref={dropdownRef}>
+      <label className="text-xs font-semibold block mb-1">Support Needed</label>
+      <div className="relative">
         <button
           type="button"
-          className="support-dropdown-button"
+          className="h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-ring/30"
           onClick={() => setIsOpen(!isOpen)}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
         >
           <span>{displayText}</span>
-          <span className="support-dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
+          <span className="ml-1 text-muted-foreground">{isOpen ? '▲' : '▼'}</span>
         </button>
         {isOpen && (
-          <div className="support-dropdown-menu">
+          <div className="absolute z-50 top-full left-0 mt-1 w-full bg-popover border border-border rounded-md shadow-md p-1">
             {SUPPORT_OPTIONS.map(option => (
-              <div key={option} className="support-dropdown-option flex items-center gap-2">
+              <div key={option} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer">
                 <Checkbox
                   id={`support-${option}`}
                   checked={value.includes(option)}
@@ -71,9 +61,7 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
         )}
       </div>
       {value.length > 0 && (
-        <div className="support-needs-selected">
-          Selected: {value.join(', ')}
-        </div>
+        <div className="mt-1 text-xs text-muted-foreground">Selected: {value.join(', ')}</div>
       )}
     </div>
   );

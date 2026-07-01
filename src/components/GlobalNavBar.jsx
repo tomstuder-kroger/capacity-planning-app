@@ -4,52 +4,18 @@ const krogerLogo = '/kroger-logo.svg';
 
 const GlobalNavBar = ({ onNavigateToTeamSupport }) => {
   return (
-    <header style={{
-      backgroundColor: '#0F52A2',
-      height: '56px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0 24px',
-      width: '100%',
-      boxSizing: 'border-box',
-    }}>
-      {/* Left side */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <img
-          src={krogerLogo}
-          alt="Kroger"
-          style={{ height: '33px', width: '60px', objectFit: 'contain' }}
-        />
-        <span style={{
-          fontFamily: 'Nunito, sans-serif',
-          fontSize: '20px',
-          fontWeight: 400,
-          lineHeight: '24px',
-          color: '#ffffff',
-          whiteSpace: 'nowrap',
-        }}>
+    <header className="flex items-center justify-between h-14 px-6 w-full bg-primary shrink-0">
+      <div className="flex items-center gap-4">
+        <img src={krogerLogo} alt="Kroger" className="h-[33px] w-[60px] object-contain" />
+        <span className="font-sans text-xl font-normal leading-6 text-white whitespace-nowrap">
           PD Capacity Planner
         </span>
       </div>
 
-      {/* Right side */}
       {onNavigateToTeamSupport && (
         <button
           onClick={onNavigateToTeamSupport}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: '#ffffff',
-            fontSize: '16px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            padding: '8px 16px',
-            borderRadius: '4px',
-            transition: 'background-color 0.2s',
-          }}
-          onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-          onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+          className="bg-transparent border-none text-white text-base font-semibold cursor-pointer px-4 py-2 rounded hover:bg-white/10 transition-colors"
         >
           Shared Services Support
         </button>

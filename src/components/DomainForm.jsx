@@ -19,13 +19,13 @@ const WEEK_OPTIONS = [
 ];
 
 const DateField = ({ label, value, onChange }) => (
-  <div className="project-field">
-    <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>{label}</label>
+  <div className="flex-1 min-w-[130px]">
+    <label className="text-xs font-semibold block mb-1">{label}</label>
     <input
       type="date"
       value={value || ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="project-date-input"
+      className="h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
     />
   </div>
 );
@@ -43,9 +43,9 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
   };
 
   return (
-    <div className="project-item">
-      <div className="project-item-header">
-        <span className="project-item-label">Project</span>
+    <div className="bg-muted/30 border border-border rounded-md p-3 mb-2">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Project</span>
         <Button
           variant="ghost"
           size="icon"
@@ -57,7 +57,7 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-1.5" style={{ marginBottom: '0.75rem' }}>
+      <div className="flex flex-col gap-1.5 mb-3">
         <Label>Title</Label>
         <Input
           placeholder="Project title"
@@ -66,18 +66,18 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
         />
       </div>
 
-      <div className="project-item-fields">
+      <div className="flex gap-3 items-start flex-wrap">
         <DateField
           label="Start Date"
           value={project.startDate}
           onChange={(iso) => onUpdate(project.id, { startDate: iso })}
         />
-        <div className="project-field">
-          <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Duration</label>
+        <div className="flex-1 min-w-[130px]">
+          <label className="text-xs font-semibold block mb-1">Duration</label>
           <select
             value={weeksValue}
             onChange={(e) => handleWeeksChange(e.target.value)}
-            className="project-weeks-select"
+            className="h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
           >
             {WEEK_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -98,7 +98,7 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
       </div>
 
       {project.weeksMode === 'custom' && (
-        <div className="project-custom-weeks">
+        <div className="mt-2 text-xs text-muted-foreground">
           {calculatedWeeks > 0
             ? `${calculatedWeeks} week${calculatedWeeks !== 1 ? 's' : ''}`
             : 'Select start and end dates to calculate weeks'}
@@ -156,9 +156,9 @@ const DomainForm = ({ domain }) => {
 
   return (
     <>
-      <div className="kds-Card kds-Card--m kds-card-section">
-        <div className="domain-header">
-          <h2 className="kds-Heading kds-Heading--s" style={{ margin: 0 }}>Domain</h2>
+      <div className="mb-4 p-6 bg-card rounded-lg border">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-base font-bold">Domain</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -170,7 +170,7 @@ const DomainForm = ({ domain }) => {
           </Button>
         </div>
 
-        <div className="flex flex-col gap-1.5" style={{ marginBottom: '1rem' }}>
+        <div className="flex flex-col gap-1.5 mb-4">
           <Label>Domain Name</Label>
           <Input
             placeholder="e.g., TEST"
@@ -179,7 +179,7 @@ const DomainForm = ({ domain }) => {
           />
         </div>
 
-        <div className="project-list">
+        <div className="flex flex-col gap-0">
           {(domain.projects || []).map(project => (
             <ProjectRow
               key={project.id}
@@ -190,16 +190,11 @@ const DomainForm = ({ domain }) => {
           ))}
         </div>
 
-        <Button
-          variant="outline"
-          className="w-full"
-          style={{ marginTop: '0.5rem' }}
-          onClick={handleAddProject}
-        >
+        <Button variant="outline" className="w-full mt-2" onClick={handleAddProject}>
           + Add Project
         </Button>
 
-        <div className="summary-box">
+        <div className="mt-4 p-3 bg-muted rounded-md">
           <span>Domain total: <strong>{totalWeeks.toFixed(1)} weeks</strong></span>
         </div>
       </div>

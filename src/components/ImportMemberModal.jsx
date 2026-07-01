@@ -10,26 +10,16 @@ const ImportMemberModal = ({ isOpen, onClose, onImported }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isOpen) {
-      setJsonInput('');
-      setError('');
-    }
+    if (isOpen) { setJsonInput(''); setError(''); }
   }, [isOpen]);
 
   const handleImport = () => {
     try {
       const data = JSON.parse(jsonInput.trim());
-
-      if (!data.icName) {
-        setError('Invalid data: missing icName field');
-        return;
-      }
-
+      if (!data.icName) { setError('Invalid data: missing icName field'); return; }
       importIC(data);
       onClose();
-      if (onImported) {
-        onImported();
-      }
+      if (onImported) onImported();
     } catch (err) {
       setError(`Invalid JSON: ${err.message}`);
     }
@@ -47,29 +37,17 @@ const ImportMemberModal = ({ isOpen, onClose, onImported }) => {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <label htmlFor="json-input" className="kds-Label" style={{ display: 'block', marginBottom: '0.5rem' }}>
+          <label htmlFor="json-input" className="text-xs font-semibold">
             Paste Team Member JSON
           </label>
           <textarea
             id="json-input"
             value={jsonInput}
-            onChange={(e) => {
-              setJsonInput(e.target.value);
-              setError('');
-            }}
+            onChange={(e) => { setJsonInput(e.target.value); setError(''); }}
             placeholder='{"icName": "Jane Smith", "icRole": "Product Designer", ...}'
-            style={{
-              width: '100%',
-              minHeight: '200px',
-              padding: '0.75rem',
-              border: '1px solid #d1d5db',
-              borderRadius: '4px',
-              fontFamily: 'Monaco, Consolas, monospace',
-              fontSize: '0.875rem',
-              resize: 'vertical'
-            }}
+            className="w-full min-h-[200px] p-3 border border-input rounded-md font-mono text-sm resize-y bg-input/10 focus:outline-none focus:ring-2 focus:ring-ring/30"
           />
-          <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+          <p className="text-sm text-muted-foreground">
             Paste the complete JSON object for a team member. The data will be imported as a new team member.
           </p>
         </div>

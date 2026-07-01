@@ -11,18 +11,18 @@ const PlanningView = ({ onBack }) => {
 
   return (
     <div>
-      <div className="planning-header">
+      <div className="flex items-center gap-4 mb-6">
         <Button variant="outline" onClick={onBack}>← Back to Team</Button>
       </div>
 
       <QuarterInfoForm />
 
-      <div className="capacity-layout-grid">
-        <div className="forms-column">
+      <div className="grid grid-cols-[7fr_5fr] gap-6 items-start max-[900px]:grid-cols-1">
+        <div>
           <TimeOffForm />
           <DomainList />
         </div>
-        <div className="dashboard-column">
+        <div>
           <CapacityDashboard />
         </div>
       </div>

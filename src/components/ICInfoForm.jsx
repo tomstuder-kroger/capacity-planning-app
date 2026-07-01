@@ -21,9 +21,9 @@ const ICInfoForm = () => {
   if (!activeIC) return null;
 
   return (
-    <div className="kds-Card kds-Card--m kds-card-section">
-      <h2 className="kds-Heading kds-Heading--s section-heading">IC Information</h2>
-      <div className="form-grid-2col">
+    <div className="mb-4 p-6 bg-card rounded-lg border">
+      <h2 className="mb-4 text-base font-bold">IC Information</h2>
+      <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="ic-name">IC Name</Label>
           <Input

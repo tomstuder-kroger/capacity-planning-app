@@ -6,22 +6,22 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { Delete02Icon } from '@hugeicons/core-free-icons';
 
 const DateField = ({ label, value, onChange }) => (
-  <div className="project-field">
-    <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>{label}</label>
+  <div className="flex-1 min-w-[130px]">
+    <label className="text-xs font-semibold block mb-1">{label}</label>
     <input
       type="date"
       value={value || ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="project-date-input"
+      className="h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
     />
   </div>
 );
 
 const PTORow = ({ pto, onUpdate, onRemove }) => {
   return (
-    <div className="project-item">
-      <div className="project-item-header">
-        <span className="project-item-label">PTO Instance</span>
+    <div className="bg-muted/30 border border-border rounded-md p-3 mb-2">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">PTO Instance</span>
         <Button
           variant="ghost"
           size="icon"
@@ -33,7 +33,7 @@ const PTORow = ({ pto, onUpdate, onRemove }) => {
         </Button>
       </div>
 
-      <div style={{ marginBottom: '0.75rem' }} className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5 mb-3">
         <Label htmlFor={`pto-type-${pto.id}`}>Type (e.g., PTO, Summer vacation, Conference)</Label>
         <Input
           id={`pto-type-${pto.id}`}
@@ -43,7 +43,7 @@ const PTORow = ({ pto, onUpdate, onRemove }) => {
         />
       </div>
 
-      <div className="project-item-fields">
+      <div className="flex gap-3 items-start flex-wrap">
         <DateField
           label="Start Date"
           value={pto.startDate}
