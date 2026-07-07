@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
@@ -54,7 +54,10 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
     <>
       <div
         className="mb-4 p-6 bg-card rounded-lg border cursor-pointer transition-shadow hover:shadow-md"
+        role={!isEditMode ? 'button' : undefined}
+        tabIndex={!isEditMode ? 0 : undefined}
         onClick={!isEditMode ? onSelect : undefined}
+        onKeyDown={!isEditMode ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect?.(); } } : undefined}
         draggable={isEditMode}
         onDragStart={onDragStart}
         onDragOver={(e) => { e.preventDefault(); onDragOver?.(); }}
@@ -121,7 +124,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
               >
                 {utilization.toFixed(0)}%
               </div>
-              <div className="text-[0.7rem] text-muted-foreground mt-1">Capacity</div>
+              <div className="text-xs text-muted-foreground mt-1">Capacity</div>
             </div>
           )}
         </div>
@@ -135,7 +138,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
               {ic.domains.length} Domain(s)
             </Badge>
             {totalProjects > 0 && (
-              <Badge variant="secondary">{totalProjects} Project(s)</Badge>
+              <Badge variant="outline">{totalProjects} Project(s)</Badge>
             )}
           </div>
         )}
@@ -146,7 +149,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
           <DialogHeader>
             <DialogTitle>Remove Team Member</DialogTitle>
           </DialogHeader>
-          <p>Remove "{ic.icName || 'Unnamed'}" from your team? This cannot be undone.</p>
+          <DialogDescription>Remove "{ic.icName || 'Unnamed'}" from your team? This cannot be undone.</DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleDeleteConfirm}>Remove</Button>

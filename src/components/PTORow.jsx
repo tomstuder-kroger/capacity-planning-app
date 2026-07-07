@@ -5,10 +5,11 @@ import { Label } from '@/components/ui/label';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Delete02Icon } from '@hugeicons/core-free-icons';
 
-const DateField = ({ label, value, onChange }) => (
+const DateField = ({ label, value, onChange, id }) => (
   <div className="flex-1 min-w-[130px]">
-    <label className="text-xs font-semibold block mb-1">{label}</label>
+    <label htmlFor={id} className="text-xs font-semibold block mb-1">{label}</label>
     <input
+      id={id}
       type="date"
       value={value || ''}
       onChange={(e) => onChange(e.target.value || null)}
@@ -48,11 +49,13 @@ const PTORow = ({ pto, onUpdate, onRemove }) => {
           label="Start Date"
           value={pto.startDate}
           onChange={(iso) => onUpdate(pto.id, { startDate: iso })}
+          id={`pto-start-${pto.id}`}
         />
         <DateField
           label="End Date"
           value={pto.endDate}
           onChange={(iso) => onUpdate(pto.id, { endDate: iso })}
+          id={`pto-end-${pto.id}`}
         />
       </div>
     </div>

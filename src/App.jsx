@@ -20,7 +20,7 @@ function AppContent() {
   const navigateToTeamSupport = () => setCurrentView('teamSupport');
 
   return (
-    <div className="min-h-screen bg-[#f4f4f4]">
+    <div className="min-h-screen bg-muted">
       <GlobalNavBar onNavigateToTeamSupport={navigateToTeamSupport} />
       <div className="max-w-[1400px] mx-auto px-6 py-8">
         {saveError && (

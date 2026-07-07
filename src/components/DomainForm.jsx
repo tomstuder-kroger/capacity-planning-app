@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,10 +18,11 @@ const WEEK_OPTIONS = [
   { value: 'custom', label: 'Custom (date range)' }
 ];
 
-const DateField = ({ label, value, onChange }) => (
+const DateField = ({ label, value, onChange, id }) => (
   <div className="flex-1 min-w-[130px]">
-    <label className="text-xs font-semibold block mb-1">{label}</label>
+    <label htmlFor={id} className="text-xs font-semibold block mb-1">{label}</label>
     <input
+      id={id}
       type="date"
       value={value || ''}
       onChange={(e) => onChange(e.target.value || null)}
@@ -58,8 +59,9 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
       </div>
 
       <div className="flex flex-col gap-1.5 mb-3">
-        <Label>Title</Label>
+        <Label htmlFor={`project-title-${project.id}`}>Title</Label>
         <Input
+          id={`project-title-${project.id}`}
           placeholder="Project title"
           value={project.title || ''}
           onChange={(e) => onUpdate(project.id, { title: e.target.value })}
@@ -71,10 +73,12 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
           label="Start Date"
           value={project.startDate}
           onChange={(iso) => onUpdate(project.id, { startDate: iso })}
+          id={`start-date-${project.id}`}
         />
         <div className="flex-1 min-w-[130px]">
-          <label className="text-xs font-semibold block mb-1">Duration</label>
+          <label htmlFor={`project-duration-${project.id}`} className="text-xs font-semibold block mb-1">Duration</label>
           <select
+            id={`project-duration-${project.id}`}
             value={weeksValue}
             onChange={(e) => handleWeeksChange(e.target.value)}
             className="h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
@@ -93,6 +97,7 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
             label="End Date"
             value={project.customEndDate}
             onChange={(iso) => onUpdate(project.id, { customEndDate: iso })}
+            id={`end-date-${project.id}`}
           />
         )}
       </div>
@@ -171,8 +176,9 @@ const DomainForm = ({ domain }) => {
         </div>
 
         <div className="flex flex-col gap-1.5 mb-4">
-          <Label>Domain Name</Label>
+          <Label htmlFor={`domain-name-${domain.id}`}>Domain Name</Label>
           <Input
+            id={`domain-name-${domain.id}`}
             placeholder="e.g., TEST"
             value={domain.name}
             onChange={(e) => updateDomain({ name: e.target.value })}
@@ -204,7 +210,7 @@ const DomainForm = ({ domain }) => {
           <DialogHeader>
             <DialogTitle>Remove Domain</DialogTitle>
           </DialogHeader>
-          <p>Remove domain "{domain.name || 'Untitled'}"?</p>
+          <DialogDescription>Remove domain "{domain.name || 'Untitled'}"?</DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleRemoveConfirm}>Remove</Button>

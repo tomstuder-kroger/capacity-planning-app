@@ -67,7 +67,14 @@ const CapacityDashboard = () => {
             <div className="mt-1" style={{ color: getStatusColor() }}>
               {getStatusLabel()}
             </div>
-            <div className="mt-3 w-full h-2.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className="mt-3 w-full h-2.5 rounded-full bg-muted overflow-hidden"
+              role="progressbar"
+              aria-valuenow={Math.round(capacityUtilization)}
+              aria-valuemin={0}
+              aria-valuemax={200}
+              aria-label="Capacity utilization"
+            >
               <div
                 className="h-full rounded-full transition-all"
                 style={{ width: `${(utilizationValue / 200) * 100}%`, backgroundColor: getStatusColor() }}

@@ -39,6 +39,8 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
           type="button"
           className="h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-ring/30"
           onClick={() => setIsOpen(!isOpen)}
+          onKeyDown={(e) => { if (e.key === 'Escape') setIsOpen(false); }}
+          aria-label="Support Needed"
           aria-haspopup="listbox"
           aria-expanded={isOpen}
         >
