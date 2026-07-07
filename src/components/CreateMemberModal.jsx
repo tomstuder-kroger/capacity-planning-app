@@ -27,7 +27,7 @@ const CreateMemberModal = ({ isOpen, onClose, onCreated }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Add Team Member</DialogTitle>
         </DialogHeader>

@@ -43,7 +43,7 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
   };
 
   return (
-    <div className="bg-muted/30 border border-border rounded-md p-3 mb-2">
+    <div className="border border-border rounded-md p-3 mb-2">
       <div className="flex justify-between items-center mb-2">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Project</span>
         <Button
@@ -200,7 +200,7 @@ const DomainForm = ({ domain }) => {
       </div>
 
       <Dialog open={deleteDialogOpen} onOpenChange={(open) => !open && setDeleteDialogOpen(false)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Remove Domain</DialogTitle>
           </DialogHeader>

@@ -45,7 +45,7 @@ const FormattedOutput = ({ open, onClose }) => {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Capacity Summary</DialogTitle>
         </DialogHeader>

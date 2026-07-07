@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { UnfoldMoreIcon } from '@hugeicons/core-free-icons';
 
 const SUPPORT_OPTIONS = ['User Research', 'Service Designer'];
 
@@ -41,7 +43,7 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
           aria-expanded={isOpen}
         >
           <span>{displayText}</span>
-          <span className="ml-1 text-muted-foreground">{isOpen ? '▲' : '▼'}</span>
+          <HugeiconsIcon icon={UnfoldMoreIcon} strokeWidth={2} className="pointer-events-none size-3.5 text-muted-foreground" />
         </button>
         {isOpen && (
           <div className="absolute z-50 top-full left-0 mt-1 w-full bg-popover border border-border rounded-md shadow-md p-1">
