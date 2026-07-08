@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KdsMessage } from 'react-mx-web-components';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CapacityProvider, useCapacity } from './context/CapacityContext';
 import GlobalNavBar from './components/GlobalNavBar';
 import TeamDashboard from './components/TeamDashboard';
@@ -16,32 +16,30 @@ function AppContent() {
     setCurrentView('planning');
   };
 
-  const navigateToTeam = () => {
-    setCurrentView('team');
-  };
-
-  const navigateToTeamSupport = () => {
-    setCurrentView('teamSupport');
-  };
+  const navigateToTeam = () => setCurrentView('team');
+  const navigateToTeamSupport = () => setCurrentView('teamSupport');
 
   return (
-    <div className="app-shell">
+    <div className="min-h-screen bg-muted">
       <GlobalNavBar onNavigateToTeamSupport={navigateToTeamSupport} />
-      <div className="app-container">
-        {saveError && (
-          <KdsMessage kind="warning" className="mb-16">
-            Auto-save disabled - data won't persist across sessions
-          </KdsMessage>
-        )}
-
-        {currentView === 'team' ? (
-          <TeamDashboard onSelectMember={navigateToPlanning} />
-        ) : currentView === 'teamSupport' ? (
-          <TeamSupportView onBack={navigateToTeam} />
-        ) : (
-          <PlanningView key={activeIC?.id} onBack={navigateToTeam} />
-        )}
-      </div>
+      {saveError && (
+        <div className="max-w-[1800px] mx-auto px-6 pt-4">
+          <Alert className="border-warning/30 bg-warning/10 text-warning-foreground">
+            <AlertDescription>Auto-save disabled - data won't persist across sessions</AlertDescription>
+          </Alert>
+        </div>
+      )}
+      {currentView === 'team' ? (
+        <TeamDashboard onSelectMember={navigateToPlanning} />
+      ) : (
+        <div className="max-w-[1800px] mx-auto px-6 py-8">
+          {currentView === 'teamSupport' ? (
+            <TeamSupportView onBack={navigateToTeam} />
+          ) : (
+            <PlanningView key={activeIC?.id} onBack={navigateToTeam} />
+          )}
+        </div>
+      )}
     </div>
   );
 }

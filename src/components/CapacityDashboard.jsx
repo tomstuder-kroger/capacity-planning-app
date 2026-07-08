@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsTag, KdsMessage, KdsIconEye } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { EyeIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import FormattedOutput from './FormattedOutput';
 import SupportNeedsDashboard from './SupportNeedsDashboard';
@@ -10,33 +14,21 @@ const CapacityDashboard = () => {
 
   if (!activeIC) {
     return (
-      <div className="kds-Card kds-Card--m kds-card-section" style={{ textAlign: 'center' }}>
-        <span style={{ color: '#6b7280' }}>Create an IC to see capacity dashboard</span>
+      <div className="mb-4 p-6 bg-card rounded-lg border text-center">
+        <span className="text-muted-foreground">Create an IC to see capacity dashboard</span>
       </div>
     );
   }
 
   const calculated = calculateResults(activeIC);
-
   if (!calculated) return null;
 
-  const {
-    totalWeeksAvailable,
-    totalPlannedWork,
-    capacityUtilization,
-    overUnderCapacity,
-    status
-  } = calculated;
+  const { totalWeeksAvailable, totalPlannedWork, capacityUtilization, overUnderCapacity, status } = calculated;
 
   const getStatusColor = () => {
     if (capacityUtilization === 0) return '#9ca3af';
     if (status === 'over') return '#d32f2f';
     return '#2e7d32';
-  };
-
-  const getStatusKind = () => {
-    if (status === 'over') return 'negative';
-    return 'positive';
   };
 
   const getStatusLabel = () => {
@@ -46,11 +38,8 @@ const CapacityDashboard = () => {
   };
 
   const getOverUnderText = () => {
-    if (overUnderCapacity > 0) {
-      return `Over by ${Math.abs(overUnderCapacity).toFixed(1)}w`;
-    } else if (overUnderCapacity < 0) {
-      return `Under by ${Math.abs(overUnderCapacity).toFixed(1)}w`;
-    }
+    if (overUnderCapacity > 0) return `Over by ${Math.abs(overUnderCapacity).toFixed(1)}w`;
+    if (overUnderCapacity < 0) return `Under by ${Math.abs(overUnderCapacity).toFixed(1)}w`;
     return 'Fully allocated';
   };
 
@@ -58,61 +47,70 @@ const CapacityDashboard = () => {
   const showInfinityWarning = !isFinite(capacityUtilization);
 
   const totalProjects = activeIC.domains.reduce((sum, d) => sum + (d.projects ? d.projects.length : 0), 0);
+  const statusBadgeVariant = status === 'over' ? 'destructive' : 'default';
+  const statusBadgeClass = status !== 'over' ? 'bg-success/15 text-success border-success/20 hover:bg-success/20' : '';
 
   return (
     <>
-      <div className="kds-Card kds-Card--m kds-card-section">
-        <h2 className="kds-Heading kds-Heading--s section-heading">Capacity Status</h2>
+      <div className="mb-4 p-6 bg-card rounded-lg border">
+        <h2 className="mb-4 text-base font-bold">Capacity Status</h2>
 
         {showInfinityWarning ? (
-          <KdsMessage kind="warning" style={{ marginBottom: '1rem' }}>
-            Cannot calculate utilization - no available time
-          </KdsMessage>
+          <Alert className="mb-4 border-warning/30 bg-warning/10 text-warning-foreground">
+            <AlertDescription>Cannot calculate utilization - no available time</AlertDescription>
+          </Alert>
         ) : (
-          <div className="utilization-display">
-            <div className="utilization-percent" style={{ color: getStatusColor() }}>
+          <div className="flex flex-col items-center text-center my-6">
+            <div className="text-6xl font-bold leading-none" style={{ color: getStatusColor() }}>
               {capacityUtilization.toFixed(0)}%
             </div>
-            <div style={{ color: getStatusColor(), marginTop: '0.25rem' }}>
+            <div className="mt-1" style={{ color: getStatusColor() }}>
               {getStatusLabel()}
             </div>
-            <div className="progress-track">
+            <div
+              className="mt-3 w-full h-2.5 rounded-full bg-muted overflow-hidden"
+              role="progressbar"
+              aria-valuenow={Math.round(capacityUtilization)}
+              aria-valuemin={0}
+              aria-valuemax={200}
+              aria-label="Capacity utilization"
+            >
               <div
-                className="progress-fill"
-                style={{
-                  width: `${(utilizationValue / 200) * 100}%`,
-                  backgroundColor: getStatusColor()
-                }}
+                className="h-full rounded-full transition-all"
+                style={{ width: `${(utilizationValue / 200) * 100}%`, backgroundColor: getStatusColor() }}
               />
             </div>
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-          <div className="stat-row">
-            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Available:</span>
-            <strong style={{ fontSize: '0.875rem' }}>{totalWeeksAvailable.toFixed(1)}w</strong>
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Available:</span>
+            <strong className="text-sm">{totalWeeksAvailable.toFixed(1)}w</strong>
           </div>
-          <div className="stat-row">
-            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Planned:</span>
-            <strong style={{ fontSize: '0.875rem' }}>{totalPlannedWork.toFixed(1)}w</strong>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Planned:</span>
+            <strong className="text-sm">{totalPlannedWork.toFixed(1)}w</strong>
           </div>
-          <div className="stat-row">
-            <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Difference:</span>
-            <strong style={{ fontSize: '0.875rem', color: getStatusColor() }}>{getOverUnderText()}</strong>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Difference:</span>
+            <strong className="text-sm" style={{ color: getStatusColor() }}>{getOverUnderText()}</strong>
           </div>
         </div>
 
-        <div className="tag-row">
-          <KdsTag kind={getStatusKind()}>{activeIC.domains.length} Domain(s)</KdsTag>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Badge variant={statusBadgeVariant} className={statusBadgeClass}>
+            {activeIC.domains.length} Domain(s)
+          </Badge>
           {totalProjects > 0 && (
-            <KdsTag kind="default">{totalProjects} Project(s)</KdsTag>
+            <Badge variant="secondary">{totalProjects} Project(s)</Badge>
           )}
         </div>
 
-        <KdsButton kind="primary" style={{ width: '100%' }} onClick={() => setSummaryOpen(true)}>
-          <KdsIconEye /> View Summary
-        </KdsButton>
+        <Button className="w-full mt-4" onClick={() => setSummaryOpen(true)}>
+          <HugeiconsIcon icon={EyeIcon} strokeWidth={2} data-icon="inline-start" />
+          View Summary
+        </Button>
       </div>
 
       <SupportNeedsDashboard />

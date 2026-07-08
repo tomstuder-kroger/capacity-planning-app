@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsIconTrash, MxInputTextBox } from 'react-mx-web-components';
-import { MxModal, MxModalBody } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
 import { getProjectWeeks } from '../utils/calculations';
@@ -14,14 +18,15 @@ const WEEK_OPTIONS = [
   { value: 'custom', label: 'Custom (date range)' }
 ];
 
-const DateField = ({ label, value, onChange }) => (
-  <div className="project-field">
-    <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>{label}</label>
+const DateField = ({ label, value, onChange, id }) => (
+  <div className="flex-1 min-w-[130px]">
+    <label htmlFor={id} className="text-xs font-semibold block mb-1">{label}</label>
     <input
+      id={id}
       type="date"
       value={value || ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="project-date-input"
+      className="h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
     />
   </div>
 );
@@ -39,43 +44,44 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
   };
 
   return (
-    <div className="project-item">
-      <div className="project-item-header">
-        <span className="project-item-label">Project</span>
-        <KdsButton
-          palette="negative"
-          kind="subtle"
-          variant="minimal"
+    <div className="border border-border rounded-md p-3 mb-2">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Project</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={() => onRemove(project.id)}
           aria-label="Remove project"
         >
-          <KdsIconTrash size="s" />
-        </KdsButton>
+          <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+        </Button>
       </div>
 
-      <div style={{ marginBottom: '0.75rem' }}>
-        <MxInputTextBox
-          label="Title"
+      <div className="flex flex-col gap-1.5 mb-3">
+        <Label htmlFor={`project-title-${project.id}`}>Title</Label>
+        <Input
+          id={`project-title-${project.id}`}
           placeholder="Project title"
           value={project.title || ''}
           onChange={(e) => onUpdate(project.id, { title: e.target.value })}
-          mask="none"
-          isClearable={false}
         />
       </div>
 
-      <div className="project-item-fields">
+      <div className="flex gap-3 items-start flex-wrap">
         <DateField
           label="Start Date"
           value={project.startDate}
           onChange={(iso) => onUpdate(project.id, { startDate: iso })}
+          id={`start-date-${project.id}`}
         />
-        <div className="project-field">
-          <label className="kds-Label kds-Text--m" style={{ fontWeight: 700 }}>Duration</label>
+        <div className="flex-1 min-w-[130px]">
+          <label htmlFor={`project-duration-${project.id}`} className="text-xs font-semibold block mb-1">Duration</label>
           <select
+            id={`project-duration-${project.id}`}
             value={weeksValue}
             onChange={(e) => handleWeeksChange(e.target.value)}
-            className="project-weeks-select"
+            className="h-7 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
           >
             {WEEK_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -91,12 +97,13 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
             label="End Date"
             value={project.customEndDate}
             onChange={(iso) => onUpdate(project.id, { customEndDate: iso })}
+            id={`end-date-${project.id}`}
           />
         )}
       </div>
 
       {project.weeksMode === 'custom' && (
-        <div className="project-custom-weeks">
+        <div className="mt-2 text-xs text-muted-foreground">
           {calculatedWeeks > 0
             ? `${calculatedWeeks} week${calculatedWeeks !== 1 ? 's' : ''}`
             : 'Select start and end dates to calculate weeks'}
@@ -154,32 +161,31 @@ const DomainForm = ({ domain }) => {
 
   return (
     <>
-      <div className="kds-Card kds-Card--m kds-card-section">
-        <div className="domain-header">
-          <h2 className="kds-Heading kds-Heading--s" style={{ margin: 0 }}>Domain</h2>
-          <KdsButton
-            palette="negative"
-            kind="subtle"
-            variant="minimal"
+      <div className="mb-4 p-6 bg-card rounded-lg border">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-base font-bold">Domain</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={() => setDeleteDialogOpen(true)}
             aria-label="Remove domain"
           >
-            <KdsIconTrash size="s" />
-          </KdsButton>
+            <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+          </Button>
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <MxInputTextBox
-            label="Domain Name"
+        <div className="flex flex-col gap-1.5 mb-4">
+          <Label htmlFor={`domain-name-${domain.id}`}>Domain Name</Label>
+          <Input
+            id={`domain-name-${domain.id}`}
             placeholder="e.g., TEST"
             value={domain.name}
             onChange={(e) => updateDomain({ name: e.target.value })}
-            mask="none"
-            isClearable={false}
           />
         </div>
 
-        <div className="project-list">
+        <div className="flex flex-col gap-0">
           {(domain.projects || []).map(project => (
             <ProjectRow
               key={project.id}
@@ -190,34 +196,27 @@ const DomainForm = ({ domain }) => {
           ))}
         </div>
 
-        <KdsButton
-          kind="secondary"
-          style={{ width: '100%', marginTop: '0.5rem' }}
-          onClick={handleAddProject}
-        >
+        <Button variant="outline" className="w-full mt-2" onClick={handleAddProject}>
           + Add Project
-        </KdsButton>
+        </Button>
 
-        <div className="summary-box">
+        <div className="mt-4 p-3 bg-muted rounded-md">
           <span>Domain total: <strong>{totalWeeks.toFixed(1)} weeks</strong></span>
         </div>
       </div>
 
-      <MxModal
-        isOpened={deleteDialogOpen}
-        headercontent="Remove Domain"
-        footerPrimaryButtonText="Remove"
-        footerPrimaryButtonKind="destructive"
-        footerSecondaryButtonText="Cancel"
-        closeOnSecondaryButton
-        onApplyClick={handleRemoveConfirm}
-        onSecondaryClick={() => setDeleteDialogOpen(false)}
-        onModalClose={() => setDeleteDialogOpen(false)}
-      >
-        <MxModalBody>
-          Remove domain "{domain.name || 'Untitled'}"?
-        </MxModalBody>
-      </MxModal>
+      <Dialog open={deleteDialogOpen} onOpenChange={(open) => !open && setDeleteDialogOpen(false)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Remove Domain</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>Remove domain "{domain.name || 'Untitled'}"?</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleRemoveConfirm}>Remove</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

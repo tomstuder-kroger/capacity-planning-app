@@ -1,5 +1,5 @@
 import React from 'react';
-import { KdsButton } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
 import { useCapacity } from '../context/CapacityContext';
 import QuarterInfoForm from './QuarterInfoForm';
 import TimeOffForm from './TimeOffForm';
@@ -11,18 +11,18 @@ const PlanningView = ({ onBack }) => {
 
   return (
     <div>
-      <div className="planning-header">
-        <KdsButton kind="secondary" onClick={onBack}>← Back to Team</KdsButton>
+      <div className="flex items-center gap-4 mb-6">
+        <Button variant="outline" onClick={onBack}>← Back to Team</Button>
       </div>
 
       <QuarterInfoForm />
 
-      <div className="capacity-layout-grid">
-        <div className="forms-column">
+      <div className="grid grid-cols-[7fr_5fr] gap-6 items-start max-[900px]:grid-cols-1">
+        <div>
           <TimeOffForm />
           <DomainList />
         </div>
-        <div className="dashboard-column">
+        <div>
           <CapacityDashboard />
         </div>
       </div>

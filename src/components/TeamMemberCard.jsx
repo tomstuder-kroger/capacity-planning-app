@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsIconTrash, KdsTag, MxInputTextBox, MxSingleSelect } from 'react-mx-web-components';
-import { MxModal, MxModalBody } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 
 const STATUS_COLORS = {
@@ -8,6 +13,17 @@ const STATUS_COLORS = {
   fully: '#1a7f3c',
   over:  '#c0392b',
 };
+
+const ROLES = [
+  'Associate Product Designer',
+  'Product Designer',
+  'Senior Product Designer',
+  'User Researcher',
+  'Senior User Researcher',
+  'Service Designer',
+  'Senior Service Designer',
+  'Journey Architect',
+];
 
 const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDragStart, onDragOver, onDrop, onDragEnd }) => {
   const { deleteIC, updateIC, calculateResults } = useCapacity();
@@ -20,8 +36,6 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
 
   const totalProjects = ic.domains.reduce((sum, d) => sum + (d.projects ? d.projects.length : 0), 0);
 
-  const statusKind = status === 'over' ? 'negative' : 'positive';
-
   const handleDeleteClick = (e) => {
     e.stopPropagation();
     setDeleteDialogOpen(true);
@@ -32,19 +46,18 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
     setDeleteDialogOpen(false);
   };
 
-  const handleNameChange = (e) => {
-    updateIC(ic.id, { icName: e.target.value });
-  };
-
-  const handleRoleChange = (e) => {
-    updateIC(ic.id, { icRole: e.detail });
-  };
+  const statusBadgeClass = status !== 'over'
+    ? 'bg-success/15 text-success border-success/20 hover:bg-success/20'
+    : '';
 
   return (
     <>
       <div
-        className="kds-Card kds-Card--m kds-card-section team-member-card"
+        className="mb-4 p-6 bg-card rounded-lg border cursor-pointer transition-shadow hover:shadow-md"
+        role={!isEditMode ? 'button' : undefined}
+        tabIndex={!isEditMode ? 0 : undefined}
         onClick={!isEditMode ? onSelect : undefined}
+        onKeyDown={!isEditMode ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect?.(); } } : undefined}
         draggable={isEditMode}
         onDragStart={onDragStart}
         onDragOver={(e) => { e.preventDefault(); onDragOver?.(); }}
@@ -54,91 +67,95 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
           cursor: isEditMode ? 'grab' : 'pointer',
           opacity: isDragging ? 0.4 : 1,
           outline: isDragOver ? '2px dashed #0F52A2' : 'none',
-          transition: 'opacity 0.2s',
+          transition: 'opacity 0.2s, box-shadow 0.2s',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="flex justify-between items-center">
           {isEditMode && (
-            <div style={{ color: '#9ca3af', fontSize: '1.1rem', marginRight: '0.5rem', flexShrink: 0, userSelect: 'none', cursor: 'grab' }}>⠿</div>
+            <div className="text-muted-foreground text-lg mr-2 shrink-0 select-none cursor-grab">⠿</div>
           )}
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="flex-1 min-w-0">
             {isEditMode ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }} onClick={(e) => e.stopPropagation()}>
-                <MxInputTextBox
-                  label="Name"
+              <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+                <Input
                   value={ic.icName}
-                  onChange={handleNameChange}
-                  mask="none"
-                  isClearable={false}
+                  onChange={(e) => updateIC(ic.id, { icName: e.target.value })}
+                  placeholder="Name"
                 />
-                <MxSingleSelect
-                  label="Role"
-                  items={['Associate Product Designer', 'Product Designer', 'Senior Product Designer', 'User Researcher', 'Senior User Researcher', 'Service Designer', 'Senior Service Designer', 'Journey Architect']}
-                  value={ic.icRole}
-                  emitOnlyValue
-                  onValueUpdate={handleRoleChange}
-                />
+                <Select
+                  value={ic.icRole || ''}
+                  onValueChange={(value) => updateIC(ic.id, { icRole: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {ROLES.map((role) => (
+                        <SelectItem key={role} value={role}>{role}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
             ) : (
               <>
-                <div className="team-card-name">{ic.icName || 'Unnamed'}</div>
-                <div className="team-card-role">{ic.icRole || 'No role set'}</div>
+                <div className="font-heading text-base font-semibold text-foreground mb-1">{ic.icName || 'Unnamed'}</div>
+                <div className="text-sm text-muted-foreground">{ic.icRole || 'No role set'}</div>
               </>
             )}
           </div>
 
           {isEditMode ? (
-            <KdsButton
-              palette="negative"
-              kind="subtle"
-              variant="minimal"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2 shrink-0"
               onClick={handleDeleteClick}
               aria-label="Remove team member"
-              style={{ marginLeft: '0.5rem', flexShrink: 0 }}
             >
-              <KdsIconTrash size="s" />
-            </KdsButton>
+              <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} />
+            </Button>
           ) : hasUtilization && (
-            <div style={{ textAlign: 'center', marginLeft: '1rem', flexShrink: 0 }}>
-              <div style={{
-                fontSize: '2rem',
-                fontWeight: 700,
-                fontFamily: 'Nunito, sans-serif',
-                lineHeight: 1,
-                color: utilization === 0 ? '#9ca3af' : STATUS_COLORS[status] || '#000',
-              }}>
+            <div className="text-center ml-4 shrink-0">
+              <div
+                className="text-3xl font-bold font-sans leading-none"
+                style={{ color: utilization === 0 ? '#9ca3af' : STATUS_COLORS[status] || '#000' }}
+              >
                 {utilization.toFixed(0)}%
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>Capacity</div>
+              <div className="text-xs text-muted-foreground mt-1">Capacity</div>
             </div>
           )}
         </div>
 
         {!isEditMode && ic.domains.length > 0 && (
-          <div className="tag-row" style={{ marginTop: '0.75rem' }}>
-            <KdsTag kind={statusKind}>{ic.domains.length} Domain(s)</KdsTag>
+          <div className="flex flex-wrap gap-2 mt-3">
+            <Badge
+              variant={status === 'over' ? 'destructive' : 'default'}
+              className={statusBadgeClass}
+            >
+              {ic.domains.length} Domain(s)
+            </Badge>
             {totalProjects > 0 && (
-              <KdsTag kind="default">{totalProjects} Project(s)</KdsTag>
+              <Badge variant="outline">{totalProjects} Project(s)</Badge>
             )}
           </div>
         )}
       </div>
 
-      <MxModal
-        isOpened={deleteDialogOpen}
-        headercontent="Remove Team Member"
-        footerPrimaryButtonText="Remove"
-        footerPrimaryButtonKind="destructive"
-        footerSecondaryButtonText="Cancel"
-        closeOnSecondaryButton
-        onApplyClick={handleDeleteConfirm}
-        onSecondaryClick={() => setDeleteDialogOpen(false)}
-        onModalClose={() => setDeleteDialogOpen(false)}
-      >
-        <MxModalBody>
-          Remove "{ic.icName || 'Unnamed'}" from your team? This cannot be undone.
-        </MxModalBody>
-      </MxModal>
+      <Dialog open={deleteDialogOpen} onOpenChange={(open) => !open && setDeleteDialogOpen(false)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Remove Team Member</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>Remove "{ic.icName || 'Unnamed'}" from your team? This cannot be undone.</DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>Remove</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

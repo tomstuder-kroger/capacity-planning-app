@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { KdsButton, KdsIconCardView, KdsIconGanttChart, MxInputTextBox } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { GridViewIcon, ChartGanttIcon, LayoutLeftIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 import EmptyState from './EmptyState';
@@ -7,6 +10,7 @@ import TeamMemberCard from './TeamMemberCard';
 import GanttChart from './GanttChart';
 import CreateMemberModal from './CreateMemberModal';
 import ImportMemberModal from './ImportMemberModal';
+import MemberListView from './MemberListView';
 
 const currentPeriod = getCurrentFiscalPeriod();
 
@@ -17,7 +21,6 @@ const TeamDashboard = ({ onSelectMember }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [view, setView] = useState('cards');
   const [ganttQuarter, setGanttQuarter] = useState(null);
-  const [editingTeamName, setEditingTeamName] = useState(false);
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
 
@@ -29,6 +32,7 @@ const TeamDashboard = ({ onSelectMember }) => {
     setDragOverId(null);
   };
   const handleDragEnd = () => { setDraggedId(null); setDragOverId(null); };
+
   const { totalAvailable, totalPlanned } = ics.reduce((acc, ic) => {
     const result = calculateResults(ic);
     const avail = result?.totalWeeksAvailable;
@@ -40,15 +44,10 @@ const TeamDashboard = ({ onSelectMember }) => {
   }, { totalAvailable: 0, totalPlanned: 0 });
 
   const totalUtilization = totalAvailable > 0 ? (totalPlanned / totalAvailable) * 100 : null;
-
   const utilizationColor = totalUtilization === null ? '#6b7280'
     : totalUtilization > 100 ? '#c0392b'
     : totalUtilization >= 90 ? '#b45309'
     : '#1a7f3c';
-
-  const handleNameClick = () => setEditingTeamName(true);
-
-  const handleNameBlur = () => setEditingTeamName(false);
 
   const handleNameKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
@@ -56,107 +55,91 @@ const TeamDashboard = ({ onSelectMember }) => {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h2 className="kds-Heading kds-Heading--l" style={{ margin: 0 }}>Team Overview</h2>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          {ics.length > 0 && view === 'cards' && (
-            <KdsButton key={isEditMode ? 'done' : 'edit'} kind="secondary" onClick={() => setIsEditMode(!isEditMode)}>
-              {isEditMode ? 'Done' : 'Edit'}
-            </KdsButton>
-          )}
-          <KdsButton kind="secondary" onClick={() => setIsImportModalOpen(true)}>
-            Import Team Member
-          </KdsButton>
-          <KdsButton kind="primary" onClick={() => setIsCreateModalOpen(true)}>
-            + Add Team Member
-          </KdsButton>
-        </div>
-      </div>
-
-      {/* Team summary card */}
-      <div className="kds-Card kds-Card--m kds-card-section" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem', background: 'rgb(239, 247, 253)', border: '1px solid rgb(15, 82, 162)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {editingTeamName || isEditMode ? (
-              <MxInputTextBox
-                label="Team Name"
+      {/* Full-width header bar */}
+      <div className="sticky top-14 z-40 w-full bg-card border-b">
+        <div className="max-w-[1800px] mx-auto px-6 py-4 flex items-center gap-6">
+          {/* Team name */}
+          <div className="shrink-0 min-w-[160px]">
+            {isEditMode ? (
+              <Input
                 value={teamName}
                 onChange={(e) => updateTeamName(e.target.value)}
-                onBlur={handleNameBlur}
                 onKeyDown={handleNameKeyDown}
                 placeholder="Enter team name"
-                mask="none"
-                isClearable={false}
-                style={{ width: '320px' }}
+                className="w-60"
               />
             ) : (
-              <h2
-                className="kds-Heading kds-Heading--l"
-                onClick={handleNameClick}
-                style={{ margin: 0, cursor: 'text' }}
-                title="Click to edit team name"
-              >
+              <h2 className="text-lg font-bold">
                 {teamName || 'My Team'}
               </h2>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>{ics.length}</div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>Members</div>
-            </div>
-            <div style={{ width: '1px', background: '#e5e7eb' }} />
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
-                {ics.length > 0 ? `${totalAvailable.toFixed(1)}w` : '—'}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>Total Available</div>
-            </div>
-            <div style={{ width: '1px', background: '#e5e7eb' }} />
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1 }}>
-                {currentPeriod ? `${currentPeriod.quarter} FY${currentPeriod.fiscalYear}` : '—'}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
-                {currentPeriod ? `${currentPeriod.weeksInQuarter} weeks` : 'Quarter'}
-              </div>
-            </div>
-            <div style={{ width: '1px', background: '#e5e7eb' }} />
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'Nunito, sans-serif', lineHeight: 1, color: utilizationColor }}>
-                {totalUtilization !== null ? `${totalUtilization.toFixed(0)}%` : '—'}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>Team Capacity</div>
-            </div>
+
+          <div className="flex-1" />
+
+          {/* Action buttons */}
+          <div className="flex gap-2 shrink-0">
+            {ics.length > 0 && view === 'cards' && (
+              <Button key={isEditMode ? 'done' : 'edit'} variant="outline" onClick={() => setIsEditMode(!isEditMode)}>
+                {isEditMode ? 'Done' : 'Edit'}
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
+              Import
+            </Button>
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              + Add Member
+            </Button>
           </div>
         </div>
       </div>
 
+      {/* Main content */}
+      <div className="max-w-[1800px] mx-auto px-6 py-8">
+
+      {/* Metrics + view controls row */}
       {ics.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="view-toggle">
-              <button
-                className={`view-toggle-btn${view === 'cards' ? ' view-toggle-btn--active' : ''}`}
-                onClick={() => { setView('cards'); setIsEditMode(false); }}
-                title="Card view"
-              >
-                <KdsIconCardView size="s" />
-              </button>
-              <button
-                className={`view-toggle-btn${view === 'gantt' ? ' view-toggle-btn--active' : ''}`}
-                onClick={() => { setView('gantt'); setIsEditMode(false); }}
-                title="Gantt view"
-              >
-                <KdsIconGanttChart size="s" />
-              </button>
+        <div className="flex items-center justify-between mb-4">
+          {/* Metrics — left aligned */}
+          <div className="flex items-center gap-6">
+            <div>
+              <div className="text-2xl font-bold font-sans leading-none">{ics.length}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Members</div>
             </div>
+            <div className="w-px h-8 bg-border" />
+            <div>
+              <div className="text-2xl font-bold font-sans leading-none">
+                {ics.length > 0 ? `${totalAvailable.toFixed(1)}w` : '—'}
+              </div>
+              <div className="text-xs text-muted-foreground mt-0.5">Total Available</div>
+            </div>
+            <div className="w-px h-8 bg-border" />
+            <div>
+              <div className="text-2xl font-bold font-sans leading-none">
+                {currentPeriod ? `${currentPeriod.quarter} FY${currentPeriod.fiscalYear}` : '—'}
+              </div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {currentPeriod ? `${currentPeriod.weeksInQuarter} weeks` : 'Quarter'}
+              </div>
+            </div>
+            <div className="w-px h-8 bg-border" />
+            <div>
+              <div className="text-2xl font-bold font-sans leading-none" style={{ color: utilizationColor }}>
+                {totalUtilization !== null ? `${totalUtilization.toFixed(0)}%` : '—'}
+              </div>
+              <div className="text-xs text-muted-foreground mt-0.5">Team Capacity</div>
+            </div>
+          </div>
+
+          {/* View controls — right aligned */}
+          <div className="flex items-center gap-3">
+            {/* Quarter filter for Gantt */}
             {view === 'gantt' && (
-              <div className="view-toggle">
-                {[null, 'Q1', 'Q2', 'Q3', 'Q4'].map((q) => (
+              <div className="inline-flex border border-border rounded-md overflow-hidden bg-card">
+                {[null, 'Q1', 'Q2', 'Q3', 'Q4'].map((q, i) => (
                   <button
                     key={q ?? 'all'}
-                    className={`view-toggle-btn${ganttQuarter === q ? ' view-toggle-btn--active' : ''}`}
+                    className={`px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${i > 0 ? 'border-l border-border' : ''} ${ganttQuarter === q ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
                     onClick={() => setGanttQuarter(q)}
                   >
                     {q ?? 'All'}
@@ -164,10 +147,36 @@ const TeamDashboard = ({ onSelectMember }) => {
                 ))}
               </div>
             )}
+
+            {/* View toggle */}
+            <div className="inline-flex border border-border rounded-md overflow-hidden bg-card">
+              <button
+                className={`px-2 py-1.5 flex items-center justify-center border-r border-border cursor-pointer transition-colors ${view === 'cards' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
+                onClick={() => { setView('cards'); setIsEditMode(false); }}
+                title="Card view"
+              >
+                <HugeiconsIcon icon={GridViewIcon} strokeWidth={2} size={16} />
+              </button>
+              <button
+                className={`px-2 py-1.5 flex items-center justify-center border-r border-border cursor-pointer transition-colors ${view === 'list' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
+                onClick={() => { setView('list'); setIsEditMode(false); }}
+                title="List view"
+              >
+                <HugeiconsIcon icon={LayoutLeftIcon} strokeWidth={2} size={16} />
+              </button>
+              <button
+                className={`px-2 py-1.5 flex items-center justify-center cursor-pointer transition-colors ${view === 'gantt' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
+                onClick={() => { setView('gantt'); setIsEditMode(false); }}
+                title="Gantt view"
+              >
+                <HugeiconsIcon icon={ChartGanttIcon} strokeWidth={2} size={16} />
+              </button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Content */}
       {ics.length === 0 ? (
         <EmptyState
           title="No team members yet"
@@ -175,8 +184,10 @@ const TeamDashboard = ({ onSelectMember }) => {
         />
       ) : view === 'gantt' ? (
         <GanttChart quarterFilter={ganttQuarter} />
+      ) : view === 'list' ? (
+        <MemberListView />
       ) : (
-        <div className="team-grid">
+        <div className="grid grid-cols-3 gap-4 mt-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
           {ics.map((ic) => (
             <TeamMemberCard
               key={ic.id}
@@ -199,11 +210,11 @@ const TeamDashboard = ({ onSelectMember }) => {
         onClose={() => setIsCreateModalOpen(false)}
         onCreated={onSelectMember}
       />
-
       <ImportMemberModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
       />
+      </div>
     </div>
   );
 };

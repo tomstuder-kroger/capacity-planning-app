@@ -9,23 +9,18 @@ const SupportNeedsDashboard = () => {
 
   const { userResearch, serviceDesigner } = getSupportNeedsByType(activeIC);
 
-  // Hide section entirely if no support needs
-  if (userResearch.length === 0 && serviceDesigner.length === 0) {
-    return null;
-  }
+  if (userResearch.length === 0 && serviceDesigner.length === 0) return null;
 
   return (
-    <div className="kds-Card kds-Card--m kds-card-section">
-      <h2 className="kds-Heading kds-Heading--s section-heading">Support Needed</h2>
+    <div className="mb-4 p-6 bg-card rounded-lg border">
+      <h2 className="mb-4 text-base font-bold">Support Needed</h2>
 
       {userResearch.length > 0 && (
-        <div className="support-section-group">
-          <div className="support-section-title">
-            User Research:
-          </div>
-          <ul className="support-section-list">
+        <div className="mb-4">
+          <div className="text-sm font-bold mb-2">User Research:</div>
+          <ul className="m-0 pl-5 list-disc">
             {userResearch.map(project => (
-              <li key={project.id} className="support-section-item">
+              <li key={project.id} className="mb-1 text-sm">
                 {project.title || 'Untitled Project'}
               </li>
             ))}
@@ -34,13 +29,11 @@ const SupportNeedsDashboard = () => {
       )}
 
       {serviceDesigner.length > 0 && (
-        <div className="support-section-group">
-          <div className="support-section-title">
-            Service Designer:
-          </div>
-          <ul className="support-section-list">
+        <div className="mb-4">
+          <div className="text-sm font-bold mb-2">Service Designer:</div>
+          <ul className="m-0 pl-5 list-disc">
             {serviceDesigner.map(project => (
-              <li key={project.id} className="support-section-item">
+              <li key={project.id} className="mb-1 text-sm">
                 {project.title || 'Untitled Project'}
               </li>
             ))}

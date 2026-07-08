@@ -1,5 +1,5 @@
 import React from 'react';
-import { KdsButton } from 'react-mx-web-components';
+import { Button } from '@/components/ui/button';
 import { useCapacity } from '../context/CapacityContext';
 import { getTeamSupportNeeds } from '../utils/supportNeeds';
 
@@ -7,36 +7,29 @@ const TeamSupportView = ({ onBack }) => {
   const { ics } = useCapacity();
 
   const { userResearch, serviceDesigner } = getTeamSupportNeeds(ics);
-
   const hasSupport = userResearch.length > 0 || serviceDesigner.length > 0;
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <KdsButton kind="secondary" onClick={onBack}>
-          ← Back to Capacity Planning
-        </KdsButton>
+    <div className="max-w-[1200px] mx-auto px-6">
+      <div className="mb-6">
+        <Button variant="outline" onClick={onBack}>← Back to Capacity Planning</Button>
       </div>
 
-      <div className="kds-Card kds-Card--m" style={{ padding: '24px' }}>
-        <h1 className="kds-Heading kds-Heading--l" style={{ marginBottom: '24px' }}>
-          Team Support Needs
-        </h1>
+      <div className="p-6 bg-card rounded-lg border">
+        <h1 className="text-xl font-bold mb-6">Team Support Needs</h1>
 
         {!hasSupport ? (
-          <div style={{ textAlign: 'center', padding: '48px', color: '#6b7280' }}>
+          <div className="text-center py-12 text-muted-foreground">
             No support requests across the team
           </div>
         ) : (
           <>
             {userResearch.length > 0 && (
-              <div style={{ marginBottom: '32px' }}>
-                <h2 className="kds-Heading kds-Heading--m" style={{ marginBottom: '16px' }}>
-                  User Research
-                </h2>
-                <ul style={{ margin: 0, paddingLeft: '20px', listStyle: 'disc' }}>
+              <div className="mb-8">
+                <h2 className="text-base font-semibold mb-4">User Research</h2>
+                <ul className="m-0 pl-5 list-disc">
                   {userResearch.map((item, index) => (
-                    <li key={index} style={{ marginBottom: '8px', fontSize: '14px' }}>
+                    <li key={index} className="mb-2 text-sm">
                       <strong>{item.projectTitle}</strong> - {item.icName} ({item.domainName})
                     </li>
                   ))}
@@ -46,12 +39,10 @@ const TeamSupportView = ({ onBack }) => {
 
             {serviceDesigner.length > 0 && (
               <div>
-                <h2 className="kds-Heading kds-Heading--m" style={{ marginBottom: '16px' }}>
-                  Service Designer
-                </h2>
-                <ul style={{ margin: 0, paddingLeft: '20px', listStyle: 'disc' }}>
+                <h2 className="text-base font-semibold mb-4">Service Designer</h2>
+                <ul className="m-0 pl-5 list-disc">
                   {serviceDesigner.map((item, index) => (
-                    <li key={index} style={{ marginBottom: '8px', fontSize: '14px' }}>
+                    <li key={index} className="mb-2 text-sm">
                       <strong>{item.projectTitle}</strong> - {item.icName} ({item.domainName})
                     </li>
                   ))}
