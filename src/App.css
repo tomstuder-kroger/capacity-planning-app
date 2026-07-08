@@ -77,11 +77,12 @@ body {
   background: white;
 }
 
-/* Inner scroll container — only this scrolls horizontally */
+/* Inner scroll container — scrolls horizontally and vertically */
 .gantt-chart {
   position: relative;
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: auto;
+  max-height: calc(100vh - 16rem);
 }
 
 /* ── Sticky left columns ────────────────────────────────────────────────── */
@@ -101,16 +102,19 @@ body {
 .gantt-quarter-header-row .gantt-sticky-left,
 .gantt-quarter-header-row .gantt-sticky-domain {
   background: #0F52A2;
+  z-index: 12;
 }
 
 .gantt-period-header .gantt-sticky-left,
 .gantt-period-header .gantt-sticky-domain {
   background: #eef2f9;
+  z-index: 12;
 }
 
 .gantt-header-row .gantt-sticky-left,
 .gantt-header-row .gantt-sticky-domain {
   background: #f9fafb;
+  z-index: 12;
 }
 
 .gantt-member-section .gantt-sticky-left {
@@ -150,6 +154,9 @@ body {
 
 /* ── Quarter header row ─────────────────────────────────────────────────── */
 .gantt-quarter-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 8;
   display: flex;
   align-items: stretch;
   background: #0F52A2;
@@ -200,6 +207,9 @@ body {
 
 /* ── Period header row ──────────────────────────────────────────────────── */
 .gantt-period-header {
+  position: sticky;
+  top: 30px;
+  z-index: 8;
   display: flex;
   align-items: stretch;
   background: #eef2f9;
@@ -233,6 +243,9 @@ body {
 
 /* ── Week header row ────────────────────────────────────────────────────── */
 .gantt-header-row {
+  position: sticky;
+  top: 52px;
+  z-index: 8;
   display: flex;
   align-items: stretch;
   background: #f9fafb;

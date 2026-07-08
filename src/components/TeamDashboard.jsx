@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { GridViewIcon, ChartGanttIcon } from '@hugeicons/core-free-icons';
+import { GridViewIcon, ChartGanttIcon, LayoutLeftIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 import EmptyState from './EmptyState';
@@ -10,6 +10,7 @@ import TeamMemberCard from './TeamMemberCard';
 import GanttChart from './GanttChart';
 import CreateMemberModal from './CreateMemberModal';
 import ImportMemberModal from './ImportMemberModal';
+import MemberListView from './MemberListView';
 
 const currentPeriod = getCurrentFiscalPeriod();
 
@@ -20,7 +21,6 @@ const TeamDashboard = ({ onSelectMember }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [view, setView] = useState('cards');
   const [ganttQuarter, setGanttQuarter] = useState(null);
-  const [editingTeamName, setEditingTeamName] = useState(false);
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
 
@@ -49,71 +49,72 @@ const TeamDashboard = ({ onSelectMember }) => {
     : totalUtilization >= 90 ? '#b45309'
     : '#1a7f3c';
 
-  const handleNameClick = () => setEditingTeamName(true);
-  const handleNameBlur = () => setEditingTeamName(false);
   const handleNameKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
   };
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold">Team Overview</h2>
-        <div className="flex gap-3 items-center">
-          {ics.length > 0 && view === 'cards' && (
-            <Button key={isEditMode ? 'done' : 'edit'} variant="outline" onClick={() => setIsEditMode(!isEditMode)}>
-              {isEditMode ? 'Done' : 'Edit'}
-            </Button>
-          )}
-          <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
-            Import Team Member
-          </Button>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
-            + Add Team Member
-          </Button>
-        </div>
-      </div>
-
-      {/* Team summary card */}
-      <div className="mb-6 p-5 rounded-lg" style={{ background: 'rgb(239, 247, 253)', border: '1px solid rgb(15, 82, 162)' }}>
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2">
-            {editingTeamName || isEditMode ? (
+      {/* Full-width header bar */}
+      <div className="sticky top-14 z-40 w-full bg-card border-b">
+        <div className="max-w-[1800px] mx-auto px-6 py-4 flex items-center gap-6">
+          {/* Team name */}
+          <div className="shrink-0 min-w-[160px]">
+            {isEditMode ? (
               <Input
                 value={teamName}
                 onChange={(e) => updateTeamName(e.target.value)}
-                onBlur={handleNameBlur}
                 onKeyDown={handleNameKeyDown}
                 placeholder="Enter team name"
-                className="w-80"
-                autoFocus={editingTeamName}
+                className="w-60"
               />
             ) : (
-              <h2
-                className="text-xl font-bold cursor-text"
-                onClick={handleNameClick}
-                title="Click to edit team name"
-              >
+              <h2 className="text-lg font-bold">
                 {teamName || 'My Team'}
               </h2>
             )}
           </div>
 
-          <div className="flex gap-6">
-            <div className="text-center">
+          <div className="flex-1" />
+
+          {/* Action buttons */}
+          <div className="flex gap-2 shrink-0">
+            {ics.length > 0 && view === 'cards' && (
+              <Button key={isEditMode ? 'done' : 'edit'} variant="outline" onClick={() => setIsEditMode(!isEditMode)}>
+                {isEditMode ? 'Done' : 'Edit'}
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
+              Import
+            </Button>
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              + Add Member
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="max-w-[1800px] mx-auto px-6 py-8">
+
+      {/* Metrics + view controls row */}
+      {ics.length > 0 && (
+        <div className="flex items-center justify-between mb-4">
+          {/* Metrics — left aligned */}
+          <div className="flex items-center gap-6">
+            <div>
               <div className="text-2xl font-bold font-sans leading-none">{ics.length}</div>
               <div className="text-xs text-muted-foreground mt-0.5">Members</div>
             </div>
-            <div className="w-px bg-border" />
-            <div className="text-center">
+            <div className="w-px h-8 bg-border" />
+            <div>
               <div className="text-2xl font-bold font-sans leading-none">
                 {ics.length > 0 ? `${totalAvailable.toFixed(1)}w` : '—'}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">Total Available</div>
             </div>
-            <div className="w-px bg-border" />
-            <div className="text-center">
+            <div className="w-px h-8 bg-border" />
+            <div>
               <div className="text-2xl font-bold font-sans leading-none">
                 {currentPeriod ? `${currentPeriod.quarter} FY${currentPeriod.fiscalYear}` : '—'}
               </div>
@@ -121,39 +122,17 @@ const TeamDashboard = ({ onSelectMember }) => {
                 {currentPeriod ? `${currentPeriod.weeksInQuarter} weeks` : 'Quarter'}
               </div>
             </div>
-            <div className="w-px bg-border" />
-            <div className="text-center">
+            <div className="w-px h-8 bg-border" />
+            <div>
               <div className="text-2xl font-bold font-sans leading-none" style={{ color: utilizationColor }}>
                 {totalUtilization !== null ? `${totalUtilization.toFixed(0)}%` : '—'}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">Team Capacity</div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* View controls */}
-      {ics.length > 0 && (
-        <div className="flex items-center justify-between mb-4">
+          {/* View controls — right aligned */}
           <div className="flex items-center gap-3">
-            {/* View toggle */}
-            <div className="inline-flex border border-border rounded-md overflow-hidden bg-card">
-              <button
-                className={`px-2 py-1.5 flex items-center justify-center border-r border-border cursor-pointer transition-colors ${view === 'cards' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
-                onClick={() => { setView('cards'); setIsEditMode(false); }}
-                title="Card view"
-              >
-                <HugeiconsIcon icon={GridViewIcon} strokeWidth={2} size={16} />
-              </button>
-              <button
-                className={`px-2 py-1.5 flex items-center justify-center cursor-pointer transition-colors ${view === 'gantt' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
-                onClick={() => { setView('gantt'); setIsEditMode(false); }}
-                title="Gantt view"
-              >
-                <HugeiconsIcon icon={ChartGanttIcon} strokeWidth={2} size={16} />
-              </button>
-            </div>
-
             {/* Quarter filter for Gantt */}
             {view === 'gantt' && (
               <div className="inline-flex border border-border rounded-md overflow-hidden bg-card">
@@ -168,6 +147,31 @@ const TeamDashboard = ({ onSelectMember }) => {
                 ))}
               </div>
             )}
+
+            {/* View toggle */}
+            <div className="inline-flex border border-border rounded-md overflow-hidden bg-card">
+              <button
+                className={`px-2 py-1.5 flex items-center justify-center border-r border-border cursor-pointer transition-colors ${view === 'cards' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
+                onClick={() => { setView('cards'); setIsEditMode(false); }}
+                title="Card view"
+              >
+                <HugeiconsIcon icon={GridViewIcon} strokeWidth={2} size={16} />
+              </button>
+              <button
+                className={`px-2 py-1.5 flex items-center justify-center border-r border-border cursor-pointer transition-colors ${view === 'list' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
+                onClick={() => { setView('list'); setIsEditMode(false); }}
+                title="List view"
+              >
+                <HugeiconsIcon icon={LayoutLeftIcon} strokeWidth={2} size={16} />
+              </button>
+              <button
+                className={`px-2 py-1.5 flex items-center justify-center cursor-pointer transition-colors ${view === 'gantt' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
+                onClick={() => { setView('gantt'); setIsEditMode(false); }}
+                title="Gantt view"
+              >
+                <HugeiconsIcon icon={ChartGanttIcon} strokeWidth={2} size={16} />
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -180,6 +184,8 @@ const TeamDashboard = ({ onSelectMember }) => {
         />
       ) : view === 'gantt' ? (
         <GanttChart quarterFilter={ganttQuarter} />
+      ) : view === 'list' ? (
+        <MemberListView />
       ) : (
         <div className="grid grid-cols-3 gap-4 mt-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
           {ics.map((ic) => (
@@ -208,6 +214,7 @@ const TeamDashboard = ({ onSelectMember }) => {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
       />
+      </div>
     </div>
   );
 };

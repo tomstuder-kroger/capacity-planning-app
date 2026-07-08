@@ -4,7 +4,7 @@ const krogerLogo = '/kroger-logo.svg';
 
 const GlobalNavBar = ({ onNavigateToTeamSupport }) => {
   return (
-    <header className="flex items-center justify-between h-14 px-6 w-full bg-primary shrink-0">
+    <header className="sticky top-0 z-50 flex items-center justify-between h-14 px-6 w-full bg-primary shrink-0">
       <div className="flex items-center gap-4">
         <img src={krogerLogo} alt="Kroger" className="h-[33px] w-[60px] object-contain" />
         <span className="font-sans text-xl font-normal leading-6 text-white whitespace-nowrap">

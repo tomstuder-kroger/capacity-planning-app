@@ -119,8 +119,8 @@ const GanttMemberSection = ({ ic, icIndex, fyStart, totalWeeks }) => {
   const hasPTO = ptoInstances.length > 0;
 
   return (
-    <div className="gantt-member-section" style={{ borderLeft: `4px solid ${personBaseColor}` }}>
-      <div className="gantt-label-col gantt-sticky-left">
+    <div className="gantt-member-section">
+      <div className="gantt-label-col gantt-sticky-left" style={{ borderLeft: `4px solid ${personBaseColor}` }}>
         <div className="gantt-member-name" style={{ color: personBaseColor }}>{ic.icName || 'Unnamed'}</div>
         {ic.icRole && <div className="gantt-member-role">{ic.icRole}</div>}
       </div>

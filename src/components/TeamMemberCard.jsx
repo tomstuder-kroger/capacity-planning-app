@@ -100,7 +100,7 @@ const TeamMemberCard = ({ ic, onSelect, isEditMode, isDragging, isDragOver, onDr
               </div>
             ) : (
               <>
-                <div className="font-sans text-base font-semibold text-foreground mb-1">{ic.icName || 'Unnamed'}</div>
+                <div className="font-heading text-base font-semibold text-foreground mb-1">{ic.icName || 'Unnamed'}</div>
                 <div className="text-sm text-muted-foreground">{ic.icRole || 'No role set'}</div>
               </>
             )}
