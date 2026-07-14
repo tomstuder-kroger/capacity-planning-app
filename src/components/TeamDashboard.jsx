@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
 import { Input } from '@/components/ui/input';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { GridViewIcon, ChartGanttIcon, LayoutLeftIcon } from '@hugeicons/core-free-icons';
@@ -91,14 +92,16 @@ const TeamDashboard = ({ onSelectMember }) => {
                 {isEditMode ? 'Done' : 'Edit'}
               </Button>
             )}
-            {ics.length > 0 && (
-              <Button variant="outline" onClick={handleExport}>
-                Export
+            <ButtonGroup>
+              {ics.length > 0 && (
+                <Button variant="outline" onClick={handleExport} className="rounded-r-none border-r-0">
+                  Export
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => setIsBulkImportModalOpen(true)} className={ics.length > 0 ? "rounded-l-none" : ""}>
+                Import
               </Button>
-            )}
-            <Button variant="outline" onClick={() => setIsBulkImportModalOpen(true)}>
-              Import
-            </Button>
+            </ButtonGroup>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               + Add Member
             </Button>
