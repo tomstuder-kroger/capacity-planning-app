@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod, getQuarterStartDate, getQuarterWeeks, getQuarterPeriods } from '../utils/fiscalCalendar';
-import { getProjectWeeks } from '../utils/calculations';
+import { getProjectWeeks, detectCapacityConflicts } from '../utils/calculations';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // One hue per person — spread around the color wheel
 const PERSON_HUES = [217, 158, 43, 271, 5, 185, 82, 316, 24, 340];
@@ -22,11 +23,12 @@ function getDomainTextColor(domainIndex) {
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 
-const GanttBar = ({ project, domainColor, textColor, fyStart, totalWeeks }) => {
+const GanttBar = ({ project, domainColor, textColor, fyStart, totalWeeks, hasConflict }) => {
   const weeks = getProjectWeeks(project);
   if (weeks === 0) return null;
 
   const unscheduled = !project.startDate;
+  const allocation = project.allocationPercent ?? 100;
   let leftPct = 0;
   let widthPct = (weeks / totalWeeks) * 100;
 
@@ -43,20 +45,24 @@ const GanttBar = ({ project, domainColor, textColor, fyStart, totalWeeks }) => {
   if (widthPct <= 0) return null;
 
   const label = project.title || 'Untitled';
-  const tooltip = `${label} · ${weeks}w${project.startDate ? ` · starts ${project.startDate}` : ' · no start date'}`;
+  const allocationLabel = allocation !== 100 ? ` (${allocation}%)` : '';
+  const tooltip = `${label}${allocationLabel} · ${weeks}w${project.startDate ? ` · starts ${project.startDate}` : ' · no start date'}`;
 
   return (
     <div
-      className={`gantt-bar${unscheduled ? ' gantt-bar--unscheduled' : ''}`}
+      className={`gantt-bar${unscheduled ? ' gantt-bar--unscheduled' : ''}${hasConflict ? ' gantt-bar--conflict' : ''}`}
       style={{
         left: `${leftPct}%`,
         width: `${widthPct}%`,
         backgroundColor: unscheduled ? '#e5e7eb' : domainColor,
-        borderColor: unscheduled ? '#9ca3af' : domainColor,
+        borderColor: hasConflict ? '#dc2626' : (unscheduled ? '#9ca3af' : domainColor),
+        borderWidth: hasConflict ? '2px' : '1px',
       }}
       title={tooltip}
     >
-      <span className="gantt-bar-label" style={{ color: textColor }}>{label}</span>
+      <span className="gantt-bar-label" style={{ color: textColor }}>
+        {label}{allocationLabel}
+      </span>
     </div>
   );
 };
@@ -102,7 +108,7 @@ const GanttPTOBar = ({ pto, fyStart, totalWeeks }) => {
   );
 };
 
-const GanttMemberSection = ({ ic, icIndex, fyStart, totalWeeks }) => {
+const GanttMemberSection = ({ ic, icIndex, fyStart, totalWeeks, conflicts }) => {
   const personHue = PERSON_HUES[icIndex % PERSON_HUES.length];
   const personBaseColor = `hsl(${personHue}, 65%, 38%)`;
   const rows = [];
@@ -117,6 +123,19 @@ const GanttMemberSection = ({ ic, icIndex, fyStart, totalWeeks }) => {
   const isEmpty = rows.length === 0;
   const ptoInstances = ic.ptoInstances || [];
   const hasPTO = ptoInstances.length > 0;
+
+  // Create a set of project IDs that have conflicts
+  const conflictProjectIds = new Set();
+  conflicts.forEach(conflict => {
+    conflict.projects.forEach(p => {
+      const matchingProject = ic.domains
+        .flatMap(d => d.projects || [])
+        .find(proj => proj.title === p.title);
+      if (matchingProject) {
+        conflictProjectIds.add(matchingProject.id);
+      }
+    });
+  });
 
   return (
     <div className="gantt-member-section">
@@ -164,6 +183,7 @@ const GanttMemberSection = ({ ic, icIndex, fyStart, totalWeeks }) => {
                   textColor={getDomainTextColor(domainIndex)}
                   fyStart={fyStart}
                   totalWeeks={totalWeeks}
+                  hasConflict={conflictProjectIds.has(project.id)}
                 />
               </div>
             </div>
@@ -250,8 +270,47 @@ const GanttChart = ({ quarterFilter = null }) => {
     return <div className="gantt-empty">No team members to display.</div>;
   }
 
+  // Detect conflicts for each IC
+  const icConflicts = useMemo(() => {
+    return ics.map(ic => {
+      const allProjects = ic.domains.flatMap(d => d.projects || []);
+      return {
+        icId: ic.id,
+        icName: ic.icName,
+        conflicts: detectCapacityConflicts(allProjects)
+      };
+    });
+  }, [ics]);
+
+  const hasAnyConflicts = icConflicts.some(ic => ic.conflicts.length > 0);
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
   return (
     <div className="gantt-wrapper" ref={wrapperRef}>
+      {/* Conflict warning banner - concise summary */}
+      {hasAnyConflicts && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>
+            <strong>⚠️ Capacity Conflicts Detected:</strong>
+            {' '}
+            {icConflicts.filter(ic => ic.conflicts.length > 0).map((ic, idx, arr) => {
+              const conflictCount = ic.conflicts.length;
+              const maxAllocation = Math.max(...ic.conflicts.map(c => c.totalAllocation));
+              return (
+                <span key={ic.icId}>
+                  <strong>{ic.icName}</strong> has {conflictCount} conflict{conflictCount !== 1 ? 's' : ''} (up to {maxAllocation}% allocated)
+                  {idx < arr.length - 1 ? ', ' : '. '}
+                </span>
+              );
+            })}
+            See red-bordered projects in chart for details.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="gantt-chart" style={chartStyle}>
 
         {/* Quarter header row */}
@@ -309,15 +368,19 @@ const GanttChart = ({ quarterFilter = null }) => {
         </div>
 
         {/* IC rows */}
-        {ics.map((ic, icIndex) => (
-          <GanttMemberSection
-            key={ic.id}
-            ic={ic}
-            icIndex={icIndex}
-            fyStart={fyStart}
-            totalWeeks={totalWeeks}
-          />
-        ))}
+        {ics.map((ic, icIndex) => {
+          const icConflictData = icConflicts.find(c => c.icId === ic.id);
+          return (
+            <GanttMemberSection
+              key={ic.id}
+              ic={ic}
+              icIndex={icIndex}
+              fyStart={fyStart}
+              totalWeeks={totalWeeks}
+              conflicts={icConflictData?.conflicts || []}
+            />
+          );
+        })}
 
         {/* Continuous quarter boundary lines spanning the full chart height */}
         <div className="gantt-boundary-overlay" aria-hidden="true">

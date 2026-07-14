@@ -28,7 +28,7 @@ const SupportNeedsSelector = ({ value = [], onChange }) => {
   };
 
   const displayText = value.length === 0
-    ? 'Select support needed'
+    ? 'Select'
     : `${value.length} item${value.length !== 1 ? 's' : ''} selected`;
 
   return (

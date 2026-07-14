@@ -7,7 +7,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
-import { getProjectWeeks } from '../utils/calculations';
+import { getProjectWeeks, calculateProjectCapacity } from '../utils/calculations';
 import SupportNeedsSelector from './SupportNeedsSelector';
 
 const WEEK_OPTIONS = [
@@ -34,6 +34,8 @@ const DateField = ({ label, value, onChange, id }) => (
 const ProjectRow = ({ project, onUpdate, onRemove }) => {
   const weeksValue = project.weeksMode === 'custom' ? 'custom' : String(project.weeks || 1);
   const calculatedWeeks = getProjectWeeks(project);
+  const allocation = project.allocationPercent ?? 100;
+  const capacityConsumed = calculateProjectCapacity(project);
 
   const handleWeeksChange = (value) => {
     if (value === 'custom') {
@@ -88,6 +90,41 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
             ))}
           </select>
         </div>
+        <div className="flex-1 min-w-[100px]">
+          <Label htmlFor={`allocation-${project.id}`} className="text-xs">
+            Allocation %
+          </Label>
+          <Input
+            id={`allocation-${project.id}`}
+            type="number"
+            min="0"
+            max="100"
+            step="5"
+            placeholder="100"
+            value={allocation}
+            onChange={(e) => onUpdate(project.id, {
+              allocationPercent: Number(e.target.value) || 100
+            })}
+            className="h-7"
+          />
+        </div>
+        <div className="flex-1 min-w-[90px]">
+          <Label htmlFor={`story-points-${project.id}`} className="text-xs">
+            Story Pts
+          </Label>
+          <Input
+            id={`story-points-${project.id}`}
+            type="number"
+            min="0"
+            step="1"
+            placeholder="—"
+            value={project.storyPoints || ''}
+            onChange={(e) => onUpdate(project.id, {
+              storyPoints: e.target.value ? Number(e.target.value) : null
+            })}
+            className="h-7"
+          />
+        </div>
         <SupportNeedsSelector
           value={project.supportNeeds || []}
           onChange={(selected) => onUpdate(project.id, { supportNeeds: selected })}
@@ -102,13 +139,11 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
         )}
       </div>
 
-      {project.weeksMode === 'custom' && (
-        <div className="mt-2 text-xs text-muted-foreground">
-          {calculatedWeeks > 0
-            ? `${calculatedWeeks} week${calculatedWeeks !== 1 ? 's' : ''}`
-            : 'Select start and end dates to calculate weeks'}
-        </div>
-      )}
+      <div className="mt-2 text-xs text-muted-foreground">
+        {project.weeksMode === 'custom' && calculatedWeeks === 0
+          ? 'Select start and end dates to calculate weeks'
+          : `${calculatedWeeks}w @ ${allocation}% = ${capacityConsumed.toFixed(1)}w capacity`}
+      </div>
     </div>
   );
 };
@@ -146,7 +181,9 @@ const DomainForm = ({ domain }) => {
       weeksMode: 'fixed',
       weeks: 1,
       customEndDate: null,
-      supportNeeds: []
+      supportNeeds: [],
+      allocationPercent: 100,
+      storyPoints: null
     };
     updateDomain({ projects: [...(domain.projects || []), newProject] });
   };
@@ -157,7 +194,11 @@ const DomainForm = ({ domain }) => {
     setDeleteDialogOpen(false);
   };
 
-  const totalWeeks = (domain.projects || []).reduce((sum, p) => sum + getProjectWeeks(p), 0);
+  const totalCapacity = (domain.projects || []).reduce((sum, p) => {
+    const weeks = getProjectWeeks(p);
+    const allocation = (p.allocationPercent ?? 100) / 100;
+    return sum + (weeks * allocation);
+  }, 0);
 
   return (
     <>
@@ -201,7 +242,7 @@ const DomainForm = ({ domain }) => {
         </Button>
 
         <div className="mt-4 p-3 bg-muted rounded-md">
-          <span>Domain total: <strong>{totalWeeks.toFixed(1)} weeks</strong></span>
+          <span>Total capacity: <strong>{totalCapacity.toFixed(1)} weeks</strong></span>
         </div>
       </div>
 

@@ -51,6 +51,97 @@ export function getProjectWeeks(project) {
 }
 
 /**
+ * Calculate capacity consumed by a project
+ * @param {Object} project - Project object
+ * @returns {number} Capacity in weeks (duration × allocation %)
+ */
+export function calculateProjectCapacity(project) {
+  if (!project) return 0;
+
+  const duration = getProjectWeeks(project);
+  const allocation = typeof project.allocationPercent === 'number'
+    && project.allocationPercent >= 0
+    ? Math.min(project.allocationPercent, 100)
+    : 100;
+
+  return duration * (allocation / 100);
+}
+
+/**
+ * Calculate total capacity consumed by a domain
+ * @param {Object} domain - Domain object with projects array
+ * @returns {number} Total capacity in weeks
+ */
+export function calculateDomainCapacity(domain) {
+  if (!domain || !Array.isArray(domain.projects)) return 0;
+
+  return domain.projects.reduce((sum, project) =>
+    sum + calculateProjectCapacity(project), 0
+  );
+}
+
+/**
+ * Detect capacity conflicts in overlapping projects
+ * @param {Array} projects - Array of project objects with startDate and endDate
+ * @returns {Array} Array of conflict objects with date ranges and total allocation
+ */
+export function detectCapacityConflicts(projects) {
+  if (!Array.isArray(projects) || projects.length === 0) return [];
+
+  // Build timeline of all project date ranges
+  const events = [];
+  projects.forEach(project => {
+    if (!project.startDate) return; // Skip projects without start dates
+
+    const start = new Date(project.startDate);
+    const end = project.weeksMode === 'custom' && project.customEndDate
+      ? new Date(project.customEndDate)
+      : new Date(start.getTime() + (getProjectWeeks(project) * 7 * 24 * 60 * 60 * 1000));
+
+    const allocation = project.allocationPercent || 100;
+
+    events.push({ date: start, type: 'start', project, allocation });
+    events.push({ date: end, type: 'end', project, allocation });
+  });
+
+  // Sort events chronologically
+  events.sort((a, b) => a.date - b.date);
+
+  // Sweep through timeline, tracking active projects
+  const conflicts = [];
+  const activeProjects = new Set();
+  let currentAllocation = 0;
+
+  events.forEach((event, idx) => {
+    if (event.type === 'start') {
+      activeProjects.add(event.project);
+      currentAllocation += event.allocation;
+
+      // Check if we've exceeded 100% capacity
+      if (currentAllocation > 100 && activeProjects.size > 1) {
+        const nextEvent = events[idx + 1];
+        const endDate = nextEvent ? nextEvent.date : event.date;
+
+        conflicts.push({
+          startDate: event.date,
+          endDate: endDate,
+          totalAllocation: currentAllocation,
+          projects: Array.from(activeProjects).map(p => ({
+            title: p.title,
+            allocation: p.allocationPercent || 100
+          }))
+        });
+      }
+    } else {
+      activeProjects.delete(event.project);
+      currentAllocation -= event.allocation;
+    }
+  });
+
+  return conflicts;
+}
+
+/**
  * Calculates total PTO weeks from an array of PTO instances
  * @param {Array} ptoInstances - Array of PTO instances
  * @param {string} ptoInstances[].startDate - Start date in ISO format
@@ -283,11 +374,15 @@ export function generateSummary(ic, calculated) {
 
   // Add each domain's breakdown
   domainEfforts.forEach((effort) => {
-    output += `- **${effort.domainName}:** ${effort.totalWeeks.toFixed(1)} weeks\n`;
+    const totalCapacity = effort.totalCapacity || effort.totalWeeks;
+    output += `- **${effort.domainName}:** ${totalCapacity.toFixed(1)} weeks capacity\n`;
     if (effort.projects && effort.projects.length > 0) {
       effort.projects.forEach(p => {
-        const wks = p.weeks;
-        output += `  - **${p.title || 'Untitled'}:** ${wks} week${wks !== 1 ? 's' : ''}\n`;
+        const duration = p.duration || p.weeks || 0;
+        const allocation = p.allocation ?? 100;
+        const capacity = p.capacity ?? duration;
+        const storyPointsStr = p.storyPoints ? ` (Story Points: ${p.storyPoints})` : '';
+        output += `  - **${p.title || 'Untitled'}:** ${duration} week${duration !== 1 ? 's' : ''} @ ${allocation}% allocation = ${capacity.toFixed(1)} weeks capacity${storyPointsStr}\n`;
       });
     }
     output += '\n';

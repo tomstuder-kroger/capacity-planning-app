@@ -6,6 +6,10 @@ import {
   calculateUtilization,
   calculateStatus,
   generateSummary,
+  getProjectWeeks,
+  calculateProjectCapacity,
+  calculateDomainCapacity,
+  detectCapacityConflicts,
 } from './calculations';
 
 describe('Capacity Planning Calculations', () => {
@@ -666,6 +670,280 @@ describe('Capacity Planning Calculations', () => {
       expect(result).toContain('No — under capacity');
       expect(result).toContain('Under by 16.0 weeks');
       expect(result).toContain('under capacity');
+    });
+  });
+
+  describe('calculateProjectCapacity', () => {
+    test('calculates capacity with 100% allocation', () => {
+      const project = { weeksMode: 'fixed', weeks: 4, allocationPercent: 100 };
+      expect(calculateProjectCapacity(project)).toBe(4);
+    });
+
+    test('calculates capacity with partial allocation', () => {
+      const project = { weeksMode: 'fixed', weeks: 4, allocationPercent: 50 };
+      expect(calculateProjectCapacity(project)).toBe(2);
+    });
+
+    test('calculates capacity with 75% allocation', () => {
+      const project = { weeksMode: 'fixed', weeks: 4, allocationPercent: 75 };
+      expect(calculateProjectCapacity(project)).toBe(3);
+    });
+
+    test('calculates capacity with 25% allocation', () => {
+      const project = { weeksMode: 'fixed', weeks: 8, allocationPercent: 25 };
+      expect(calculateProjectCapacity(project)).toBe(2);
+    });
+
+    test('defaults to 100% when allocation not specified', () => {
+      const project = { weeksMode: 'fixed', weeks: 4 };
+      expect(calculateProjectCapacity(project)).toBe(4);
+    });
+
+    test('handles allocation over 100% by capping at 100%', () => {
+      const project = { weeksMode: 'fixed', weeks: 4, allocationPercent: 150 };
+      expect(calculateProjectCapacity(project)).toBe(4);
+    });
+
+    test('handles 0% allocation', () => {
+      const project = { weeksMode: 'fixed', weeks: 4, allocationPercent: 0 };
+      expect(calculateProjectCapacity(project)).toBe(0);
+    });
+
+    test('handles negative allocation by treating as 100%', () => {
+      const project = { weeksMode: 'fixed', weeks: 4, allocationPercent: -50 };
+      expect(calculateProjectCapacity(project)).toBe(4);
+    });
+
+    test('handles null project', () => {
+      expect(calculateProjectCapacity(null)).toBe(0);
+    });
+
+    test('handles undefined project', () => {
+      expect(calculateProjectCapacity(undefined)).toBe(0);
+    });
+
+    test('calculates capacity for custom date range projects', () => {
+      const project = {
+        weeksMode: 'custom',
+        startDate: '2024-01-01',
+        customEndDate: '2024-01-15',
+        allocationPercent: 50
+      };
+      const weeks = getProjectWeeks(project);
+      expect(calculateProjectCapacity(project)).toBe(weeks * 0.5);
+    });
+  });
+
+  describe('calculateDomainCapacity', () => {
+    test('calculates total capacity for multiple projects', () => {
+      const domain = {
+        projects: [
+          { weeksMode: 'fixed', weeks: 4, allocationPercent: 100 },
+          { weeksMode: 'fixed', weeks: 2, allocationPercent: 50 },
+          { weeksMode: 'fixed', weeks: 3, allocationPercent: 75 }
+        ]
+      };
+      // 4*1.0 + 2*0.5 + 3*0.75 = 4 + 1 + 2.25 = 7.25
+      expect(calculateDomainCapacity(domain)).toBeCloseTo(7.25);
+    });
+
+    test('calculates capacity for single project', () => {
+      const domain = {
+        projects: [
+          { weeksMode: 'fixed', weeks: 4, allocationPercent: 75 }
+        ]
+      };
+      expect(calculateDomainCapacity(domain)).toBe(3);
+    });
+
+    test('handles empty projects array', () => {
+      const domain = { projects: [] };
+      expect(calculateDomainCapacity(domain)).toBe(0);
+    });
+
+    test('handles null domain', () => {
+      expect(calculateDomainCapacity(null)).toBe(0);
+    });
+
+    test('handles undefined domain', () => {
+      expect(calculateDomainCapacity(undefined)).toBe(0);
+    });
+
+    test('handles domain without projects array', () => {
+      const domain = { name: 'Test' };
+      expect(calculateDomainCapacity(domain)).toBe(0);
+    });
+
+    test('handles projects with missing allocation (defaults to 100%)', () => {
+      const domain = {
+        projects: [
+          { weeksMode: 'fixed', weeks: 2 },
+          { weeksMode: 'fixed', weeks: 3 }
+        ]
+      };
+      expect(calculateDomainCapacity(domain)).toBe(5);
+    });
+  });
+
+  describe('detectCapacityConflicts', () => {
+    test('detects overlapping projects exceeding 100%', () => {
+      const projects = [
+        {
+          title: 'P1',
+          startDate: '2024-01-01',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 75
+        },
+        {
+          title: 'P2',
+          startDate: '2024-01-08',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 45
+        }
+      ];
+      const conflicts = detectCapacityConflicts(projects);
+      expect(conflicts.length).toBeGreaterThan(0);
+      expect(conflicts[0].totalAllocation).toBe(120);
+    });
+
+    test('no conflicts when projects do not overlap', () => {
+      const projects = [
+        {
+          title: 'P1',
+          startDate: '2024-01-01',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 100
+        },
+        {
+          title: 'P2',
+          startDate: '2024-01-22',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 100
+        }
+      ];
+      const conflicts = detectCapacityConflicts(projects);
+      expect(conflicts.length).toBe(0);
+    });
+
+    test('no conflicts when overlapping projects total less than 100%', () => {
+      const projects = [
+        {
+          title: 'P1',
+          startDate: '2024-01-01',
+          weeksMode: 'fixed',
+          weeks: 4,
+          allocationPercent: 50
+        },
+        {
+          title: 'P2',
+          startDate: '2024-01-08',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 40
+        }
+      ];
+      const conflicts = detectCapacityConflicts(projects);
+      expect(conflicts.length).toBe(0);
+    });
+
+    test('detects conflicts with custom date ranges', () => {
+      const projects = [
+        {
+          title: 'P1',
+          startDate: '2024-01-01',
+          weeksMode: 'custom',
+          customEndDate: '2024-01-21',
+          allocationPercent: 60
+        },
+        {
+          title: 'P2',
+          startDate: '2024-01-08',
+          weeksMode: 'custom',
+          customEndDate: '2024-01-22',
+          allocationPercent: 50
+        }
+      ];
+      const conflicts = detectCapacityConflicts(projects);
+      expect(conflicts.length).toBeGreaterThan(0);
+      expect(conflicts[0].totalAllocation).toBe(110);
+    });
+
+    test('handles empty projects array', () => {
+      const conflicts = detectCapacityConflicts([]);
+      expect(conflicts.length).toBe(0);
+    });
+
+    test('handles null input', () => {
+      const conflicts = detectCapacityConflicts(null);
+      expect(conflicts.length).toBe(0);
+    });
+
+    test('handles undefined input', () => {
+      const conflicts = detectCapacityConflicts(undefined);
+      expect(conflicts.length).toBe(0);
+    });
+
+    test('handles single project (no conflicts possible)', () => {
+      const projects = [
+        {
+          title: 'P1',
+          startDate: '2024-01-01',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 100
+        }
+      ];
+      const conflicts = detectCapacityConflicts(projects);
+      expect(conflicts.length).toBe(0);
+    });
+
+    test('handles projects without start dates', () => {
+      const projects = [
+        {
+          title: 'P1',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 75
+        },
+        {
+          title: 'P2',
+          startDate: '2024-01-08',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 45
+        }
+      ];
+      const conflicts = detectCapacityConflicts(projects);
+      expect(conflicts.length).toBe(0);
+    });
+
+    test('includes project details in conflict objects', () => {
+      const projects = [
+        {
+          title: 'Project Alpha',
+          startDate: '2024-01-01',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 75
+        },
+        {
+          title: 'Project Beta',
+          startDate: '2024-01-08',
+          weeksMode: 'fixed',
+          weeks: 2,
+          allocationPercent: 45
+        }
+      ];
+      const conflicts = detectCapacityConflicts(projects);
+      expect(conflicts.length).toBeGreaterThan(0);
+      const conflict = conflicts[0];
+      expect(conflict.projects.length).toBe(2);
+      expect(conflict.projects.some(p => p.title === 'Project Alpha')).toBe(true);
+      expect(conflict.projects.some(p => p.title === 'Project Beta')).toBe(true);
     });
   });
 });

@@ -443,6 +443,12 @@ body {
   color: #6b7280;
 }
 
+.gantt-bar--conflict {
+  border-color: #dc2626 !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
 .gantt-no-projects {
   position: absolute;
   top: 50%;

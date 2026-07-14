@@ -9,6 +9,19 @@ const STORAGE_KEYS = {
 const CURRENT_VERSION = 1;
 
 /**
+ * Migrate project data to support allocation percentage and story points
+ * @param {Object} project - Project object
+ * @returns {Object} Migrated project with allocationPercent and storyPoints
+ */
+export const migrateProjectData = (project) => {
+  return {
+    ...project,
+    allocationPercent: project.allocationPercent ?? 100, // Default to 100%
+    storyPoints: project.storyPoints ?? null, // Optional reference field
+  };
+};
+
+/**
  * Migrate IC data to support new ptoInstances format
  * Checks if IC already has ptoInstances property
  * If not, initializes it as empty array and removes ptoDays if present
@@ -43,7 +56,17 @@ export const loadICs = () => {
     if (!data) return [];
     const ics = JSON.parse(data);
     // Apply migration to all ICs
-    return ics.map(ic => migrateICData(ic));
+    return ics.map(ic => {
+      const migratedIC = migrateICData(ic);
+      // Apply project migration to all domains and projects
+      if (migratedIC.domains && Array.isArray(migratedIC.domains)) {
+        migratedIC.domains = migratedIC.domains.map(domain => ({
+          ...domain,
+          projects: (domain.projects || []).map(project => migrateProjectData(project))
+        }));
+      }
+      return migratedIC;
+    });
   } catch (error) {
     console.error('Failed to load ICs from localStorage:', error);
     return [];
