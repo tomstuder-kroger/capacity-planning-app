@@ -5,6 +5,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { GridViewIcon, ChartGanttIcon, LayoutLeftIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
+import { exportAllICsAsJSON } from '../utils/storage';
 import EmptyState from './EmptyState';
 import TeamMemberCard from './TeamMemberCard';
 import GanttChart from './GanttChart';
@@ -53,6 +54,12 @@ const TeamDashboard = ({ onSelectMember }) => {
     if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
   };
 
+  const handleExport = () => {
+    if (ics.length > 0) {
+      exportAllICsAsJSON(ics);
+    }
+  };
+
   return (
     <div>
       {/* Full-width header bar */}
@@ -82,6 +89,11 @@ const TeamDashboard = ({ onSelectMember }) => {
             {ics.length > 0 && view === 'cards' && (
               <Button key={isEditMode ? 'done' : 'edit'} variant="outline" onClick={() => setIsEditMode(!isEditMode)}>
                 {isEditMode ? 'Done' : 'Edit'}
+              </Button>
+            )}
+            {ics.length > 0 && (
+              <Button variant="outline" onClick={handleExport}>
+                Export
               </Button>
             )}
             <Button variant="outline" onClick={() => setIsBulkImportModalOpen(true)}>
