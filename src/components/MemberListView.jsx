@@ -3,10 +3,8 @@ import { Button } from '@/components/ui/button';
 import { useCapacity } from '../context/CapacityContext';
 import SinglePersonGantt from './SinglePersonGantt';
 import FormattedOutput from './FormattedOutput';
-import QuarterInfoForm from './QuarterInfoForm';
 import TimeOffForm from './TimeOffForm';
 import DomainList from './DomainList';
-import CapacityDashboard from './CapacityDashboard';
 
 const PERSON_HUES = [217, 158, 43, 271, 5, 185, 82, 316, 24, 340];
 
@@ -231,7 +229,6 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit }) => {
 
 const EditPanel = ({ ic, icIndex, onDone }) => {
   const { setActiveIC } = useCapacity();
-  const color = personColor(icIndex);
 
   useEffect(() => {
     setActiveIC(ic.id);
@@ -240,19 +237,12 @@ const EditPanel = ({ ic, icIndex, onDone }) => {
   return (
     <div className="h-full overflow-y-auto">
       {/* Sticky header */}
-      <div className="sticky top-0 z-10 bg-card border-b px-6 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-7 rounded-full shrink-0" style={{ backgroundColor: color }} />
-          <span className="font-heading font-bold text-base">{ic.icName || 'Unnamed'}</span>
-          <span className="text-sm text-muted-foreground">{ic.icRole || ''}</span>
-        </div>
+      <div className="sticky top-0 z-10 bg-card border-b px-6 py-3 flex items-center justify-end shrink-0">
         <Button size="sm" onClick={onDone}>Done</Button>
       </div>
 
       {/* Forms */}
       <div className="p-6">
-        <CapacityDashboard />
-        <QuarterInfoForm />
         <TimeOffForm />
         <DomainList />
       </div>
