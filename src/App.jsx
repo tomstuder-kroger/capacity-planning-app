@@ -21,7 +21,9 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-muted">
-      <GlobalNavBar onNavigateToTeamSupport={navigateToTeamSupport} />
+      <GlobalNavBar
+        onNavigateToTeamSupport={navigateToTeamSupport}
+      />
       {saveError && (
         <div className="max-w-[1800px] mx-auto px-6 pt-4">
           <Alert className="border-warning/30 bg-warning/10 text-warning-foreground">

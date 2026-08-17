@@ -9,8 +9,8 @@ import EmptyState from './EmptyState';
 import TeamMemberCard from './TeamMemberCard';
 import GanttChart from './GanttChart';
 import CreateMemberModal from './CreateMemberModal';
-import ImportMemberModal from './ImportMemberModal';
 import BulkImportModal from './BulkImportModal';
+import ExportDataModal from './ExportDataModal';
 import MemberListView from './MemberListView';
 
 const currentPeriod = getCurrentFiscalPeriod();
@@ -19,7 +19,7 @@ const TeamDashboard = ({ onSelectMember }) => {
   const { ics, teamName, updateTeamName, calculateResults, reorderICs } = useCapacity();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isBulkImportModalOpen, setIsBulkImportModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [view, setView] = useState('cards');
   const [ganttQuarter, setGanttQuarter] = useState(null);
@@ -86,11 +86,11 @@ const TeamDashboard = ({ onSelectMember }) => {
                 {isEditMode ? 'Done' : 'Edit'}
               </Button>
             )}
+            <Button variant="outline" onClick={() => setIsExportModalOpen(true)}>
+              Export
+            </Button>
             <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
               Import
-            </Button>
-            <Button variant="outline" onClick={() => setIsBulkImportModalOpen(true)}>
-              Bulk Import
             </Button>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               + Add Member
@@ -215,14 +215,14 @@ const TeamDashboard = ({ onSelectMember }) => {
         onClose={() => setIsCreateModalOpen(false)}
         onCreated={onSelectMember}
       />
-      <ImportMemberModal
+      <BulkImportModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
-      />
-      <BulkImportModal
-        isOpen={isBulkImportModalOpen}
-        onClose={() => setIsBulkImportModalOpen(false)}
         onImported={onSelectMember}
+      />
+      <ExportDataModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
       />
       </div>
     </div>

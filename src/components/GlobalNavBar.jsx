@@ -12,14 +12,16 @@ const GlobalNavBar = ({ onNavigateToTeamSupport }) => {
         </span>
       </div>
 
-      {onNavigateToTeamSupport && (
-        <button
-          onClick={onNavigateToTeamSupport}
-          className="bg-transparent border-none text-white text-base font-semibold cursor-pointer px-4 py-2 rounded hover:bg-white/10 transition-colors"
-        >
-          Shared Services Support
-        </button>
-      )}
+      <div className="flex items-center gap-2">
+        {onNavigateToTeamSupport && (
+          <button
+            onClick={onNavigateToTeamSupport}
+            className="bg-transparent border-none text-white text-base font-semibold cursor-pointer px-4 py-2 rounded hover:bg-white/10 transition-colors"
+          >
+            Shared Services Support
+          </button>
+        )}
+      </div>
     </header>
   );
 };
