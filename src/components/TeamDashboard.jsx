@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
 import { Input } from '@/components/ui/input';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { GridViewIcon, ChartGanttIcon, LayoutLeftIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
-import { exportAllICsAsJSON } from '../utils/storage';
 import EmptyState from './EmptyState';
 import TeamMemberCard from './TeamMemberCard';
 import GanttChart from './GanttChart';
 import CreateMemberModal from './CreateMemberModal';
 import BulkImportModal from './BulkImportModal';
+import ExportDataModal from './ExportDataModal';
 import MemberListView from './MemberListView';
 
 const currentPeriod = getCurrentFiscalPeriod();
@@ -19,7 +18,8 @@ const currentPeriod = getCurrentFiscalPeriod();
 const TeamDashboard = ({ onSelectMember }) => {
   const { ics, teamName, updateTeamName, calculateResults, reorderICs } = useCapacity();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isBulkImportModalOpen, setIsBulkImportModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [view, setView] = useState('cards');
   const [ganttQuarter, setGanttQuarter] = useState(null);
@@ -55,12 +55,6 @@ const TeamDashboard = ({ onSelectMember }) => {
     if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
   };
 
-  const handleExport = () => {
-    if (ics.length > 0) {
-      exportAllICsAsJSON(ics);
-    }
-  };
-
   return (
     <div>
       {/* Full-width header bar */}
@@ -92,16 +86,12 @@ const TeamDashboard = ({ onSelectMember }) => {
                 {isEditMode ? 'Done' : 'Edit'}
               </Button>
             )}
-            <ButtonGroup>
-              {ics.length > 0 && (
-                <Button variant="outline" onClick={handleExport} className="rounded-r-none border-r-0">
-                  Export
-                </Button>
-              )}
-              <Button variant="outline" onClick={() => setIsBulkImportModalOpen(true)} className={ics.length > 0 ? "rounded-l-none" : ""}>
-                Import
-              </Button>
-            </ButtonGroup>
+            <Button variant="outline" onClick={() => setIsExportModalOpen(true)}>
+              Export
+            </Button>
+            <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
+              Import
+            </Button>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               + Add Member
             </Button>
@@ -226,9 +216,13 @@ const TeamDashboard = ({ onSelectMember }) => {
         onCreated={onSelectMember}
       />
       <BulkImportModal
-        isOpen={isBulkImportModalOpen}
-        onClose={() => setIsBulkImportModalOpen(false)}
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
         onImported={onSelectMember}
+      />
+      <ExportDataModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
       />
       </div>
     </div>

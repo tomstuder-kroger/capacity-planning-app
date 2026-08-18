@@ -112,9 +112,9 @@ const BulkImportModal = ({ isOpen, onClose, onImported }) => {
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Bulk Import Data</DialogTitle>
+          <DialogTitle>Import Team Members</DialogTitle>
           <DialogDescription>
-            Import multiple team members or restore from a backup
+            Add a single or multiple team members, or restore from a backup
           </DialogDescription>
         </DialogHeader>
 
