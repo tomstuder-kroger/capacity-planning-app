@@ -55,20 +55,38 @@ export const loadICs = () => {
     const data = localStorage.getItem(STORAGE_KEYS.ICS);
     if (!data) return [];
     const ics = JSON.parse(data);
-    // Apply migration to all ICs
-    return ics.map(ic => {
-      const migratedIC = migrateICData(ic);
-      // Apply project migration to all domains and projects
-      if (migratedIC.domains && Array.isArray(migratedIC.domains)) {
-        migratedIC.domains = migratedIC.domains.map(domain => ({
-          ...domain,
-          projects: (domain.projects || []).map(project => migrateProjectData(project))
-        }));
+
+    // Apply migration to all ICs with individual error handling
+    return ics.map((ic, index) => {
+      try {
+        const migratedIC = migrateICData(ic);
+        // Apply project migration to all domains and projects
+        if (migratedIC.domains && Array.isArray(migratedIC.domains)) {
+          migratedIC.domains = migratedIC.domains.map(domain => ({
+            ...domain,
+            projects: (domain.projects || []).map(project => migrateProjectData(project))
+          }));
+        }
+        return migratedIC;
+      } catch (migrationError) {
+        console.error(`Failed to migrate IC at index ${index}:`, migrationError, ic);
+        // Return the original IC if migration fails rather than losing data
+        return ic;
       }
-      return migratedIC;
     });
   } catch (error) {
     console.error('Failed to load ICs from localStorage:', error);
+    // IMPORTANT: Don't return empty array on error - check if data exists
+    // This prevents data loss if migration fails
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.ICS);
+      if (data) {
+        console.warn('Returning raw data without migration due to error');
+        return JSON.parse(data);
+      }
+    } catch (fallbackError) {
+      console.error('Fallback load also failed:', fallbackError);
+    }
     return [];
   }
 };
