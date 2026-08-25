@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { GridViewIcon, ChartGanttIcon, LayoutLeftIcon } from '@hugeicons/core-free-icons';
+import { ChartGanttIcon, LayoutLeftIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 import EmptyState from './EmptyState';
-import TeamMemberCard from './TeamMemberCard';
 import GanttChart from './GanttChart';
 import CreateMemberModal from './CreateMemberModal';
 import BulkImportModal from './BulkImportModal';
@@ -16,24 +15,13 @@ import MemberListView from './MemberListView';
 const currentPeriod = getCurrentFiscalPeriod();
 
 const TeamDashboard = ({ onSelectMember }) => {
-  const { ics, teamName, updateTeamName, calculateResults, reorderICs } = useCapacity();
+  const { ics, teamName, updateTeamName, calculateResults } = useCapacity();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [view, setView] = useState('cards');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [view, setView] = useState('list');
   const [ganttQuarter, setGanttQuarter] = useState(null);
-  const [draggedId, setDraggedId] = useState(null);
-  const [dragOverId, setDragOverId] = useState(null);
-
-  const handleDragStart = (id) => setDraggedId(id);
-  const handleDragOver = (id) => setDragOverId(id);
-  const handleDrop = (toId) => {
-    if (draggedId && toId && draggedId !== toId) reorderICs(draggedId, toId);
-    setDraggedId(null);
-    setDragOverId(null);
-  };
-  const handleDragEnd = () => { setDraggedId(null); setDragOverId(null); };
 
   const { totalAvailable, totalPlanned } = ics.reduce((acc, ic) => {
     const result = calculateResults(ic);
@@ -62,13 +50,15 @@ const TeamDashboard = ({ onSelectMember }) => {
         <div className="max-w-[1800px] mx-auto px-6 py-4 flex items-center gap-6">
           {/* Team name */}
           <div className="shrink-0 min-w-[160px]">
-            {isEditMode ? (
+            {isEditingName ? (
               <Input
                 value={teamName}
                 onChange={(e) => updateTeamName(e.target.value)}
                 onKeyDown={handleNameKeyDown}
+                onBlur={() => setIsEditingName(false)}
                 placeholder="Enter team name"
                 className="w-60"
+                autoFocus
               />
             ) : (
               <h2 className="text-lg font-bold">
@@ -81,11 +71,9 @@ const TeamDashboard = ({ onSelectMember }) => {
 
           {/* Action buttons */}
           <div className="flex gap-2 shrink-0">
-            {ics.length > 0 && view === 'cards' && (
-              <Button key={isEditMode ? 'done' : 'edit'} variant="outline" onClick={() => setIsEditMode(!isEditMode)}>
-                {isEditMode ? 'Done' : 'Edit'}
-              </Button>
-            )}
+            <Button key={isEditingName ? 'done' : 'edit'} variant="outline" onClick={() => setIsEditingName(!isEditingName)}>
+              {isEditingName ? 'Done' : 'Edit'}
+            </Button>
             <Button variant="outline" onClick={() => setIsExportModalOpen(true)}>
               Export
             </Button>
@@ -156,22 +144,15 @@ const TeamDashboard = ({ onSelectMember }) => {
             {/* View toggle */}
             <div className="inline-flex border border-border rounded-md overflow-hidden bg-card">
               <button
-                className={`px-2 py-1.5 flex items-center justify-center border-r border-border cursor-pointer transition-colors ${view === 'cards' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
-                onClick={() => { setView('cards'); setIsEditMode(false); }}
-                title="Card view"
-              >
-                <HugeiconsIcon icon={GridViewIcon} strokeWidth={2} size={16} />
-              </button>
-              <button
                 className={`px-2 py-1.5 flex items-center justify-center border-r border-border cursor-pointer transition-colors ${view === 'list' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
-                onClick={() => { setView('list'); setIsEditMode(false); }}
+                onClick={() => setView('list')}
                 title="List view"
               >
                 <HugeiconsIcon icon={LayoutLeftIcon} strokeWidth={2} size={16} />
               </button>
               <button
                 className={`px-2 py-1.5 flex items-center justify-center cursor-pointer transition-colors ${view === 'gantt' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
-                onClick={() => { setView('gantt'); setIsEditMode(false); }}
+                onClick={() => setView('gantt')}
                 title="Gantt view"
               >
                 <HugeiconsIcon icon={ChartGanttIcon} strokeWidth={2} size={16} />
@@ -189,25 +170,8 @@ const TeamDashboard = ({ onSelectMember }) => {
         />
       ) : view === 'gantt' ? (
         <GanttChart quarterFilter={ganttQuarter} />
-      ) : view === 'list' ? (
-        <MemberListView />
       ) : (
-        <div className="grid grid-cols-3 gap-4 mt-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
-          {ics.map((ic) => (
-            <TeamMemberCard
-              key={ic.id}
-              ic={ic}
-              onSelect={() => !isEditMode && onSelectMember(ic.id)}
-              isEditMode={isEditMode}
-              isDragging={draggedId === ic.id}
-              isDragOver={dragOverId === ic.id}
-              onDragStart={() => handleDragStart(ic.id)}
-              onDragOver={() => handleDragOver(ic.id)}
-              onDrop={() => handleDrop(ic.id)}
-              onDragEnd={handleDragEnd}
-            />
-          ))}
-        </div>
+        <MemberListView />
       )}
 
       <CreateMemberModal

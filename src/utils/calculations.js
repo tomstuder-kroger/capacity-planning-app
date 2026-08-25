@@ -51,12 +51,55 @@ export function getProjectWeeks(project) {
 }
 
 /**
+ * Determines whether a project's date range overlaps a given quarter range.
+ * Projects without a startDate can't be scoped, so they're treated as always in-quarter
+ * (matches prior behavior and avoids silently dropping capacity for undated work).
+ * @param {Object} project - Project object
+ * @param {{start: Date, end: Date}} [quarterRange] - Quarter bounds; omit to skip scoping
+ * @returns {boolean} True if the project overlaps the quarter (or scoping doesn't apply)
+ */
+export function isProjectInQuarter(project, quarterRange) {
+  if (!quarterRange || !project || !project.startDate) return true;
+
+  const start = new Date(project.startDate);
+  if (isNaN(start.getTime())) return true;
+
+  const end = project.weeksMode === 'custom' && project.customEndDate
+    ? new Date(project.customEndDate)
+    : new Date(start.getTime() + (getProjectWeeks(project) * 7 * 24 * 60 * 60 * 1000));
+
+  return start < quarterRange.end && end > quarterRange.start;
+}
+
+/**
+ * Determines whether a project's date range has fully ended before the given quarter began.
+ * Unscheduled projects (no startDate) are never considered past.
+ * @param {Object} project - Project object
+ * @param {{start: Date, end: Date}} [quarterRange] - Quarter bounds; omit to always return false
+ * @returns {boolean} True if the project's effective end date is at or before quarterRange.start
+ */
+export function isProjectPast(project, quarterRange) {
+  if (!quarterRange || !project || !project.startDate) return false;
+
+  const start = new Date(project.startDate);
+  if (isNaN(start.getTime())) return false;
+
+  const end = project.weeksMode === 'custom' && project.customEndDate
+    ? new Date(project.customEndDate)
+    : new Date(start.getTime() + (getProjectWeeks(project) * 7 * 24 * 60 * 60 * 1000));
+
+  return end <= quarterRange.start;
+}
+
+/**
  * Calculate capacity consumed by a project
  * @param {Object} project - Project object
+ * @param {{start: Date, end: Date}} [quarterRange] - When provided, projects outside this range contribute 0
  * @returns {number} Capacity in weeks (duration × allocation %)
  */
-export function calculateProjectCapacity(project) {
+export function calculateProjectCapacity(project, quarterRange) {
   if (!project) return 0;
+  if (!isProjectInQuarter(project, quarterRange)) return 0;
 
   const duration = getProjectWeeks(project);
   const allocation = typeof project.allocationPercent === 'number'
@@ -70,13 +113,14 @@ export function calculateProjectCapacity(project) {
 /**
  * Calculate total capacity consumed by a domain
  * @param {Object} domain - Domain object with projects array
+ * @param {{start: Date, end: Date}} [quarterRange] - When provided, scopes capacity to this quarter
  * @returns {number} Total capacity in weeks
  */
-export function calculateDomainCapacity(domain) {
+export function calculateDomainCapacity(domain, quarterRange) {
   if (!domain || !Array.isArray(domain.projects)) return 0;
 
   return domain.projects.reduce((sum, project) =>
-    sum + calculateProjectCapacity(project), 0
+    sum + calculateProjectCapacity(project, quarterRange), 0
   );
 }
 
@@ -301,7 +345,8 @@ export function generateSummary(ic, calculated) {
     totalPlannedWork,
     capacityUtilization,
     overUnderCapacity,
-    status
+    status,
+    currentQuarterLabel
   } = calculated;
 
   // Format domain names list
@@ -357,7 +402,7 @@ export function generateSummary(ic, calculated) {
 
 - **IC Name:** ${ic.icName || 'N/A'}
 - **IC Role:** ${ic.icRole || 'N/A'}
-- **Quarter:** ${ic.quarter || 'N/A'}
+- **Quarter:** ${currentQuarterLabel || ic.quarter || 'N/A'}
 
 ## Capacity Utilization
 **IC Capacity Utilization: ${capacityUtilization.toFixed(0)}%**

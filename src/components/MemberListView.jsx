@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import SinglePersonGantt from './SinglePersonGantt';
 import FormattedOutput from './FormattedOutput';
 import TimeOffForm from './TimeOffForm';
 import DomainList from './DomainList';
+import ICInfoForm from './ICInfoForm';
 
 const PERSON_HUES = [217, 158, 43, 271, 5, 185, 82, 316, 24, 340];
 
@@ -14,27 +17,57 @@ const STATUS_COLORS = {
   over: '#c0392b',
 };
 
+const QUARTER_ORDER = { Q1: 0, Q2: 1, Q3: 2, Q4: 3 };
+
+const groupPastProjects = (pastProjects) => {
+  const groups = {};
+  (pastProjects || []).forEach((p) => {
+    if (!groups[p.quarterLabel]) {
+      groups[p.quarterLabel] = { label: p.quarterLabel, fiscalYear: p.fiscalYear, quarter: p.quarter, projects: [] };
+    }
+    groups[p.quarterLabel].projects.push(p);
+  });
+
+  return Object.values(groups).sort((a, b) => {
+    const rank = (g) => (g.fiscalYear ?? 0) * 4 + (QUARTER_ORDER[g.quarter] ?? 0);
+    return rank(b) - rank(a);
+  });
+};
+
 const personColor = (icIndex) =>
   `hsl(${PERSON_HUES[icIndex % PERSON_HUES.length]}, 65%, 38%)`;
 
-const MemberListItem = ({ ic, icIndex, isSelected, onClick }) => {
+const MemberListItem = ({ ic, icIndex, isSelected, onClick, onDelete }) => {
   const { calculateResults } = useCapacity();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const calculated = calculateResults(ic);
   const utilization = calculated?.capacityUtilization;
   const status = calculated?.status;
   const hasUtil = typeof utilization === 'number' && isFinite(utilization);
 
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    if (confirmingDelete) {
+      onDelete(ic.id);
+    } else {
+      setConfirmingDelete(true);
+    }
+  };
+
   return (
-    <button
-      className={`w-full text-left px-4 py-3 border-b border-border flex items-center gap-3 transition-colors ${isSelected ? 'bg-primary/8' : 'hover:bg-muted'}`}
+    <div
+      role="button"
+      tabIndex={0}
+      className={`w-full text-left px-4 py-3 border-b border-border flex items-center gap-3 transition-colors cursor-pointer ${isSelected ? 'bg-primary/8' : 'hover:bg-muted'}`}
       onClick={onClick}
+      onBlur={() => setConfirmingDelete(false)}
       style={{ borderLeft: `4px solid ${personColor(icIndex)}` }}
     >
       <div className="flex-1 min-w-0">
         <div className="font-heading font-semibold text-sm truncate">{ic.icName || 'Unnamed'}</div>
         <div className="text-xs text-muted-foreground truncate mt-0.5">{ic.icRole || 'No role set'}</div>
       </div>
-      {hasUtil && (
+      {hasUtil && !confirmingDelete && (
         <div
           className="text-sm font-bold tabular-nums shrink-0"
           style={{ color: utilization === 0 ? '#9ca3af' : STATUS_COLORS[status] || '#000' }}
@@ -42,7 +75,21 @@ const MemberListItem = ({ ic, icIndex, isSelected, onClick }) => {
           {utilization.toFixed(0)}%
         </div>
       )}
-    </button>
+      {confirmingDelete ? (
+        <Button variant="destructive" size="sm" className="shrink-0 h-7 px-2 text-xs" onClick={handleDeleteClick}>
+          Confirm?
+        </Button>
+      ) : (
+        <button
+          type="button"
+          className="shrink-0 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+          onClick={handleDeleteClick}
+          title="Delete member"
+        >
+          <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} size={14} />
+        </button>
+      )}
+    </div>
   );
 };
 
@@ -55,9 +102,11 @@ const StatCard = ({ label, value, color }) => (
   </div>
 );
 
-const MemberDetailPanel = ({ ic, icIndex, onEdit }) => {
+const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
   const { calculateResults, setActiveIC } = useCapacity();
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   if (!ic) {
     return (
@@ -74,6 +123,7 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit }) => {
   const totalPlanned = calculated?.totalPlannedWork;
   const totalTimeOff = calculated?.totalTimeOffWeeks;
   const domainEfforts = calculated?.domainEfforts ?? [];
+  const historyGroups = groupPastProjects(calculated?.pastProjects);
 
   const hasUtil = typeof utilization === 'number' && isFinite(utilization);
   const utilizationColor = !hasUtil || utilization === 0
@@ -98,6 +148,19 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit }) => {
             View Summary
           </Button>
           <Button variant="outline" size="sm" onClick={onEdit}>Edit Plan</Button>
+          {confirmingDelete ? (
+            <Button
+              variant="destructive"
+              size="sm"
+              onBlur={() => setConfirmingDelete(false)}
+              onClick={() => onDelete(ic.id)}
+              autoFocus
+            >
+              Confirm Delete?
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" onClick={() => setConfirmingDelete(true)}>Delete</Button>
+          )}
         </div>
       </div>
 
@@ -154,24 +217,34 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit }) => {
                     <span className="font-semibold text-sm">{effort.domainName || 'Unnamed Domain'}</span>
                     <span className="text-xs text-muted-foreground tabular-nums">{effort.totalWeeks.toFixed(1)}w</span>
                   </div>
-                  {rawProjects.length > 0 ? (
-                    <div className="divide-y divide-border/60">
-                      {rawProjects.map((project, pi) => {
-                        const projectWeeks = effort.projects[pi]?.weeks ?? 0;
-                        return (
-                          <div key={project.id} className="flex items-center justify-between px-3 py-2 text-sm">
-                            <span className="truncate mr-3">{project.title || 'Untitled'}</span>
-                            <div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
-                              {project.startDate && <span>{project.startDate}</span>}
-                              <span className="font-medium text-foreground tabular-nums">{projectWeeks}w</span>
+                  {(() => {
+                    const visibleProjects = rawProjects
+                      .map((project, pi) => ({ project, pi }))
+                      .filter(({ pi }) => !effort.projects[pi]?.isPast);
+
+                    return visibleProjects.length > 0 ? (
+                      <div className="divide-y divide-border/60">
+                        {visibleProjects.map(({ project, pi }) => {
+                          const projectWeeks = effort.projects[pi]?.capacity ?? 0;
+                          const inQuarter = effort.projects[pi]?.inQuarter ?? true;
+                          return (
+                            <div key={project.id} className={`flex items-center justify-between px-3 py-2 text-sm ${inQuarter ? '' : 'opacity-50'}`}>
+                              <span className="truncate mr-3">{project.title || 'Untitled'}</span>
+                              <div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
+                                {project.startDate && <span>{project.startDate}</span>}
+                                {!inQuarter && (
+                                  <span className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground">Out of quarter</span>
+                                )}
+                                <span className="font-medium text-foreground tabular-nums">{projectWeeks}w</span>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="px-3 py-2 text-xs text-muted-foreground italic">No projects</p>
-                  )}
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="px-3 py-2 text-xs text-muted-foreground italic">No projects</p>
+                    );
+                  })()}
                 </div>
               );
             })}
@@ -223,6 +296,50 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit }) => {
         </h3>
         <SinglePersonGantt ic={ic} icIndex={icIndex} />
       </div>
+
+      {/* Project History */}
+      {historyGroups.length > 0 && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Project History
+            </h3>
+            <Button variant="outline" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowHistory(v => !v)}>
+              {showHistory ? 'Hide' : 'Show'}
+            </Button>
+          </div>
+          {showHistory && (
+            <div className="space-y-3">
+              {historyGroups.map(group => {
+                const groupTotal = group.projects.reduce((sum, p) => sum + p.capacity, 0);
+                return (
+                  <div key={group.label} className="border border-border rounded-lg overflow-hidden">
+                    <div className="flex items-center justify-between px-3 py-2 bg-muted/50">
+                      <span className="font-semibold text-sm">{group.label}</span>
+                      <span className="text-xs text-muted-foreground tabular-nums">{groupTotal.toFixed(1)}w</span>
+                    </div>
+                    <div className="divide-y divide-border/60">
+                      {group.projects.map(project => (
+                        <div key={project.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                          <span className="truncate mr-3">
+                            <span className="text-muted-foreground">{project.domainName}</span>
+                            {project.domainName ? ' · ' : ''}
+                            {project.title || 'Untitled'}
+                          </span>
+                          <div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
+                            {project.startDate && <span>{project.startDate}</span>}
+                            <span className="font-medium text-foreground tabular-nums">{project.capacity.toFixed(1)}w</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -243,17 +360,29 @@ const EditPanel = ({ ic, icIndex, onDone }) => {
 
       {/* Forms */}
       <div className="p-6">
-        <TimeOffForm />
-        <DomainList />
+        <div className="grid grid-cols-1 min-[1100px]:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-6 items-start">
+          <div className="min-w-0">
+            <ICInfoForm />
+            <TimeOffForm />
+          </div>
+          <div className="min-w-0">
+            <DomainList />
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 const MemberListView = () => {
-  const { ics } = useCapacity();
+  const { ics, deleteIC } = useCapacity();
   const [selectedId, setSelectedId] = useState(ics[0]?.id ?? null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const handleDeleteMember = (id) => {
+    deleteIC(id);
+    setIsEditing(false);
+  };
 
   useEffect(() => {
     if (!ics.find(ic => ic.id === selectedId) && ics.length > 0) {
@@ -284,6 +413,7 @@ const MemberListView = () => {
             icIndex={i}
             isSelected={ic.id === selectedId}
             onClick={() => handleSelectMember(ic.id)}
+            onDelete={handleDeleteMember}
           />
         ))}
       </div>
@@ -301,6 +431,7 @@ const MemberListView = () => {
             ic={selectedIC}
             icIndex={icIndex}
             onEdit={() => setIsEditing(true)}
+            onDelete={handleDeleteMember}
           />
         )}
       </div>

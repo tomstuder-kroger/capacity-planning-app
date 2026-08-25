@@ -10,6 +10,8 @@ import {
   calculateProjectCapacity,
   calculateDomainCapacity,
   detectCapacityConflicts,
+  isProjectInQuarter,
+  isProjectPast,
 } from './calculations';
 
 describe('Capacity Planning Calculations', () => {
@@ -782,6 +784,91 @@ describe('Capacity Planning Calculations', () => {
         ]
       };
       expect(calculateDomainCapacity(domain)).toBe(5);
+    });
+  });
+
+  describe('isProjectInQuarter / quarter-scoped capacity', () => {
+    const quarterRange = { start: new Date('2024-05-01'), end: new Date('2024-08-01') };
+
+    test('counts a project fully inside the quarter', () => {
+      const project = { startDate: '2024-05-10', weeksMode: 'fixed', weeks: 2 };
+      expect(isProjectInQuarter(project, quarterRange)).toBe(true);
+    });
+
+    test('excludes a project entirely before the quarter', () => {
+      const project = { startDate: '2024-01-01', weeksMode: 'fixed', weeks: 2 };
+      expect(isProjectInQuarter(project, quarterRange)).toBe(false);
+    });
+
+    test('excludes a project entirely after the quarter', () => {
+      const project = { startDate: '2024-09-01', weeksMode: 'fixed', weeks: 2 };
+      expect(isProjectInQuarter(project, quarterRange)).toBe(false);
+    });
+
+    test('counts a project that spans a quarter boundary', () => {
+      const project = { startDate: '2024-04-20', weeksMode: 'fixed', weeks: 3 };
+      expect(isProjectInQuarter(project, quarterRange)).toBe(true);
+    });
+
+    test('counts an unscheduled project (no startDate) as always in-quarter', () => {
+      const project = { weeksMode: 'fixed', weeks: 4 };
+      expect(isProjectInQuarter(project, quarterRange)).toBe(true);
+    });
+
+    test('counts everything when no quarterRange is given', () => {
+      const project = { startDate: '2024-01-01', weeksMode: 'fixed', weeks: 2 };
+      expect(isProjectInQuarter(project, undefined)).toBe(true);
+    });
+
+    test('calculateProjectCapacity returns 0 for a project outside the quarter', () => {
+      const project = { startDate: '2024-01-01', weeksMode: 'fixed', weeks: 4, allocationPercent: 100 };
+      expect(calculateProjectCapacity(project, quarterRange)).toBe(0);
+    });
+
+    test('calculateProjectCapacity is unaffected when quarterRange is omitted', () => {
+      const project = { startDate: '2024-01-01', weeksMode: 'fixed', weeks: 4, allocationPercent: 100 };
+      expect(calculateProjectCapacity(project)).toBe(4);
+    });
+
+    test('calculateDomainCapacity only sums projects overlapping the quarter', () => {
+      const domain = {
+        projects: [
+          { startDate: '2024-05-10', weeksMode: 'fixed', weeks: 4, allocationPercent: 100 }, // in
+          { startDate: '2024-01-01', weeksMode: 'fixed', weeks: 4, allocationPercent: 100 }, // before
+          { startDate: '2024-09-01', weeksMode: 'fixed', weeks: 4, allocationPercent: 100 }, // after
+          { weeksMode: 'fixed', weeks: 2, allocationPercent: 100 }, // unscheduled, still counts
+        ]
+      };
+      expect(calculateDomainCapacity(domain, quarterRange)).toBe(6);
+    });
+  });
+
+  describe('isProjectPast', () => {
+    const quarterRange = { start: new Date('2024-05-01'), end: new Date('2024-08-01') };
+
+    test('is true for a project that fully ended before the quarter started', () => {
+      const project = { startDate: '2024-01-01', weeksMode: 'fixed', weeks: 2 };
+      expect(isProjectPast(project, quarterRange)).toBe(true);
+    });
+
+    test('is false for a project inside the current quarter', () => {
+      const project = { startDate: '2024-05-10', weeksMode: 'fixed', weeks: 2 };
+      expect(isProjectPast(project, quarterRange)).toBe(false);
+    });
+
+    test('is false for a project in a future quarter', () => {
+      const project = { startDate: '2024-09-01', weeksMode: 'fixed', weeks: 2 };
+      expect(isProjectPast(project, quarterRange)).toBe(false);
+    });
+
+    test('is false for an unscheduled project (no startDate)', () => {
+      const project = { weeksMode: 'fixed', weeks: 4 };
+      expect(isProjectPast(project, quarterRange)).toBe(false);
+    });
+
+    test('is false when no quarterRange is given', () => {
+      const project = { startDate: '2024-01-01', weeksMode: 'fixed', weeks: 2 };
+      expect(isProjectPast(project, undefined)).toBe(false);
     });
   });
 

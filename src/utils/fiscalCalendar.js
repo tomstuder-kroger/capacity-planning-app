@@ -102,6 +102,32 @@ export function getQuarterStartDate(fiscalYear, quarter) {
 }
 
 /**
+ * Returns the date range [start, end) a fiscal quarter spans.
+ * `end` is the start of the following quarter (rolling Q4 into next FY's Q1),
+ * falling back to start + weeksInQuarter*7 days if that lookup is unavailable.
+ */
+export function getQuarterDateRange(fiscalYear, quarter) {
+  const start = getQuarterStartDate(fiscalYear, quarter);
+
+  const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+  const qIndex = quarters.indexOf(quarter);
+  const nextQuarter = quarters[(qIndex + 1) % 4];
+  const nextFiscalYear = qIndex === 3 ? fiscalYear + 1 : fiscalYear;
+
+  const nextFyData = getFiscalYearData(nextFiscalYear);
+  let end;
+  if (nextFyData?.quarters?.[nextQuarter]?.start_date) {
+    end = getQuarterStartDate(nextFiscalYear, nextQuarter);
+  } else {
+    const weeksInQuarter = getQuarterWeeks(fiscalYear, quarter);
+    end = new Date(start);
+    end.setDate(start.getDate() + weeksInQuarter * 7);
+  }
+
+  return { start, end };
+}
+
+/**
  * Returns the period definitions for a fiscal quarter.
  * Uses explicit periods from calendar JSON when available; falls back to 4-5-4 pattern.
  */

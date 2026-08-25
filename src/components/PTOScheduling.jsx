@@ -33,36 +33,32 @@ const PTOScheduling = () => {
   const totalPTOWeeks = calculateTotalPTO(ptoInstances);
 
   return (
-    <div className="mt-6">
-      <h2 className="mb-4 text-base font-bold">Scheduled PTO</h2>
-
-      <div className="mb-4 p-6 bg-card rounded-lg border">
-        <div className="flex flex-col gap-0">
-          {ptoInstances.length === 0 ? (
-            <EmptyState
-              title="No PTO scheduled"
-              subtitle='Click "+ Add PTO Instance" below to schedule time off'
-            />
-          ) : (
-            ptoInstances.map(pto => (
-              <PTORow
-                key={pto.id}
-                pto={pto}
-                onUpdate={handlePTOUpdate}
-                onRemove={handlePTORemove}
-              />
-            ))
-          )}
-        </div>
-
-        <div className="mt-4 p-3 bg-muted rounded-md">
-          <div className="flex justify-between items-center">
-            <span>PTO total: {formatWeeksAndDays(totalPTOWeeks)}</span>
-          </div>
-        </div>
+    <div className="mt-6 pt-6 border-t border-border">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-base font-bold">Scheduled PTO</h2>
+        <span className="text-xs text-muted-foreground">{formatWeeksAndDays(totalPTOWeeks)} total</span>
       </div>
 
-      <Button variant="outline" className="w-full mt-2" onClick={handleAddPTO}>
+      <div className="flex flex-col gap-0">
+        {ptoInstances.length === 0 ? (
+          <EmptyState
+            compact
+            title="No PTO scheduled"
+            subtitle='Click "+ Add PTO Instance" below to schedule time off'
+          />
+        ) : (
+          ptoInstances.map(pto => (
+            <PTORow
+              key={pto.id}
+              pto={pto}
+              onUpdate={handlePTOUpdate}
+              onRemove={handlePTORemove}
+            />
+          ))
+        )}
+      </div>
+
+      <Button variant="outline" size="sm" className="w-full mt-2" onClick={handleAddPTO}>
         + Add PTO Instance
       </Button>
     </div>

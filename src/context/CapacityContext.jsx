@@ -9,8 +9,11 @@ import {
   calculateDomainCapacity,
   calculateTotalPlanned,
   calculateUtilization,
-  calculateStatus
+  calculateStatus,
+  isProjectInQuarter,
+  isProjectPast
 } from '../utils/calculations';
+import { getCurrentFiscalPeriod, getQuarterDateRange } from '../utils/fiscalCalendar';
 
 const CapacityContext = createContext(null);
 
@@ -147,18 +150,6 @@ export const CapacityProvider = ({ children }) => {
     saveTeamName(name);
   }, []);
 
-  const reorderICs = useCallback((fromId, toId) => {
-    setICs(prev => {
-      const from = prev.findIndex(ic => ic.id === fromId);
-      const to = prev.findIndex(ic => ic.id === toId);
-      if (from === -1 || to === -1 || from === to) return prev;
-      const updated = [...prev];
-      const [moved] = updated.splice(from, 1);
-      updated.splice(to, 0, moved);
-      return updated;
-    });
-  }, []);
-
   const importIC = useCallback((icData) => {
     const newIC = {
       ...icData,
@@ -172,7 +163,14 @@ export const CapacityProvider = ({ children }) => {
   const calculateResults = useCallback((ic) => {
     if (!ic) return null;
 
-    const totalWeeksInQuarter = Number(ic.weeksInQuarter) || 0;
+    const currentPeriod = getCurrentFiscalPeriod();
+    const quarterRange = currentPeriod
+      ? getQuarterDateRange(currentPeriod.fiscalYear, currentPeriod.quarter)
+      : null;
+    const currentQuarterLabel = currentPeriod
+      ? `${currentPeriod.quarter} FY${currentPeriod.fiscalYear}`
+      : null;
+    const totalWeeksInQuarter = currentPeriod?.weeksInQuarter ?? 0;
 
     // Get PTO from scheduled instances
     const ptoWeeks = calculateTotalPTO(ic.ptoInstances || []);
@@ -195,16 +193,41 @@ export const CapacityProvider = ({ children }) => {
     const totalTimeOffWeeks = otherTimeOffWeeks + ptoWeeks;
     const totalWeeksAvailable = totalWeeksInQuarter - totalTimeOffWeeks;
 
-    const domainEfforts = ic.domains.map(domain => {
-      const projects = (domain.projects || []).map(p => ({
-        title: p.title,
-        duration: getProjectWeeks(p),
-        allocation: p.allocationPercent || 100,
-        capacity: calculateProjectCapacity(p),
-        storyPoints: p.storyPoints || null
-      }));
+    const pastProjects = [];
 
-      const totalCapacity = calculateDomainCapacity(domain);
+    const domainEfforts = ic.domains.map(domain => {
+      const projects = (domain.projects || []).map(p => {
+        const isPast = isProjectPast(p, quarterRange);
+
+        if (isPast) {
+          const period = getCurrentFiscalPeriod(new Date(p.startDate));
+          pastProjects.push({
+            id: p.id,
+            domainName: domain.name,
+            title: p.title,
+            startDate: p.startDate,
+            weeks: getProjectWeeks(p),
+            allocation: p.allocationPercent || 100,
+            capacity: calculateProjectCapacity(p),
+            storyPoints: p.storyPoints || null,
+            fiscalYear: period?.fiscalYear ?? null,
+            quarter: period?.quarter ?? null,
+            quarterLabel: period ? `${period.quarter} FY${period.fiscalYear}` : 'Unknown'
+          });
+        }
+
+        return {
+          title: p.title,
+          duration: getProjectWeeks(p),
+          allocation: p.allocationPercent || 100,
+          capacity: calculateProjectCapacity(p, quarterRange),
+          storyPoints: p.storyPoints || null,
+          inQuarter: isProjectInQuarter(p, quarterRange),
+          isPast
+        };
+      });
+
+      const totalCapacity = calculateDomainCapacity(domain, quarterRange);
 
       return {
         domainId: domain.id,
@@ -229,7 +252,9 @@ export const CapacityProvider = ({ children }) => {
       totalPlannedWork,
       capacityUtilization,
       overUnderCapacity,
-      status
+      status,
+      currentQuarterLabel,
+      pastProjects
     };
   }, []);
 
@@ -247,7 +272,6 @@ export const CapacityProvider = ({ children }) => {
     clearIC,
     importIC,
     updateTeamName,
-    reorderICs,
     calculateResults
   };
 

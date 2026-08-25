@@ -59,20 +59,18 @@ const TimeOffForm = () => {
     <div className="mb-4 p-6 bg-card rounded-lg border">
       <h2 className="mb-4 text-base font-bold">Quarterly Planning</h2>
 
-      <div className="grid grid-cols-[2fr_1fr_1fr] gap-4 max-[768px]:grid-cols-1">
+      <div className="flex flex-col gap-4">
         {/* OKR Time */}
         <div>
-          <div className="flex items-end gap-4">
-            <div className="flex-1">
-              <div className="flex items-center mb-1.5">
-                <label htmlFor="okr-time-value" className="text-xs font-semibold">OKR Time</label>
-                <InfoTooltip content="Provide the time spent during OKR Planning with your team." />
-              </div>
-              <div onKeyDown={allowNumericOnly}>
-                <Input id="okr-time-value" value={String(activeIC.timeOff.okrTime.value)} onChange={handleOKRValueChange} />
-              </div>
+          <div className="flex items-center mb-1.5">
+            <label htmlFor="okr-time-value" className="text-xs font-semibold">OKR Time</label>
+            <InfoTooltip content="Provide the time spent during OKR Planning with your team." />
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="w-24" onKeyDown={allowNumericOnly}>
+              <Input id="okr-time-value" value={String(activeIC.timeOff.okrTime.value)} onChange={handleOKRValueChange} />
             </div>
-            <fieldset className="border-none p-0 m-0 pb-0.5">
+            <fieldset className="border-none p-0 m-0">
               <legend className="sr-only">OKR Time unit</legend>
               <RadioGroup
                 value={activeIC.timeOff.okrTime.unit}
@@ -95,23 +93,23 @@ const TimeOffForm = () => {
         </div>
 
         {/* Dev / L&D Days */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center">
+        <div>
+          <div className="flex items-center mb-1.5">
             <label htmlFor="dev-days" className="text-xs font-semibold">Dev / L&amp;D Days</label>
             <InfoTooltip content="KTD provides Learning and Development days for FTE Associates only. Provide the number of days you will use during the quarter" />
           </div>
-          <div onKeyDown={allowNumericOnly}>
+          <div className="w-24" onKeyDown={allowNumericOnly}>
             <Input id="dev-days" value={String(activeIC.timeOff.devDays)} onChange={handleDevChange} />
           </div>
         </div>
 
         {/* Holiday Days */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center">
+        <div>
+          <div className="flex items-center mb-1.5">
             <label htmlFor="holiday-days" className="text-xs font-semibold">Holiday Days</label>
             <InfoTooltip content="Provide the number of Holidays during the quarter." />
           </div>
-          <div onKeyDown={allowNumericOnly}>
+          <div className="w-24" onKeyDown={allowNumericOnly}>
             <Input id="holiday-days" value={String(activeIC.timeOff.holidayDays)} onChange={handleHolidayChange} />
           </div>
         </div>
