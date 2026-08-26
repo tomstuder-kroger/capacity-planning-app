@@ -1,6 +1,24 @@
 import { generateSupportSummary } from './supportNeeds';
 
 /**
+ * Parses a date-only string (e.g. "2026-05-24") as local midnight instead of UTC midnight.
+ * Plain `new Date("2026-05-24")` parses as UTC, which in negative-UTC-offset timezones
+ * renders as the previous local day — enough to misclassify a project into the wrong
+ * fiscal quarter when its startDate lands exactly on a quarter boundary. Fiscal quarter
+ * boundaries (fiscalCalendar.js) are already parsed as local midnight, so project dates
+ * must match that convention to compare correctly.
+ * @param {string|Date|null|undefined} value
+ * @returns {Date}
+ */
+export function parseLocalDate(value) {
+  if (value instanceof Date) return value;
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return new Date(value + 'T00:00:00');
+  }
+  return new Date(value);
+}
+
+/**
  * Calculates total time off in weeks based on OKR period and time off days
  * @param {Object} params - Time off parameters
  * @param {number} params.okrWeeks - OKR period in weeks (optional)
@@ -40,8 +58,8 @@ export function getProjectWeeks(project) {
   if (!project) return 0;
   if (project.weeksMode === 'custom') {
     if (!project.startDate || !project.customEndDate) return 0;
-    const start = new Date(project.startDate);
-    const end = new Date(project.customEndDate);
+    const start = parseLocalDate(project.startDate);
+    const end = parseLocalDate(project.customEndDate);
     const diffMs = end - start;
     if (diffMs <= 0) return 0;
     return Math.ceil(diffMs / (7 * 24 * 60 * 60 * 1000));
@@ -61,11 +79,11 @@ export function getProjectWeeks(project) {
 export function isProjectInQuarter(project, quarterRange) {
   if (!quarterRange || !project || !project.startDate) return true;
 
-  const start = new Date(project.startDate);
+  const start = parseLocalDate(project.startDate);
   if (isNaN(start.getTime())) return true;
 
   const end = project.weeksMode === 'custom' && project.customEndDate
-    ? new Date(project.customEndDate)
+    ? parseLocalDate(project.customEndDate)
     : new Date(start.getTime() + (getProjectWeeks(project) * 7 * 24 * 60 * 60 * 1000));
 
   return start < quarterRange.end && end > quarterRange.start;
@@ -81,11 +99,11 @@ export function isProjectInQuarter(project, quarterRange) {
 export function isProjectPast(project, quarterRange) {
   if (!quarterRange || !project || !project.startDate) return false;
 
-  const start = new Date(project.startDate);
+  const start = parseLocalDate(project.startDate);
   if (isNaN(start.getTime())) return false;
 
   const end = project.weeksMode === 'custom' && project.customEndDate
-    ? new Date(project.customEndDate)
+    ? parseLocalDate(project.customEndDate)
     : new Date(start.getTime() + (getProjectWeeks(project) * 7 * 24 * 60 * 60 * 1000));
 
   return end <= quarterRange.start;
@@ -137,9 +155,9 @@ export function detectCapacityConflicts(projects) {
   projects.forEach(project => {
     if (!project.startDate) return; // Skip projects without start dates
 
-    const start = new Date(project.startDate);
+    const start = parseLocalDate(project.startDate);
     const end = project.weeksMode === 'custom' && project.customEndDate
-      ? new Date(project.customEndDate)
+      ? parseLocalDate(project.customEndDate)
       : new Date(start.getTime() + (getProjectWeeks(project) * 7 * 24 * 60 * 60 * 1000));
 
     const allocation = project.allocationPercent || 100;
@@ -215,17 +233,19 @@ export function calculateTotalPTO(ptoInstances) {
     }
 
     // Parse dates
-    const startDate = new Date(pto.startDate);
-    const endDate = new Date(pto.endDate);
+    const startDate = parseLocalDate(pto.startDate);
+    const endDate = parseLocalDate(pto.endDate);
 
     // Skip if dates are invalid or invalid range (start > end)
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate > endDate) {
       return totalWeeks;
     }
 
-    // Calculate days difference (inclusive: same day counts as 1 day)
-    const diffMs = endDate - startDate;
-    const daysDiff = Math.floor(diffMs / (24 * 60 * 60 * 1000)) + 1;
+    // Calculate days difference using calendar dates (not raw ms), so DST transitions
+    // (a 23- or 25-hour local day) don't throw off the day count. Inclusive: same day = 1 day.
+    const startUTC = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const endUTC = Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+    const daysDiff = Math.round((endUTC - startUTC) / (24 * 60 * 60 * 1000)) + 1;
 
     // Convert days to weeks (5 working days per week, matching methodology)
     const weeksForPto = daysDiff / 5;

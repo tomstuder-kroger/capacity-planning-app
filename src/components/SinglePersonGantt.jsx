@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { getCurrentFiscalPeriod, getQuarterStartDate, getQuarterWeeks, getQuarterPeriods } from '../utils/fiscalCalendar';
-import { getProjectWeeks } from '../utils/calculations';
+import { getProjectWeeks, parseLocalDate } from '../utils/calculations';
 
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 const PERSON_HUES = [217, 158, 43, 271, 5, 185, 82, 316, 24, 340];
@@ -67,10 +67,19 @@ const SinglePersonGantt = ({ ic, icIndex }) => {
     overflowY: 'visible',
   };
 
-  // Collect domain rows
+  // Collect domain rows, skipping projects with no visible bar in the current quarter
   const rows = [];
   ic.domains.forEach((domain, di) => {
-    (domain.projects || []).filter(p => getProjectWeeks(p) > 0).forEach((project, pi) => {
+    const visibleProjects = (domain.projects || []).filter(p => {
+      const weeks = getProjectWeeks(p);
+      if (weeks <= 0) return false;
+      if (!p.startDate) return true;
+      const startW = (parseLocalDate(p.startDate) - quarterStart) / MS_PER_WEEK;
+      const l = Math.max(0, Math.min((startW / totalWeeks) * 100, 100));
+      const r = Math.max(0, Math.min(((startW + weeks) / totalWeeks) * 100, 100));
+      return r - l > 0;
+    });
+    visibleProjects.forEach((project, pi) => {
       rows.push({ domain, domainIndex: di, project, showLabel: pi === 0 });
     });
   });
@@ -131,7 +140,7 @@ const SinglePersonGantt = ({ ic, icIndex }) => {
                 <div className="gantt-bars-track">
                   {ptoInstances.map((pto, idx) => {
                     if (!pto.startDate || !pto.endDate) return null;
-                    const s = new Date(pto.startDate), e = new Date(pto.endDate);
+                    const s = parseLocalDate(pto.startDate), e = parseLocalDate(pto.endDate);
                     if (isNaN(s) || isNaN(e) || s > e) return null;
                     const startW = (s - quarterStart) / MS_PER_WEEK;
                     const wks = (e - s) / MS_PER_WEEK;
@@ -165,7 +174,7 @@ const SinglePersonGantt = ({ ic, icIndex }) => {
               let widthPct = (weeks / totalWeeks) * 100;
 
               if (!unscheduled) {
-                const startW = (new Date(project.startDate) - quarterStart) / MS_PER_WEEK;
+                const startW = (parseLocalDate(project.startDate) - quarterStart) / MS_PER_WEEK;
                 const l = Math.max(0, Math.min((startW / totalWeeks) * 100, 100));
                 const r = Math.max(0, Math.min(((startW + weeks) / totalWeeks) * 100, 100));
                 leftPct = l;

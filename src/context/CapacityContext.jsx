@@ -11,7 +11,8 @@ import {
   calculateUtilization,
   calculateStatus,
   isProjectInQuarter,
-  isProjectPast
+  isProjectPast,
+  parseLocalDate
 } from '../utils/calculations';
 import { getCurrentFiscalPeriod, getQuarterDateRange } from '../utils/fiscalCalendar';
 
@@ -200,7 +201,7 @@ export const CapacityProvider = ({ children }) => {
         const isPast = isProjectPast(p, quarterRange);
 
         if (isPast) {
-          const period = getCurrentFiscalPeriod(new Date(p.startDate));
+          const period = getCurrentFiscalPeriod(parseLocalDate(p.startDate));
           pastProjects.push({
             id: p.id,
             domainName: domain.name,

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Delete02Icon } from '@hugeicons/core-free-icons';
+import { Delete02Icon, PanelLeftIcon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
+import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
 import SinglePersonGantt from './SinglePersonGantt';
+import CapacityLineChart from './CapacityLineChart';
 import FormattedOutput from './FormattedOutput';
 import TimeOffForm from './TimeOffForm';
 import DomainList from './DomainList';
@@ -106,7 +108,11 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
   const { calculateResults, setActiveIC } = useCapacity();
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [view, setView] = useState('plan');
+
+  useEffect(() => {
+    setView('plan');
+  }, [ic?.id]);
 
   if (!ic) {
     return (
@@ -124,6 +130,28 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
   const totalTimeOff = calculated?.totalTimeOffWeeks;
   const domainEfforts = calculated?.domainEfforts ?? [];
   const historyGroups = groupPastProjects(calculated?.pastProjects);
+
+  const currentPeriod = getCurrentFiscalPeriod();
+  // Historical time-off/availability isn't tracked per past quarter — only the IC's current
+  // totalWeeksAvailable snapshot exists — so past-quarter utilization % approximates using
+  // today's available-weeks figure applied retroactively.
+  const toPercent = (weeks) =>
+    typeof totalAvailable === 'number' && totalAvailable > 0 ? (weeks / totalAvailable) * 100 : 0;
+  const capacityTrend = currentPeriod
+    ? ['Q1', 'Q2', 'Q3', 'Q4']
+        .slice(0, QUARTER_ORDER[currentPeriod.quarter])
+        .map(q => {
+          const group = historyGroups.find(g => g.quarter === q && g.fiscalYear === currentPeriod.fiscalYear);
+          const weeks = group ? group.projects.reduce((sum, p) => sum + p.capacity, 0) : 0;
+          return { label: q, weeks, percent: toPercent(weeks) };
+        })
+        .concat([{
+          label: currentPeriod.quarter,
+          weeks: totalPlanned ?? 0,
+          percent: typeof utilization === 'number' && isFinite(utilization) ? utilization : toPercent(totalPlanned ?? 0),
+          isCurrent: true,
+        }])
+    : [];
 
   const hasUtil = typeof utilization === 'number' && isFinite(utilization);
   const utilizationColor = !hasUtil || utilization === 0
@@ -144,22 +172,29 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => { setActiveIC(ic.id); setSummaryOpen(true); }}>
-            View Summary
-          </Button>
-          <Button variant="outline" size="sm" onClick={onEdit}>Edit Plan</Button>
-          {confirmingDelete ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onBlur={() => setConfirmingDelete(false)}
-              onClick={() => onDelete(ic.id)}
-              autoFocus
-            >
-              Confirm Delete?
-            </Button>
+          {view === 'history' ? (
+            <Button variant="outline" size="sm" onClick={() => setView('plan')}>Back</Button>
           ) : (
-            <Button variant="outline" size="sm" onClick={() => setConfirmingDelete(true)}>Delete</Button>
+            <>
+              <Button variant="outline" size="sm" onClick={() => setView('history')}>History</Button>
+              <Button variant="outline" size="sm" onClick={() => { setActiveIC(ic.id); setSummaryOpen(true); }}>
+                View Summary
+              </Button>
+              <Button variant="outline" size="sm" onClick={onEdit}>Edit Plan</Button>
+              {confirmingDelete ? (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onBlur={() => setConfirmingDelete(false)}
+                  onClick={() => onDelete(ic.id)}
+                  autoFocus
+                >
+                  Confirm Delete?
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => setConfirmingDelete(true)}>Delete</Button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -202,6 +237,57 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
         </div>
       )}
 
+      {view === 'history' ? (
+        <div>
+          {/* Capacity over time */}
+          <div className="mb-6">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              Capacity Over Time
+            </h3>
+            <CapacityLineChart points={capacityTrend} />
+          </div>
+
+          {/* Project History */}
+          <div>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              Project History
+            </h3>
+            {historyGroups.length > 0 ? (
+              <div className="space-y-3">
+                {historyGroups.map(group => {
+                  const groupTotal = group.projects.reduce((sum, p) => sum + p.capacity, 0);
+                  return (
+                    <div key={group.label} className="border border-border rounded-lg overflow-hidden">
+                      <div className="flex items-center justify-between px-3 py-2 bg-muted/50">
+                        <span className="font-semibold text-sm">{group.label}</span>
+                        <span className="text-xs text-muted-foreground tabular-nums">{groupTotal.toFixed(1)}w</span>
+                      </div>
+                      <div className="divide-y divide-border/60">
+                        {group.projects.map(project => (
+                          <div key={project.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                            <span className="truncate mr-3">
+                              <span className="text-muted-foreground">{project.domainName}</span>
+                              {project.domainName ? ' · ' : ''}
+                              {project.title || 'Untitled'}
+                            </span>
+                            <div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
+                              {project.startDate && <span>{project.startDate}</span>}
+                              <span className="font-medium text-foreground tabular-nums">{project.capacity.toFixed(1)}w</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">No past projects yet</p>
+            )}
+          </div>
+        </div>
+      ) : (
+      <>
       {/* Domains & Projects */}
       {domainEfforts.length > 0 && (
         <div className="mb-6">
@@ -296,49 +382,7 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
         </h3>
         <SinglePersonGantt ic={ic} icIndex={icIndex} />
       </div>
-
-      {/* Project History */}
-      {historyGroups.length > 0 && (
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Project History
-            </h3>
-            <Button variant="outline" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowHistory(v => !v)}>
-              {showHistory ? 'Hide' : 'Show'}
-            </Button>
-          </div>
-          {showHistory && (
-            <div className="space-y-3">
-              {historyGroups.map(group => {
-                const groupTotal = group.projects.reduce((sum, p) => sum + p.capacity, 0);
-                return (
-                  <div key={group.label} className="border border-border rounded-lg overflow-hidden">
-                    <div className="flex items-center justify-between px-3 py-2 bg-muted/50">
-                      <span className="font-semibold text-sm">{group.label}</span>
-                      <span className="text-xs text-muted-foreground tabular-nums">{groupTotal.toFixed(1)}w</span>
-                    </div>
-                    <div className="divide-y divide-border/60">
-                      {group.projects.map(project => (
-                        <div key={project.id} className="flex items-center justify-between px-3 py-2 text-sm">
-                          <span className="truncate mr-3">
-                            <span className="text-muted-foreground">{project.domainName}</span>
-                            {project.domainName ? ' · ' : ''}
-                            {project.title || 'Untitled'}
-                          </span>
-                          <div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
-                            {project.startDate && <span>{project.startDate}</span>}
-                            <span className="font-medium text-foreground tabular-nums">{project.capacity.toFixed(1)}w</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+      </>
       )}
     </div>
   );
@@ -378,6 +422,7 @@ const MemberListView = () => {
   const { ics, deleteIC } = useCapacity();
   const [selectedId, setSelectedId] = useState(ics[0]?.id ?? null);
   const [isEditing, setIsEditing] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleDeleteMember = (id) => {
     deleteIC(id);
@@ -405,17 +450,29 @@ const MemberListView = () => {
       style={{ height: 'calc(100vh - 16rem)' }}
     >
       {/* Left: member list */}
-      <div className="w-72 shrink-0 border-r border-border overflow-y-auto">
-        {ics.map((ic, i) => (
-          <MemberListItem
-            key={ic.id}
-            ic={ic}
-            icIndex={i}
-            isSelected={ic.id === selectedId}
-            onClick={() => handleSelectMember(ic.id)}
-            onDelete={handleDeleteMember}
-          />
-        ))}
+      <div className={`shrink-0 border-r border-border flex flex-col ${collapsed ? 'w-10' : 'w-72'}`}>
+        <button
+          type="button"
+          className="shrink-0 flex items-center justify-center h-9 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border-b border-border"
+          onClick={() => setCollapsed(v => !v)}
+          title={collapsed ? 'Expand member list' : 'Collapse member list'}
+        >
+          <HugeiconsIcon icon={PanelLeftIcon} strokeWidth={2} size={16} />
+        </button>
+        {!collapsed && (
+          <div className="overflow-y-auto">
+            {ics.map((ic, i) => (
+              <MemberListItem
+                key={ic.id}
+                ic={ic}
+                icIndex={i}
+                isSelected={ic.id === selectedId}
+                onClick={() => handleSelectMember(ic.id)}
+                onDelete={handleDeleteMember}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Right: detail or edit */}
