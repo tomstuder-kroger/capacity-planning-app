@@ -256,7 +256,18 @@ const EditHistoryProjectDialog = ({ project, domainName, onClose, onSave }) => {
   );
 };
 
-const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
+const CollapseToggle = ({ collapsed, onToggle, className = '' }) => (
+  <button
+    type="button"
+    className={`inline-flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0 ${className}`}
+    onClick={onToggle}
+    title={collapsed ? 'Expand member list' : 'Collapse member list'}
+  >
+    <HugeiconsIcon icon={PanelLeftIcon} strokeWidth={2} size={16} />
+  </button>
+);
+
+const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete, collapsed, onToggleCollapse }) => {
   const { calculateResults, setActiveIC, updateIC } = useCapacity();
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -269,8 +280,11 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
 
   if (!ic) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-        Select a team member to view their details
+      <div className="h-full p-6">
+        <CollapseToggle collapsed={collapsed} onToggle={onToggleCollapse} className="mb-2" />
+        <div className="flex items-center justify-center h-[calc(100%-2.5rem)] text-muted-foreground text-sm">
+          Select a team member to view their details
+        </div>
       </div>
     );
   }
@@ -328,15 +342,14 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
   return (
     <div className="h-full overflow-y-auto p-6">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-12 rounded-full shrink-0" style={{ backgroundColor: color }} />
-          <div>
-            <h2 className="font-heading text-xl font-bold leading-tight">{ic.icName || 'Unnamed'}</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">{ic.icRole || 'No role set'}</p>
-          </div>
+      <div className="flex items-center justify-between mb-6 gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <CollapseToggle collapsed={collapsed} onToggle={onToggleCollapse} />
+          <div className="w-1.5 h-6 rounded-full shrink-0" style={{ backgroundColor: color }} />
+          <h2 className="font-heading text-xl font-bold leading-tight truncate">{ic.icName || 'Unnamed'}</h2>
+          <span className="text-sm text-muted-foreground truncate">{ic.icRole || 'No role set'}</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           {view === 'history' ? (
             <Button variant="outline" size="sm" onClick={() => setView('plan')}>Back</Button>
           ) : (
@@ -569,7 +582,7 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
   );
 };
 
-const EditPanel = ({ ic, icIndex, onDone }) => {
+const EditPanel = ({ ic, icIndex, onDone, collapsed, onToggleCollapse }) => {
   const { setActiveIC } = useCapacity();
 
   useEffect(() => {
@@ -579,7 +592,15 @@ const EditPanel = ({ ic, icIndex, onDone }) => {
   return (
     <div className="h-full overflow-y-auto">
       {/* Sticky header */}
-      <div className="sticky top-0 z-10 bg-card border-b px-6 py-3 flex items-center justify-end shrink-0">
+      <div className="sticky top-0 z-10 bg-card border-b px-6 py-3 flex items-center justify-between shrink-0">
+        <button
+          type="button"
+          className="inline-flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          onClick={onToggleCollapse}
+          title={collapsed ? 'Expand member list' : 'Collapse member list'}
+        >
+          <HugeiconsIcon icon={PanelLeftIcon} strokeWidth={2} size={16} />
+        </button>
         <Button size="sm" onClick={onDone}>Done</Button>
       </div>
 
@@ -631,29 +652,23 @@ const MemberListView = () => {
       style={{ height: 'calc(100vh - 16rem)' }}
     >
       {/* Left: member list */}
-      <div className={`shrink-0 border-r border-border flex flex-col ${collapsed ? 'w-10' : 'w-72'}`}>
-        <button
-          type="button"
-          className="shrink-0 flex items-center justify-center h-9 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border-b border-border"
-          onClick={() => setCollapsed(v => !v)}
-          title={collapsed ? 'Expand member list' : 'Collapse member list'}
-        >
-          <HugeiconsIcon icon={PanelLeftIcon} strokeWidth={2} size={16} />
-        </button>
-        {!collapsed && (
-          <div className="overflow-y-auto">
-            {ics.map((ic, i) => (
-              <MemberListItem
-                key={ic.id}
-                ic={ic}
-                icIndex={i}
-                isSelected={ic.id === selectedId}
-                onClick={() => handleSelectMember(ic.id)}
-                onDelete={handleDeleteMember}
-              />
-            ))}
-          </div>
-        )}
+      <div
+        className={`shrink-0 flex flex-col overflow-hidden transition-[width,opacity] duration-300 ease-in-out ${
+          collapsed ? 'w-0 opacity-0' : 'w-72 opacity-100 border-r border-border'
+        }`}
+      >
+        <div className="w-72 overflow-y-auto">
+          {ics.map((ic, i) => (
+            <MemberListItem
+              key={ic.id}
+              ic={ic}
+              icIndex={i}
+              isSelected={ic.id === selectedId}
+              onClick={() => handleSelectMember(ic.id)}
+              onDelete={handleDeleteMember}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Right: detail or edit */}
@@ -663,6 +678,8 @@ const MemberListView = () => {
             ic={selectedIC}
             icIndex={icIndex}
             onDone={() => setIsEditing(false)}
+            collapsed={collapsed}
+            onToggleCollapse={() => setCollapsed(v => !v)}
           />
         ) : (
           <MemberDetailPanel
@@ -670,6 +687,8 @@ const MemberListView = () => {
             icIndex={icIndex}
             onEdit={() => setIsEditing(true)}
             onDelete={handleDeleteMember}
+            collapsed={collapsed}
+            onToggleCollapse={() => setCollapsed(v => !v)}
           />
         )}
       </div>
