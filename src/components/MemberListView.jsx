@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Delete02Icon, PanelLeftIcon } from '@hugeicons/core-free-icons';
+import { Delete02Icon, PanelLeftIcon, Edit02Icon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod } from '../utils/fiscalCalendar';
+import { getProjectWeeks } from '../utils/calculations';
 import SinglePersonGantt from './SinglePersonGantt';
 import CapacityLineChart from './CapacityLineChart';
 import FormattedOutput from './FormattedOutput';
@@ -104,11 +108,160 @@ const StatCard = ({ label, value, color }) => (
   </div>
 );
 
+const WEEK_OPTIONS = [
+  ...Array.from({ length: 13 }, (_, i) => ({ value: String(i + 1), label: `${i + 1} week${i > 0 ? 's' : ''}` })),
+  { value: 'custom', label: 'Custom (date range)' }
+];
+
+const EditHistoryProjectDialog = ({ project, domainName, onClose, onSave }) => {
+  const [draft, setDraft] = useState(null);
+
+  useEffect(() => {
+    if (project) {
+      setDraft({
+        title: project.title || '',
+        startDate: project.startDate || null,
+        weeksMode: project.weeksMode === 'custom' ? 'custom' : 'fixed',
+        weeks: project.weeksMode === 'custom' ? 1 : (project.weeks || 1),
+        customEndDate: project.customEndDate || null,
+        allocationPercent: project.allocationPercent ?? 100,
+        storyPoints: project.storyPoints ?? null,
+      });
+    } else {
+      setDraft(null);
+    }
+  }, [project]);
+
+  if (!project || !draft) return null;
+
+  const durationValue = draft.weeksMode === 'custom' ? 'custom' : String(draft.weeks);
+  const calculatedWeeks = getProjectWeeks(draft);
+
+  const handleSave = () => {
+    onSave(project.id, {
+      title: draft.title,
+      startDate: draft.startDate,
+      weeksMode: draft.weeksMode,
+      weeks: draft.weeksMode === 'fixed' ? draft.weeks : project.weeks,
+      customEndDate: draft.weeksMode === 'custom' ? draft.customEndDate : null,
+      allocationPercent: draft.allocationPercent,
+      storyPoints: draft.storyPoints,
+    });
+    onClose();
+  };
+
+  return (
+    <Dialog open={!!project} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit Past Project</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-3">
+          {domainName && <p className="text-xs text-muted-foreground -mt-2">{domainName}</p>}
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="history-project-title">Title</Label>
+            <Input
+              id="history-project-title"
+              value={draft.title}
+              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+            />
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
+            <div className="flex-1 min-w-[130px]">
+              <label htmlFor="history-project-start" className="text-xs font-semibold block mb-1">Start Date</label>
+              <input
+                id="history-project-start"
+                type="date"
+                value={draft.startDate || ''}
+                onChange={(e) => setDraft({ ...draft, startDate: e.target.value || null })}
+                className="h-8 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </div>
+            <div className="flex-1 min-w-[150px]">
+              <label htmlFor="history-project-duration" className="text-xs font-semibold block mb-1">Duration</label>
+              <select
+                id="history-project-duration"
+                value={durationValue}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setDraft(value === 'custom'
+                    ? { ...draft, weeksMode: 'custom' }
+                    : { ...draft, weeksMode: 'fixed', weeks: Number(value) });
+                }}
+                className="h-8 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
+              >
+                {WEEK_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            {draft.weeksMode === 'custom' && (
+              <div className="flex-1 min-w-[130px]">
+                <label htmlFor="history-project-end" className="text-xs font-semibold block mb-1">End Date</label>
+                <input
+                  id="history-project-end"
+                  type="date"
+                  value={draft.customEndDate || ''}
+                  onChange={(e) => setDraft({ ...draft, customEndDate: e.target.value || null })}
+                  className="h-8 w-full rounded-md border border-input bg-input/20 px-2 text-xs/relaxed focus:outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <Label htmlFor="history-project-allocation" className="text-xs">Allocation %</Label>
+              <Input
+                id="history-project-allocation"
+                type="number"
+                min="0"
+                max="100"
+                step="5"
+                value={draft.allocationPercent}
+                onChange={(e) => setDraft({ ...draft, allocationPercent: Number(e.target.value) || 100 })}
+                className="h-8"
+              />
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="history-project-points" className="text-xs">Story Pts</Label>
+              <Input
+                id="history-project-points"
+                type="number"
+                min="0"
+                step="1"
+                value={draft.storyPoints || ''}
+                onChange={(e) => setDraft({ ...draft, storyPoints: e.target.value ? Number(e.target.value) : null })}
+                className="h-8"
+              />
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            {draft.weeksMode === 'custom' && calculatedWeeks === 0
+              ? 'Select start and end dates to calculate weeks'
+              : `${calculatedWeeks}w @ ${draft.allocationPercent}% allocation`}
+          </p>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
-  const { calculateResults, setActiveIC } = useCapacity();
+  const { calculateResults, setActiveIC, updateIC } = useCapacity();
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [view, setView] = useState('plan');
+  const [editingHistoryProjectId, setEditingHistoryProjectId] = useState(null);
 
   useEffect(() => {
     setView('plan');
@@ -160,6 +313,18 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
 
   const color = personColor(icIndex);
 
+  const rawEditingProject = editingHistoryProjectId
+    ? ic.domains.flatMap(d => d.projects.map(p => ({ ...p, __domainName: d.name }))).find(p => p.id === editingHistoryProjectId)
+    : null;
+
+  const handleSaveHistoryProject = (projectId, updates) => {
+    const updatedDomains = ic.domains.map(d => ({
+      ...d,
+      projects: (d.projects || []).map(p => p.id === projectId ? { ...p, ...updates } : p),
+    }));
+    updateIC(ic.id, { domains: updatedDomains });
+  };
+
   return (
     <div className="h-full overflow-y-auto p-6">
       {/* Header */}
@@ -200,6 +365,13 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
       </div>
 
       <FormattedOutput open={summaryOpen} onClose={() => setSummaryOpen(false)} />
+
+      <EditHistoryProjectDialog
+        project={rawEditingProject}
+        domainName={rawEditingProject?.__domainName}
+        onClose={() => setEditingHistoryProjectId(null)}
+        onSave={handleSaveHistoryProject}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-5">
@@ -273,6 +445,15 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete }) => {
                             <div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
                               {project.startDate && <span>{project.startDate}</span>}
                               <span className="font-medium text-foreground tabular-nums">{project.capacity.toFixed(1)}w</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                aria-label="Edit project"
+                                onClick={() => setEditingHistoryProjectId(project.id)}
+                              >
+                                <HugeiconsIcon icon={Edit02Icon} size={14} strokeWidth={2} />
+                              </Button>
                             </div>
                           </div>
                         ))}

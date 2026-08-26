@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
+import { getCurrentFiscalPeriod, getQuarterDateRange } from '../utils/fiscalCalendar';
 import DomainForm from './DomainForm';
 import EmptyState from './EmptyState';
 
@@ -9,6 +10,11 @@ const DomainList = () => {
   const { activeIC, updateIC } = useCapacity();
 
   if (!activeIC) return null;
+
+  const currentPeriod = getCurrentFiscalPeriod();
+  const quarterRange = currentPeriod
+    ? getQuarterDateRange(currentPeriod.fiscalYear, currentPeriod.quarter)
+    : null;
 
   const handleAddDomain = () => {
     const newDomain = { id: uuidv4(), name: '', projects: [] };
@@ -28,7 +34,7 @@ const DomainList = () => {
         </div>
       ) : (
         activeIC.domains.map(domain => (
-          <DomainForm key={domain.id} domain={domain} />
+          <DomainForm key={domain.id} domain={domain} quarterRange={quarterRange} />
         ))
       )}
 

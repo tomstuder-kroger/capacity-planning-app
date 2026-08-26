@@ -7,7 +7,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useCapacity } from '../context/CapacityContext';
-import { getProjectWeeks, calculateProjectCapacity } from '../utils/calculations';
+import { getProjectWeeks, calculateProjectCapacity, isProjectPast } from '../utils/calculations';
 import SupportNeedsSelector from './SupportNeedsSelector';
 
 const WEEK_OPTIONS = [
@@ -148,11 +148,15 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
   );
 };
 
-const DomainForm = ({ domain }) => {
+const DomainForm = ({ domain, quarterRange }) => {
   const { activeIC, updateIC } = useCapacity();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   if (!activeIC) return null;
+
+  // Completed work from prior quarters is edited from the History view instead —
+  // the plan editor should only reflect what's currently in flight.
+  const currentProjects = (domain.projects || []).filter(p => !isProjectPast(p, quarterRange));
 
   const updateDomain = (updates) => {
     const updatedDomains = activeIC.domains.map(d =>
@@ -194,7 +198,7 @@ const DomainForm = ({ domain }) => {
     setDeleteDialogOpen(false);
   };
 
-  const totalCapacity = (domain.projects || []).reduce((sum, p) => {
+  const totalCapacity = currentProjects.reduce((sum, p) => {
     const weeks = getProjectWeeks(p);
     const allocation = (p.allocationPercent ?? 100) / 100;
     return sum + (weeks * allocation);
@@ -227,7 +231,7 @@ const DomainForm = ({ domain }) => {
         </div>
 
         <div className="flex flex-col gap-0">
-          {(domain.projects || []).map(project => (
+          {currentProjects.map(project => (
             <ProjectRow
               key={project.id}
               project={project}
@@ -236,6 +240,11 @@ const DomainForm = ({ domain }) => {
             />
           ))}
         </div>
+        {currentProjects.length === 0 && (domain.projects || []).length > 0 && (
+          <p className="text-xs text-muted-foreground italic mb-2">
+            All work in this domain is from a past quarter — view or edit it from History.
+          </p>
+        )}
 
         <Button variant="outline" className="w-full mt-2" onClick={handleAddProject}>
           + Add Project
