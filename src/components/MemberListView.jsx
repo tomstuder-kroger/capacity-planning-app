@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Delete02Icon, PanelLeftIcon, Edit02Icon } from '@hugeicons/core-free-icons';
 import { useCapacity } from '../context/CapacityContext';
@@ -273,6 +273,7 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete, collapsed, onToggleC
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [view, setView] = useState('plan');
   const [editingHistoryProjectId, setEditingHistoryProjectId] = useState(null);
+  const [deletingHistoryProjectId, setDeletingHistoryProjectId] = useState(null);
 
   useEffect(() => {
     setView('plan');
@@ -339,6 +340,19 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete, collapsed, onToggleC
     updateIC(ic.id, { domains: updatedDomains });
   };
 
+  const rawDeletingProject = deletingHistoryProjectId
+    ? ic.domains.flatMap(d => d.projects).find(p => p.id === deletingHistoryProjectId)
+    : null;
+
+  const handleDeleteHistoryProject = () => {
+    const updatedDomains = ic.domains.map(d => ({
+      ...d,
+      projects: (d.projects || []).filter(p => p.id !== deletingHistoryProjectId),
+    }));
+    updateIC(ic.id, { domains: updatedDomains });
+    setDeletingHistoryProjectId(null);
+  };
+
   return (
     <div className="h-full overflow-y-auto p-6">
       {/* Header */}
@@ -385,6 +399,21 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete, collapsed, onToggleC
         onClose={() => setEditingHistoryProjectId(null)}
         onSave={handleSaveHistoryProject}
       />
+
+      <Dialog open={!!deletingHistoryProjectId} onOpenChange={(open) => !open && setDeletingHistoryProjectId(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Project</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            Delete "{rawDeletingProject?.title || 'Untitled'}" from history? This can't be undone.
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingHistoryProjectId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteHistoryProject}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-5">
@@ -466,6 +495,15 @@ const MemberDetailPanel = ({ ic, icIndex, onEdit, onDelete, collapsed, onToggleC
                                 onClick={() => setEditingHistoryProjectId(project.id)}
                               >
                                 <HugeiconsIcon icon={Edit02Icon} size={14} strokeWidth={2} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                aria-label="Delete project"
+                                onClick={() => setDeletingHistoryProjectId(project.id)}
+                              >
+                                <HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={2} />
                               </Button>
                             </div>
                           </div>
