@@ -9,14 +9,14 @@ IC Capacity Planning web app built with React to help Individual Contributors an
 ## Development Commands
 
 ```bash
-# Start development server (port 3000)
+# Start development server (Vite)
 npm start
 
-# Run all tests (watch mode by default)
+# Run all tests once (CI mode, via Vitest)
 npm test
 
-# Run tests once (CI mode)
-npm test -- --watchAll=false
+# Run tests in watch mode
+npm run test:watch
 
 # Run specific test file
 npm test -- calculations.test.js
@@ -147,19 +147,19 @@ timeOff: {
 
 ## Testing
 
-48 tests in `src/utils/calculations.test.js` covering:
+Tests in `src/utils/calculations.test.js` covering:
 - All calculation functions
 - Edge cases (negative values, null/undefined, non-numeric)
 - Type coercion and validation
 - Float to integer conversion
 
-**Jest configuration notes:**
-- `transformIgnorePatterns` excludes `uuid` module (ES modules require transformation)
-- Lodash pinned to `4.17.21` (compatibility with webpack)
+**Vitest configuration notes** (`vite.config.js`):
+- `test.environment: 'jsdom'`, setup file at `src/setupTests.js`
+- `test.alias` mocks `react-mx-web-components`, `react-markdown`, and `marked` for tests
 
 Always run tests before committing:
 ```bash
-npm test -- --watchAll=false
+npm test
 ```
 
 ## Component Structure
