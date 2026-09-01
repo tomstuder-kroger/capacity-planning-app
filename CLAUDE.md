@@ -70,6 +70,68 @@ All calculations work in **WEEKS** as the base unit.
 - `loadActiveICId()` / `saveActiveICId()`: Selected IC
 - Auto-save triggers on every state change (debounced)
 
+## Planned Feature: Multi-Quarter Support
+
+**Status**: Planning phase - see `QUARTER_MANAGEMENT_PLAN.md` for full implementation plan
+
+**Problem Identified**:
+Current architecture stores each IC with a single `quarter` field and flat `domains[]`/`ptoInstances[]` arrays. When moving from Q2 to Q3, there's no way to preserve Q2 data while planning Q3 work. Users must either:
+- Overwrite Q2 data (losing historical record)
+- Keep appending to Q2 data (creating clutter and confusion)
+
+**Planned Solution**: Quarter-Scoped Data Snapshots
+Restructure IC objects to use `quarterData` object where each key is a quarter identifier (e.g., "Q3 FY2026") and value is a complete snapshot of that quarter's planning data.
+
+**New IC Structure** (planned):
+```javascript
+{
+  id: uuidv4(),
+  icName: 'Jane Smith',
+  icRole: 'Senior Engineer',
+  activeQuarter: 'Q3 FY2026',  // Currently selected quarter for editing
+  quarterData: {
+    'Q2 FY2026': { quarter, weeksInQuarter, timeOff, ptoInstances, domains },
+    'Q3 FY2026': { quarter, weeksInQuarter, timeOff, ptoInstances, domains },
+    'Q4 FY2026': { quarter, weeksInQuarter, timeOff, ptoInstances, domains }
+  },
+  lastModified: '...'
+}
+```
+
+**Key Architectural Concepts**:
+
+1. **Current Quarter vs Active Quarter**:
+   - **Current Quarter**: Determined by today's date via `getCurrentFiscalPeriod()`, used for TeamDashboard capacity reporting
+   - **Active Quarter**: Per-IC field (`ic.activeQuarter`), can be past/current/future, used for PlanningView editing
+   - TeamDashboard ALWAYS shows current quarter capacity (what's happening NOW)
+   - PlanningView shows capacity for whichever quarter is being edited
+
+2. **Multi-Quarter Planning**:
+   - Users can plan ANY quarter (past, current, future) without data loss
+   - Example: While in Q3, users can forecast Q4 work
+   - Each quarter is completely isolated - switching quarters changes what's visible/editable
+   - Historical quarters preserved for reference
+
+3. **Migration Strategy**:
+   - Existing single-quarter data will be migrated to `quarterData[currentQuarter]`
+   - Migration function in `storage.js` with error handling to prevent data loss
+   - Backward compatible - migration runs automatically on app load
+
+**Implementation Files** (planned changes):
+- `src/utils/storage.js` - Add `migrateQuarterData()` migration function
+- `src/context/CapacityContext.jsx` - Update `createEmptyIC()`, `updateIC()`, add `setActiveQuarter()`, `createQuarter()`, `getAvailableQuarters()`
+- `src/context/CapacityContext.jsx` - Update `calculateResults(ic, quarterKey)` to accept optional quarter parameter
+- `src/components/QuarterInfoForm.jsx` - Add quarter selector dropdown and "+ New Quarter" button
+- `src/components/CreateQuarterModal.jsx` - NEW FILE for creating quarters with copy options
+- `src/components/TeamDashboard.jsx` - Pass current quarter explicitly to `calculateResults()` for reporting
+- `src/components/TimeOffForm.jsx`, `DomainList.jsx`, `PTOScheduling.jsx` - Add defensive checks for quarterData
+
+**Future Enhancements** (Phase 2+):
+- Multi-quarter forecast view (Q3, Q4, Q1 FY2027 side-by-side)
+- Quarter selector on team dashboard cards
+- Capacity trending graphs across quarters
+- Quarterly reports and exports
+
 ## Critical Implementation Details
 
 ### ⚠️ Project Sizes are WEEKS not DAYS
