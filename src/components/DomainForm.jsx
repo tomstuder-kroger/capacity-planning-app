@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,7 +31,7 @@ const DateField = ({ label, value, onChange, id }) => (
   </div>
 );
 
-const ProjectRow = ({ project, onUpdate, onRemove }) => {
+const ProjectRow = ({ project, onUpdate, onRemove, movingToHistory }) => {
   const weeksValue = project.weeksMode === 'custom' ? 'custom' : String(project.weeks || 1);
   const calculatedWeeks = getProjectWeeks(project);
   const allocation = project.allocationPercent ?? 100;
@@ -47,6 +47,11 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
 
   return (
     <div className="border border-border rounded-md p-3 mb-2">
+      {movingToHistory && (
+        <div className="mb-2 text-xs rounded-md bg-amber-100 text-amber-900 px-2 py-1.5 border border-amber-200">
+          These dates now fall in a past quarter — moving to History.
+        </div>
+      )}
       <div className="flex justify-between items-center mb-2">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Project</span>
         <Button
@@ -148,15 +153,73 @@ const ProjectRow = ({ project, onUpdate, onRemove }) => {
   );
 };
 
+const MOVED_TO_HISTORY_NOTICE_MS = 3000;
+
 const DomainForm = ({ domain, quarterRange }) => {
   const { activeIC, updateIC } = useCapacity();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [movingToHistoryIds, setMovingToHistoryIds] = useState(new Set());
+  const wasPastRef = useRef(new Map());
+  const timersRef = useRef(new Map());
+
+  const allProjects = domain.projects || [];
+
+  // Completed work from prior quarters is edited from the History view instead —
+  // the plan editor should only reflect what's currently in flight. When an edit
+  // pushes a project's dates into the past, show a brief notice before it moves
+  // out of view instead of having it vanish with no explanation.
+  useEffect(() => {
+    setMovingToHistoryIds(prev => {
+      let changed = false;
+      const next = new Set(prev);
+
+      allProjects.forEach(p => {
+        const isPast = isProjectPast(p, quarterRange);
+        const wasPast = wasPastRef.current.get(p.id) ?? false;
+
+        if (isPast && !wasPast) {
+          next.add(p.id);
+          changed = true;
+          const timer = setTimeout(() => {
+            setMovingToHistoryIds(curr => {
+              if (!curr.has(p.id)) return curr;
+              const updated = new Set(curr);
+              updated.delete(p.id);
+              return updated;
+            });
+            timersRef.current.delete(p.id);
+          }, MOVED_TO_HISTORY_NOTICE_MS);
+          timersRef.current.set(p.id, timer);
+        } else if (!isPast) {
+          if (next.has(p.id)) {
+            next.delete(p.id);
+            changed = true;
+          }
+          const existingTimer = timersRef.current.get(p.id);
+          if (existingTimer) {
+            clearTimeout(existingTimer);
+            timersRef.current.delete(p.id);
+          }
+        }
+
+        wasPastRef.current.set(p.id, isPast);
+      });
+
+      return changed ? next : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allProjects, quarterRange]);
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => timers.forEach(timer => clearTimeout(timer));
+  }, []);
 
   if (!activeIC) return null;
 
-  // Completed work from prior quarters is edited from the History view instead —
-  // the plan editor should only reflect what's currently in flight.
-  const currentProjects = (domain.projects || []).filter(p => !isProjectPast(p, quarterRange));
+  const currentProjects = allProjects.filter(p =>
+    !isProjectPast(p, quarterRange) || movingToHistoryIds.has(p.id)
+  );
 
   const updateDomain = (updates) => {
     const updatedDomains = activeIC.domains.map(d =>
@@ -237,6 +300,7 @@ const DomainForm = ({ domain, quarterRange }) => {
               project={project}
               onUpdate={handleProjectUpdate}
               onRemove={handleProjectRemove}
+              movingToHistory={movingToHistoryIds.has(project.id)}
             />
           ))}
         </div>

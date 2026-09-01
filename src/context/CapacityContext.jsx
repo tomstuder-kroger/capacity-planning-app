@@ -152,14 +152,28 @@ export const CapacityProvider = ({ children }) => {
   }, []);
 
   const importIC = useCallback((icData) => {
-    const newIC = {
-      ...icData,
-      id: uuidv4(),
-      lastModified: new Date().toISOString()
-    };
-    setICs(prev => [...prev, newIC]);
-    setActiveICIdState(newIC.id);
-  }, []);
+    const importedId = icData.id;
+    const existingIndex = importedId ? ics.findIndex(ic => ic.id === importedId) : -1;
+
+    if (existingIndex !== -1) {
+      // Re-importing a previously exported IC: update it in place instead of duplicating
+      setICs(prev => prev.map(ic =>
+        ic.id === importedId
+          ? { ...ic, ...icData, id: importedId, lastModified: new Date().toISOString() }
+          : ic
+      ));
+      setActiveICIdState(importedId);
+    } else {
+      const newId = importedId || uuidv4();
+      const newIC = {
+        ...icData,
+        id: newId,
+        lastModified: new Date().toISOString()
+      };
+      setICs(prev => [...prev, newIC]);
+      setActiveICIdState(newId);
+    }
+  }, [ics]);
 
   const calculateResults = useCallback((ic) => {
     if (!ic) return null;

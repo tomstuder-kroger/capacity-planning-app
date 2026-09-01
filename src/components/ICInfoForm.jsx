@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { useCapacity } from '../context/CapacityContext';
 
 const ROLES = [
+  'Intern',
   'Associate Product Designer',
   'Product Designer',
   'Senior Product Designer',
