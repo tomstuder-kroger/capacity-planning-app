@@ -48,6 +48,57 @@ export const migrateICData = (ic) => {
 };
 
 /**
+ * Deduplicate ICs that share the same name (case/whitespace-insensitive),
+ * keeping only the most recently modified record per name.
+ *
+ * Historical bug: repeated use of the Import feature (and, separately, a
+ * double-fire in BulkImportModal's synchronous submit handler) appended
+ * whole new copies of team members instead of updating existing ones,
+ * since the old dedup logic only matched on `id`. This runs on every load
+ * so any duplicates already sitting in localStorage self-heal.
+ */
+export const dedupeICsByName = (ics) => {
+  const byName = new Map();
+
+  for (const ic of ics) {
+    const key = (ic.icName || '').trim().toLowerCase();
+    if (!key) {
+      // No name to key on (e.g. a brand-new blank IC) - always keep.
+      byName.set(Symbol(), ic);
+      continue;
+    }
+
+    const existing = byName.get(key);
+    if (!existing) {
+      byName.set(key, ic);
+      continue;
+    }
+
+    const existingTime = Date.parse(existing.lastModified) || 0;
+    const icTime = Date.parse(ic.lastModified) || 0;
+
+    if (icTime > existingTime) {
+      byName.set(key, ic);
+    } else if (icTime === existingTime) {
+      // Exact-timestamp tie (e.g. a duplicate import fired twice in the
+      // same millisecond): prefer whichever record has more project data
+      // rather than arbitrarily discarding one.
+      const projectCount = (record) => (record.domains || [])
+        .reduce((sum, d) => sum + (d.projects?.length || 0), 0);
+      if (projectCount(ic) > projectCount(existing)) {
+        byName.set(key, ic);
+      }
+    }
+  }
+
+  const deduped = Array.from(byName.values());
+  if (deduped.length !== ics.length) {
+    console.warn(`Removed ${ics.length - deduped.length} duplicate team member record(s) (matched by name, kept most recent).`);
+  }
+  return deduped;
+};
+
+/**
  * Load all ICs from localStorage
  */
 export const loadICs = () => {
@@ -57,7 +108,7 @@ export const loadICs = () => {
     const ics = JSON.parse(data);
 
     // Apply migration to all ICs with individual error handling
-    return ics.map((ic, index) => {
+    const migrated = ics.map((ic, index) => {
       try {
         const migratedIC = migrateICData(ic);
         // Apply project migration to all domains and projects
@@ -74,6 +125,8 @@ export const loadICs = () => {
         return ic;
       }
     });
+
+    return dedupeICsByName(migrated);
   } catch (error) {
     console.error('Failed to load ICs from localStorage:', error);
     // IMPORTANT: Don't return empty array on error - check if data exists

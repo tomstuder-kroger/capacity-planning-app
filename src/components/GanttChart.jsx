@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { useCapacity } from '../context/CapacityContext';
 import { getCurrentFiscalPeriod, getQuarterStartDate, getQuarterWeeks, getQuarterPeriods } from '../utils/fiscalCalendar';
 import { getProjectWeeks, detectCapacityConflicts } from '../utils/calculations';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { KdsIconWarning } from 'react-mx-web-components';
 
 // One hue per person — spread around the color wheel
 const PERSON_HUES = [217, 158, 43, 271, 5, 185, 82, 316, 24, 340];
@@ -142,6 +142,12 @@ const GanttMemberSection = ({ ic, icIndex, fyStart, totalWeeks, conflicts }) => 
       <div className="gantt-label-col gantt-sticky-left" style={{ borderLeft: `4px solid ${personBaseColor}` }}>
         <div className="gantt-member-name" style={{ color: personBaseColor }}>{ic.icName || 'Unnamed'}</div>
         {ic.icRole && <div className="gantt-member-role">{ic.icRole}</div>}
+        {conflicts.length > 0 && (
+          <div className="gantt-member-conflict-alert">
+            <KdsIconWarning size="s" />
+            Capacity Conflicts
+          </div>
+        )}
       </div>
 
       <div className="gantt-domain-rows">
@@ -282,35 +288,12 @@ const GanttChart = ({ quarterFilter = null }) => {
     });
   }, [ics]);
 
-  const hasAnyConflicts = icConflicts.some(ic => ic.conflicts.length > 0);
-
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
     <div className="gantt-wrapper" ref={wrapperRef}>
-      {/* Conflict warning banner - concise summary */}
-      {hasAnyConflicts && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>
-            <strong>⚠️ Capacity Conflicts Detected:</strong>
-            {' '}
-            {icConflicts.filter(ic => ic.conflicts.length > 0).map((ic, idx, arr) => {
-              const conflictCount = ic.conflicts.length;
-              const maxAllocation = Math.max(...ic.conflicts.map(c => c.totalAllocation));
-              return (
-                <span key={ic.icId}>
-                  <strong>{ic.icName}</strong> has {conflictCount} conflict{conflictCount !== 1 ? 's' : ''} (up to {maxAllocation}% allocated)
-                  {idx < arr.length - 1 ? ', ' : '. '}
-                </span>
-              );
-            })}
-            See red-bordered projects in chart for details.
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="gantt-chart" style={chartStyle}>
 
         {/* Quarter header row */}

@@ -153,16 +153,26 @@ export const CapacityProvider = ({ children }) => {
 
   const importIC = useCallback((icData) => {
     const importedId = icData.id;
-    const existingIndex = importedId ? ics.findIndex(ic => ic.id === importedId) : -1;
+    const importedName = (icData.icName || '').trim().toLowerCase();
 
-    if (existingIndex !== -1) {
-      // Re-importing a previously exported IC: update it in place instead of duplicating
+    const existingById = importedId ? ics.findIndex(ic => ic.id === importedId) : -1;
+    // Fall back to matching by name so re-importing an older backup (whose
+    // ids don't match what's already live) updates the existing member
+    // instead of appending a duplicate.
+    const existingByName = existingById === -1 && importedName
+      ? ics.findIndex(ic => (ic.icName || '').trim().toLowerCase() === importedName)
+      : -1;
+
+    const matchIndex = existingById !== -1 ? existingById : existingByName;
+
+    if (matchIndex !== -1) {
+      const matchedId = ics[matchIndex].id;
       setICs(prev => prev.map(ic =>
-        ic.id === importedId
-          ? { ...ic, ...icData, id: importedId, lastModified: new Date().toISOString() }
+        ic.id === matchedId
+          ? { ...ic, ...icData, id: matchedId, lastModified: new Date().toISOString() }
           : ic
       ));
-      setActiveICIdState(importedId);
+      setActiveICIdState(matchedId);
     } else {
       const newId = importedId || uuidv4();
       const newIC = {

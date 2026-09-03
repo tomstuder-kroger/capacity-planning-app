@@ -369,6 +369,16 @@ body {
   margin-top: 2px;
 }
 
+.gantt-member-conflict-alert {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin-top: 24px;
+}
+
 .gantt-domain-rows {
   display: flex;
   flex-direction: column;

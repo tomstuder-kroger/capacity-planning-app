@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,16 +11,24 @@ const BulkImportModal = ({ isOpen, onClose, onImported }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [importMode, setImportMode] = useState('append'); // 'append' or 'replace'
+  // Synchronous guard against double-fire (e.g. a fast double-click before
+  // React re-renders the disabled button) causing the same import to run
+  // twice and create duplicate records sharing one timestamp.
+  const isImportingRef = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
       setJsonInput('');
       setError('');
       setSuccess('');
+      isImportingRef.current = false;
     }
   }, [isOpen]);
 
   const handleImport = () => {
+    if (isImportingRef.current) return;
+    isImportingRef.current = true;
+
     try {
       setError('');
       setSuccess('');
@@ -45,9 +53,11 @@ const BulkImportModal = ({ isOpen, onClose, onImported }) => {
         }, 1500);
       } else {
         setError('Invalid data format. Please provide a valid IC object, array of ICs, or full backup.');
+        isImportingRef.current = false;
       }
     } catch (err) {
       setError(`Invalid JSON: ${err.message}`);
+      isImportingRef.current = false;
     }
   };
 
